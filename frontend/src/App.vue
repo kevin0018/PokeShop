@@ -64,7 +64,3 @@ import { RouterLink, RouterView } from 'vue-router'
     </footer>
   </div>
 </template>
-
-<style scoped>
-/* Custom styles if needed beyond Tailwind */
-</style>
