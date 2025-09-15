@@ -3,7 +3,7 @@ import { RouterLink, RouterView } from 'vue-router'
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="bg-gray-50">
     <!-- Header -->
     <header class="bg-gradient-to-r from-red-500 via-yellow-500 to-blue-500 text-white shadow-lg">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
