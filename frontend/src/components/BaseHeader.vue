@@ -1,5 +1,5 @@
 <template>
-  <header style="width: 100%; text-align: center; padding: 1rem 0; background: #f2f2f2;">
+  <header class="w-full text-center py-4 bg-gray-100 text-gray-900">
     PokeShop
   </header>
 </template>
