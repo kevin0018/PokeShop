@@ -7,12 +7,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        'pokemon': {
-          'red': '#dc2626',
-          'blue': '#1e40af',
-          'yellow': '#facc15',
-          'green': '#16a34a',
-        }
+        'primary': '#977BB8',
+        'secondary': '#2B1A16',
+        'accent': '#543C7C',
       }
     },
   },
