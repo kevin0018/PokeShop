@@ -2,11 +2,12 @@
 name = "pokeshop-backend"
 version = "0.1.0"
 description = "Pokemon Ecommerce Backend with FastAPI and Hexagonal Architecture"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["kevin0018 <akevin.2215@gmail.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.9"
 fastapi = "^0.104.0"
 uvicorn = {extras = ["standard"], version = "^0.24.0"}
 sqlalchemy = "^2.0.23"
@@ -29,9 +30,7 @@ pytest = "^7.4.3"
 pytest-asyncio = "^0.21.1"
 pytest-cov = "^4.1.0"
 httpx = "^0.25.2"
-black = "^23.11.0"
-isort = "^5.12.0"
-flake8 = "^6.1.0"
+ruff = "^0.1.7"
 mypy = "^1.7.1"
 pre-commit = "^3.5.0"
 
@@ -39,15 +38,32 @@ pre-commit = "^3.5.0"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.black]
+[tool.ruff]
+target-version = "py312"
 line-length = 88
-target-version = ['py312']
-include = '\.pyi?$'
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by formatter
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-line_length = 88
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.isort]
+known-first-party = ["src"]
 
 [tool.mypy]
 python_version = "3.12"
