@@ -2,11 +2,11 @@
 
 [English](README.md) · [Español](README.es.md)
 
-![Despliegue: demo local](https://img.shields.io/badge/despliegue-demo_local-71549a)
+![Despliegue: pendiente](https://img.shields.io/badge/despliegue-pendiente-71549a)
 
 Una tienda Pokémon de demostración con portada a todo el ancho con los tres iniciales de Kanto, catálogo completo importado y carrito persistente. Creada con Vue 3, TypeScript y FastAPI. Precios y stock ficticios; las cuentas, pagos y pedidos reales quedan fuera de esta fase.
 
-[Demo local](http://localhost:5173) · [Documentación de la API](http://localhost:8000/docs)
+[Repositorio](https://github.com/kevin0018/PokeShop) · [Demo solo local](http://localhost:5173) · [Documentación de la API](http://localhost:8000/docs)
 
 [![Interfaz real de PokeShop](docs/home.png)](docs/home.png)
 
@@ -19,9 +19,9 @@ Una tienda Pokémon de demostración con portada a todo el ancho con los tres in
 - `/pokemon/:id`: biología localizada, dimensiones y origen. Las estadísticas se abren desde la esquina superior derecha de la ilustración con hover, foco o toque; un clic fija el popover y Escape, pulsación fuera o Cerrar lo cierran. Las habilidades permanecen en la API, pero se omiten en la vista.
 - `/carrito`: seis productos distintos por página y totales calculados sobre toda la cesta. Eliminar el último producto de una página ajusta a la última válida; cambiar cantidades mantiene la página. IDs y cantidades persisten, independientemente de la paginación del catálogo y los fallos de red.
 - Cuatro recomendaciones disponibles priorizan tipos compartidos, después generación y proximidad de precio. No repiten especie y excluyen las especies seleccionadas. El carrito vacío muestra destacados.
-- Español/inglés con Vue I18n, selectores accesibles de Reka UI, iconos Lucide, temas claro/oscuro/sistema y revelación circular de 700 ms para cambios manuales. El movimiento reducido y los cambios automáticos del sistema omiten la animación; los navegadores sin soporte transicionan los colores durante 300 ms, sin atenuar la página.
+- Español/inglés con Vue I18n, selectores accesibles de Reka UI, iconos Lucide, temas claro/oscuro con detección inicial de la preferencia del navegador y revelación circular de 700 ms para cambios manuales. El movimiento reducido y los cambios automáticos del sistema omiten la animación; los navegadores sin soporte transicionan los colores durante 300 ms, sin atenuar la página.
 
-Chansey aparece con 200–240 px debajo del resumen con aspecto de ticket, tanto en escritorio como en móvil y también acompaña el estado vacío. Los avisos de tres segundos usan un disco que se vacía, se pausan con hover/foco y se reinician con cada acción. Los errores de almacenamiento permanecen visibles. Un switch animado Espeon/Umbreon selecciona claro/oscuro, usando inicialmente la preferencia del navegador y recordando las elecciones manuales. Se conserva la revelación de página de 700 ms.
+Chansey aparece con 180–240 px según el ancho de pantalla debajo del resumen con aspecto de ticket, tanto en escritorio como en móvil y también acompaña el estado vacío. Los avisos de tres segundos usan un disco que se vacía, se pausan con hover/foco y se reinician con cada acción. Los errores de almacenamiento permanecen visibles. Un switch animado Espeon/Umbreon selecciona claro/oscuro, usando inicialmente la preferencia del navegador y recordando las elecciones manuales. Se conserva la revelación de página de 700 ms.
 
 La cabecera permite previsualizar los tres últimos productos distintos añadidos y el total de toda la cesta con hover, teclado, clic o toque. «Ver carrito completo» abre la lista; «Vaciar carrito» elimina toda la selección guardada. El orden reciente persiste sin reordenar las páginas del carrito.
 
@@ -130,7 +130,7 @@ frontend/e2e/                           # Regresiones de navegador y capturas
 
 ## Stack y límites de memoria
 
-Python 3.12, Poetry 2.1.3, FastAPI, SQLAlchemy/asyncpg, Alembic; Vue 3, TypeScript, Vite 7, Pinia, Vue Router, Vue I18n 11, Reka UI, Lucide, Tailwind CSS 4; Node 22 y pnpm 10.10.0. Ambos lockfiles están versionados.
+Python 3.12, Poetry 2.1.3, FastAPI, SQLAlchemy/asyncpg, Alembic; Vue 3, TypeScript, Vite 7, Pinia, Vue Router, Vue I18n 11, Reka UI, Lucide, Tailwind CSS 4; Node 22 y pnpm 10.10.0. Ambos lockfiles están versionados. Redis está disponible en Compose, pero el catálogo no lo utiliza. Las dependencias heredadas declaradas, como Stripe, no implican funcionalidades de pago implementadas.
 
 | Contenedor | Límite de memoria |
 | --- | --- |
@@ -165,7 +165,21 @@ docker compose down
 
 Verificado el 07/09/2026: 21 pruebas de backend y 19 pruebas unitarias de frontend; tipos, ESLint, build de producción y Ruff. La suite completa de Chromium pasó contra el preview de producción; también se comprobaron las interacciones principales en desarrollo. La cobertura de navegador contiene 13 regresiones de interacción y 20 escenarios responsive, cada uno recorriendo las cuatro rutas a 320/375/414/768/1280 px en español/inglés y claro/oscuro (80 capturas, incluyendo un carrito con siete productos). Se comprueban la carga correcta y los desbordamientos horizontales; las capturas se generan en `frontend/test-results/`, ignorado en Git, para revisión visual. Se cubren selección con teclado, Escape y recuperación del foco, carrito tras paginación/recarga/error de red y persistencia de preferencias. También se ejecutaron repetición, interrupción controlada y recuperación de la importación.
 
+La última ejecución completa de navegador cubrió el rediseño con el collage de iniciales. Los cambios posteriores de favicon y posición del botón de añadir se verificaron con comprobaciones específicas de SVG/HTTP y distribución en navegador, sin repetir toda la suite. Son verificaciones locales, no resultados de CI alojada.
+
 Las pruebas de integración requieren la migración y sincronización inicial. Las de navegador utilizan Chromium y el servidor de desarrollo encendido; configura `PLAYWRIGHT_BASE_URL` para otro servidor. No se han verificado otros motores de navegador. `pnpm build` también ejecuta tipos y empaquetado secuencialmente.
+
+## Despliegue — pendiente
+
+**La aplicación funciona en local; no hay una URL de demo pública ni un proveedor de hosting elegido.** Las capturas anteriores corresponden a la aplicación local funcionando, no a un despliegue publicado.
+
+Compose arranca actualmente Vite en modo desarrollo y FastAPI con recarga. No es una configuración de producción. El proxy `/api` de Vite es un ajuste de desarrollo y debe configurarse por separado en producción; las rutas de Vue también necesitan un fallback a `index.html`.
+
+Se han considerado alojar todo el stack en una VPS, o Vue/FastAPI en Vercel y PostgreSQL en una VPS. Ninguna opción se ha implementado ni elegido como destino definitivo. No se ha comprado un dominio, configurado una base de datos cloud ni migrado un servidor.
+
+Cuando se elija destino, faltará configurar el servidor y las rutas de producción, variables privadas, acceso y límites de conexiones a la base de datos, migraciones y traslado del catálogo, HTTPS y copias de seguridad; después se verificarán las cuatro rutas en ese entorno. La importación y el recálculo de precios seguirán siendo comandos administrativos explícitos, no peticiones web.
+
+Actualmente no hay un workflow de GitHub Actions ni un pipeline de despliegue automático. Publicar commits en GitHub y desplegar la aplicación son pasos diferentes; esta actualización de documentación no publica ninguno.
 
 ## Alcance y atribución
 

@@ -2,11 +2,11 @@
 
 [English](README.md) · [Español](README.es.md)
 
-![Deployment: local demo](https://img.shields.io/badge/deployment-local_demo-71549a)
+![Deployment: pending](https://img.shields.io/badge/deployment-pending-71549a)
 
 A Pokémon shop demo with a full-width Kanto starter collage, a complete imported catalog, and a persistent cart. Built with Vue 3, TypeScript and FastAPI. Prices and stock are fictional; accounts, payments and real orders are outside this phase.
 
-[Local demo](http://localhost:5173) · [API documentation](http://localhost:8000/docs)
+[Repository](https://github.com/kevin0018/PokeShop) · [Local demo only](http://localhost:5173) · [API documentation](http://localhost:8000/docs)
 
 [![Actual PokeShop interface](docs/home.png)](docs/home.png)
 
@@ -19,9 +19,9 @@ A Pokémon shop demo with a full-width Kanto starter collage, a complete importe
 - `/pokemon/:id`: localized biology, dimensions and origin. Statistics open from the top-right corner of the illustration on hover, keyboard focus or tap; click pins the popover and Escape/outside/close dismiss it. Abilities remain in the API but are omitted from the view.
 - `/carrito`: six distinct products per page, with totals calculated over the complete cart. Removing the final item on a page selects the last valid page; quantity changes retain the page. IDs and quantities persist, independently of catalog pagination and network failures.
 - Four available recommendations prioritize shared types, then generation, then price proximity. Species are unique and species already selected are excluded. An empty cart shows featured Pokémon.
-- Spanish/English through Vue I18n, accessible Reka UI selects, Lucide icons, light/dark/system themes, and a 700 ms circular manual theme transition. Reduced motion and automatic system changes skip animation; unsupported browsers transition colors for 300 ms without fading the page.
+- Spanish/English through Vue I18n, accessible Reka UI selects, Lucide icons, light/dark themes with browser-default detection, and a 700 ms circular manual theme transition. Reduced motion and automatic system changes skip animation; unsupported browsers transition colors for 300 ms without fading the page.
 
-Chansey appears at 200–240 px below the receipt-style summary on desktop and mobile, and accompanies the empty state. Three-second notices use a disappearing pie indicator, pause on hover/focus and restart with each action. Storage errors remain visible. An animated Espeon/Umbreon switch selects light/dark, using the browser preference initially and remembering manual selections. The existing 700 ms page reveal is preserved.
+Chansey appears at 180–240 px depending on the viewport below the receipt-style summary on desktop and mobile, and accompanies the empty state. Three-second notices use a disappearing pie indicator, pause on hover/focus and restart with each action. Storage errors remain visible. An animated Espeon/Umbreon switch selects light/dark, using the browser preference initially and remembering manual selections. The existing 700 ms page reveal is preserved.
 
 The header previews the three most recently added distinct products and the complete cart total on hover, keyboard focus, click or tap. “View full cart” opens the list; “Empty cart” clears the saved selection. Recent order persists without rearranging cart pages.
 
@@ -130,7 +130,7 @@ frontend/e2e/                           # Browser regressions and responsive cap
 
 ## Stack and memory limits
 
-Python 3.12, Poetry 2.1.3, FastAPI, SQLAlchemy/asyncpg, Alembic; Vue 3, TypeScript, Vite 7, Pinia, Vue Router, Vue I18n 11, Reka UI, Lucide, Tailwind CSS 4; Node 22 and pnpm 10.10.0. Both dependency lockfiles are committed.
+Python 3.12, Poetry 2.1.3, FastAPI, SQLAlchemy/asyncpg, Alembic; Vue 3, TypeScript, Vite 7, Pinia, Vue Router, Vue I18n 11, Reka UI, Lucide, Tailwind CSS 4; Node 22 and pnpm 10.10.0. Both dependency lockfiles are committed. Redis is available in Compose but is not used by the catalog. Declared legacy dependencies such as Stripe do not imply implemented payment features.
 
 | Container | Memory limit |
 | --- | --- |
@@ -165,7 +165,21 @@ docker compose down
 
 Verified on 2026-09-07: 21 backend tests and 19 frontend unit tests; type checks, ESLint, production build and Ruff. The full Chromium suite passed against the production preview; core interactions were also checked against the development server. Browser coverage comprises 13 interaction regressions and 20 responsive scenarios, each visiting all four routes at 320/375/414/768/1280 px in Spanish/English and light/dark (80 captures, including a populated seven-product cart). The suite checks successful loading and horizontal overflow; screenshots are generated under the ignored `frontend/test-results/` directory for visual review. Keyboard selection, Escape/focus restoration, cart paging/reload/network recovery and preference persistence are covered. Import repeat, controlled interruption and successful recovery were also exercised.
 
+The last full browser run covered the starter-collage redesign. Subsequent favicon and horizontal add-button changes received targeted SVG/HTTP and browser-layout checks rather than a repeat of the entire suite. These are locally executed checks, not hosted CI results.
+
 Integration tests require the migration and initial sync above. Browser tests use Chromium and the running dev server; set `PLAYWRIGHT_BASE_URL` for an external server. Other browser engines are not verified. `pnpm build` also runs type checking and bundling sequentially.
+
+## Deployment — pending
+
+**The application runs locally; there is no public demo URL and no hosting provider has been selected.** The screenshots above are captures of the working local application, not evidence of a hosted deployment.
+
+The current Compose configuration starts Vite in development mode and FastAPI with reload. It is not a production deployment configuration. The Vite `/api` proxy is a development setting and must be configured separately for production; Vue deep links also need a fallback to `index.html`.
+
+Options discussed include hosting the full stack on a VPS, or hosting Vue/FastAPI on Vercel with PostgreSQL on a VPS. Neither option has been implemented or approved as the final destination. No domain purchase, cloud database setup or server migration has been performed.
+
+When a destination is chosen, remaining work is to configure production serving/routing, private environment variables, database access and connection limits, migrations/catalog transfer, HTTPS and backups, then verify all four routes in the deployed environment. Import and repricing remain explicit administrative commands, not web requests.
+
+No GitHub Actions workflow or automatic deployment pipeline is currently configured. Publishing commits to GitHub and deploying the application are separate steps; this documentation update does not publish either.
 
 ## Scope and attribution
 

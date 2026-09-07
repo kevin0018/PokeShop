@@ -13,7 +13,7 @@ pnpm exec eslint .
 pnpm build-only
 ```
 
-`pnpm build` runs type checking and bundling sequentially. Source folders separate PokÃ©mon, cart, shared preferences and UI translations. Catalog URL state is independent of the Pinia entity cache; cart storage contains only IDs and quantities.
+`pnpm build` runs type checking and bundling sequentially. Source folders separate Pokémon, cart, shared preferences and UI translations. Catalog URL state is independent of the Pinia entity cache; cart entries contain only IDs and quantities; a separate versioned key stores recent product IDs for the header preview. Prices always come from the API.
 
 ## Browser tests
 
@@ -32,3 +32,7 @@ The homepage is a full-width collage of the three Kanto starters and appears imm
 The header previews the three most recently added distinct products and the complete cart total on hover, keyboard focus, click or tap. “View full cart” opens the list; “Empty cart” clears the saved selection. Recent order persists without rearranging cart pages.
 
 Type colors are shared across catalog cards, detail artwork, cart thumbnails and cart preview. The receipt takes a subtle tint from the most recently added product.
+
+## Deployment status
+
+**Pending — local development only.** No public demo or hosting provider is configured. See the [deployment section](../README.md#deployment--pending) for the current status and remaining production work. No deployment is triggered by this documentation update.
