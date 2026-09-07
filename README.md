@@ -2,11 +2,11 @@
 
 [English](README.md) · [Español](README.es.md)
 
-![Deployment: pending](https://img.shields.io/badge/deployment-pending-71549a)
+![Deployment: VPS / HTTP](https://img.shields.io/badge/deployment-VPS_HTTP-71549a)
 
 A Pokémon shop demo with a full-width Kanto starter collage, a complete imported catalog, and a persistent cart. Built with Vue 3, TypeScript and FastAPI. Prices and stock are fictional; accounts, payments and real orders are outside this phase.
 
-[Repository](https://github.com/kevin0018/PokeShop) · [Local demo only](http://localhost:5173) · [API documentation](http://localhost:8000/docs)
+[Repository](https://github.com/kevin0018/PokeShop) · [Live demo (HTTP)](http://62.171.169.187) · [API documentation](http://localhost:8000/docs)
 
 [![Actual PokeShop interface](docs/home.png)](docs/home.png)
 
@@ -165,24 +165,22 @@ docker compose down
 
 Verified on 2026-09-07: 21 backend tests and 19 frontend unit tests; type checks, ESLint, production build and Ruff. The full Chromium suite passed against the production preview; core interactions were also checked against the development server. Browser coverage comprises 13 interaction regressions and 20 responsive scenarios, each visiting all four routes at 320/375/414/768/1280 px in Spanish/English and light/dark (80 captures, including a populated seven-product cart). The suite checks successful loading and horizontal overflow; screenshots are generated under the ignored `frontend/test-results/` directory for visual review. Keyboard selection, Escape/focus restoration, cart paging/reload/network recovery and preference persistence are covered. Import repeat, controlled interruption and successful recovery were also exercised.
 
-The last full browser run covered the starter-collage redesign. Subsequent favicon and horizontal add-button changes received targeted SVG/HTTP and browser-layout checks rather than a repeat of the entire suite. These are locally executed checks, not hosted CI results.
+Deployment verification on 2026-09-07 repeated all 33 Chromium tests against the public VPS URL, including the current favicon and card layout. All passed. The production build, Nginx configuration, database transfer checksum and persistence after restarting the stack were also verified. These are manually executed checks, not hosted CI results.
 
 Integration tests require the migration and initial sync above. Browser tests use Chromium and the running dev server; set `PLAYWRIGHT_BASE_URL` for an external server. Other browser engines are not verified. `pnpm build` also runs type checking and bundling sequentially.
 
-## Deployment — pending
+## Deployment
 
-**The application runs locally; there is no public demo URL and no hosting provider has been selected.** The screenshots above are captures of the working local application, not evidence of a hosted deployment.
+**Live on the Contabo VPS: [http://62.171.169.187](http://62.171.169.187). Domain and HTTPS are pending.**
 
-The current Compose configuration starts Vite in development mode and FastAPI with reload. It is not a production deployment configuration. The Vite `/api` proxy is a development setting and must be configured separately for production; Vue deep links also need a fallback to `index.html`.
+The standalone `compose.production.yaml` serves the compiled Vue frontend with Nginx and runs FastAPI without reload. Host Nginx forwards to a loopback-only port; `/api` stays on the same origin, and Vue deep links fall back to `index.html`. PostgreSQL and the API expose no host ports. The existing website remains running.
 
-Options discussed include hosting the full stack on a VPS, or hosting Vue/FastAPI on Vercel with PostgreSQL on a VPS. Neither option has been implemented or approved as the final destination. No domain purchase, cloud database setup or server migration has been performed.
+Production containers are capped at 896 MiB total (frontend 128, API 512, PostgreSQL 256), with no additional swap. The unused Redis service is omitted. Development Compose and its limits remain unchanged.
 
-When a destination is chosen, remaining work is to configure production serving/routing, private environment variables, database access and connection limits, migrations/catalog transfer, HTTPS and backups, then verify all four routes in the deployed environment. Import and repricing remain explicit administrative commands, not web requests.
-
-No GitHub Actions workflow or automatic deployment pipeline is currently configured. Publishing commits to GitHub and deploying the application are separate steps; this documentation update does not publish either.
+The initial deployment transferred all 1,351 products, offers and cached upstream data, preserving prices and stock. Secrets live only in a private server environment file. See the [deployment runbook](docs/deployment.md) for paths, release commands, migrations, backups and verification. Domain/TLS, scheduled off-server backups and CI/CD remain pending; GitHub pushes do not deploy automatically.
 
 ## Scope and attribution
 
-This Compose stack uses development servers. No production deployment, accounts, reservations, real checkout or payments are configured. The browser cart is not an authoritative order. `docker compose down -v` deletes local database, Redis and frontend dependency volumes.
+The default Compose stack uses development servers; production uses the separate configuration above. No accounts, reservations, real checkout or payments are configured. The browser cart is not an authoritative order. `docker compose down -v` deletes local database, Redis and frontend dependency volumes.
 
 Data: [PokéAPI](https://pokeapi.co/docs/v2). Artwork: [PokéAPI sprites](https://github.com/PokeAPI/sprites). Pokémon and character artwork belong to their respective rights holders. This is an independent educational demo.

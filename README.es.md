@@ -2,11 +2,11 @@
 
 [English](README.md) · [Español](README.es.md)
 
-![Despliegue: pendiente](https://img.shields.io/badge/despliegue-pendiente-71549a)
+![Despliegue: VPS / HTTP](https://img.shields.io/badge/despliegue-VPS_HTTP-71549a)
 
 Una tienda Pokémon de demostración con portada a todo el ancho con los tres iniciales de Kanto, catálogo completo importado y carrito persistente. Creada con Vue 3, TypeScript y FastAPI. Precios y stock ficticios; las cuentas, pagos y pedidos reales quedan fuera de esta fase.
 
-[Repositorio](https://github.com/kevin0018/PokeShop) · [Demo solo local](http://localhost:5173) · [Documentación de la API](http://localhost:8000/docs)
+[Repositorio](https://github.com/kevin0018/PokeShop) · [Demo pública (HTTP)](http://62.171.169.187) · [Documentación de la API](http://localhost:8000/docs)
 
 [![Interfaz real de PokeShop](docs/home.png)](docs/home.png)
 
@@ -165,24 +165,22 @@ docker compose down
 
 Verificado el 07/09/2026: 21 pruebas de backend y 19 pruebas unitarias de frontend; tipos, ESLint, build de producción y Ruff. La suite completa de Chromium pasó contra el preview de producción; también se comprobaron las interacciones principales en desarrollo. La cobertura de navegador contiene 13 regresiones de interacción y 20 escenarios responsive, cada uno recorriendo las cuatro rutas a 320/375/414/768/1280 px en español/inglés y claro/oscuro (80 capturas, incluyendo un carrito con siete productos). Se comprueban la carga correcta y los desbordamientos horizontales; las capturas se generan en `frontend/test-results/`, ignorado en Git, para revisión visual. Se cubren selección con teclado, Escape y recuperación del foco, carrito tras paginación/recarga/error de red y persistencia de preferencias. También se ejecutaron repetición, interrupción controlada y recuperación de la importación.
 
-La última ejecución completa de navegador cubrió el rediseño con el collage de iniciales. Los cambios posteriores de favicon y posición del botón de añadir se verificaron con comprobaciones específicas de SVG/HTTP y distribución en navegador, sin repetir toda la suite. Son verificaciones locales, no resultados de CI alojada.
+La verificación del despliegue del 07/09/2026 repitió las 33 pruebas de Chromium contra la URL pública de la VPS, incluyendo el favicon y las tarjetas actuales. Todas pasaron. También se verificaron el build de producción, Nginx, la huella de los datos trasladados y la persistencia tras reiniciar el stack. Son verificaciones ejecutadas manualmente, no resultados de CI alojada.
 
 Las pruebas de integración requieren la migración y sincronización inicial. Las de navegador utilizan Chromium y el servidor de desarrollo encendido; configura `PLAYWRIGHT_BASE_URL` para otro servidor. No se han verificado otros motores de navegador. `pnpm build` también ejecuta tipos y empaquetado secuencialmente.
 
-## Despliegue — pendiente
+## Despliegue
 
-**La aplicación funciona en local; no hay una URL de demo pública ni un proveedor de hosting elegido.** Las capturas anteriores corresponden a la aplicación local funcionando, no a un despliegue publicado.
+**Publicado en la VPS de Contabo: [http://62.171.169.187](http://62.171.169.187). Dominio y HTTPS pendientes.**
 
-Compose arranca actualmente Vite en modo desarrollo y FastAPI con recarga. No es una configuración de producción. El proxy `/api` de Vite es un ajuste de desarrollo y debe configurarse por separado en producción; las rutas de Vue también necesitan un fallback a `index.html`.
+El archivo independiente `compose.production.yaml` sirve Vue compilado con Nginx y ejecuta FastAPI sin recarga. El Nginx del host conecta con un puerto limitado a loopback; `/api` utiliza el mismo origen y las rutas de Vue tienen fallback a `index.html`. PostgreSQL y la API no publican puertos del host. La otra web sigue funcionando.
 
-Se han considerado alojar todo el stack en una VPS, o Vue/FastAPI en Vercel y PostgreSQL en una VPS. Ninguna opción se ha implementado ni elegido como destino definitivo. No se ha comprado un dominio, configurado una base de datos cloud ni migrado un servidor.
+Los contenedores de producción tienen un límite conjunto de 896 MiB (frontend 128, API 512, PostgreSQL 256), sin swap adicional. Redis se omite porque la aplicación no lo utiliza. Compose de desarrollo y sus límites se mantienen.
 
-Cuando se elija destino, faltará configurar el servidor y las rutas de producción, variables privadas, acceso y límites de conexiones a la base de datos, migraciones y traslado del catálogo, HTTPS y copias de seguridad; después se verificarán las cuatro rutas en ese entorno. La importación y el recálculo de precios seguirán siendo comandos administrativos explícitos, no peticiones web.
-
-Actualmente no hay un workflow de GitHub Actions ni un pipeline de despliegue automático. Publicar commits en GitHub y desplegar la aplicación son pasos diferentes; esta actualización de documentación no publica ninguno.
+El primer despliegue trasladó los 1.351 productos, ofertas y caché, conservando precios y stock. Los secretos solo están en un archivo privado del servidor. El [manual de despliegue](docs/deployment.md) recoge rutas, comandos, migraciones, copias y verificaciones. Quedan pendientes dominio/TLS, copias periódicas externas y CI/CD; un push a GitHub no despliega automáticamente.
 
 ## Alcance y atribución
 
-Compose utiliza servidores de desarrollo. No hay despliegue de producción, cuentas, reservas de stock, compras reales ni pagos. El carrito del navegador no es un pedido autoritativo. `docker compose down -v` elimina los volúmenes locales de base de datos, Redis y dependencias frontend.
+Compose por defecto utiliza servidores de desarrollo; producción tiene la configuración independiente anterior. No hay cuentas, reservas de stock, compras reales ni pagos. El carrito del navegador no es un pedido autoritativo. `docker compose down -v` elimina los volúmenes locales de base de datos, Redis y dependencias frontend.
 
 Datos: [PokéAPI](https://pokeapi.co/docs/v2). Ilustraciones: [PokéAPI sprites](https://github.com/PokeAPI/sprites). Pokémon y sus ilustraciones pertenecen a sus respectivos titulares. Es un proyecto educativo independiente.

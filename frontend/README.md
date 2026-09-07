@@ -35,4 +35,4 @@ Type colors are shared across catalog cards, detail artwork, cart thumbnails and
 
 ## Deployment status
 
-**Pending — local development only.** No public demo or hosting provider is configured. See the [deployment section](../README.md#deployment--pending) for the current status and remaining production work. No deployment is triggered by this documentation update.
+**Live at [http://62.171.169.187](http://62.171.169.187)** on the Contabo VPS. Domain and HTTPS are pending. Production uses the standalone root `compose.production.yaml`; the default Compose remains for development. See the [deployment runbook](../docs/deployment.md) for routing, private configuration, data and release procedures.
