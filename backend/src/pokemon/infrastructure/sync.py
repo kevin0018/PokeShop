@@ -7,7 +7,12 @@ from collections import defaultdict
 import httpx
 from sqlalchemy import text
 
-from ..application.pricing import calculate_price, evolution_stage, region_for, REGION_NAMES
+from ..application.pricing import (
+    REGION_NAMES,
+    calculate_price,
+    evolution_stage,
+    region_for,
+)
 from .postgres_repository import engine
 
 TYPE_NAMES = dict(
@@ -121,12 +126,26 @@ class Importer:
         form = await self.fetch(p["forms"][0]["url"]) if p["forms"] else {}
         abilities = [await self.fetch(a["ability"]["url"]) for a in p["abilities"]]
         data = normalize(p, species, form, abilities)
-        generation = await self.fetch(species['generation']['url'])
-        region_resource = await self.fetch(generation['main_region']['url'])
-        chain = await self.fetch(species['evolution_chain']['url']) if species.get('evolution_chain') else None
-        region = region_for(p,species,region_resource['name'])
-        localized_region = names(region_resource['names']) if region == region_resource['name'] else dict(zip(('es','en'),REGION_NAMES[region],strict=True))
-        data.update(region=region,region_names=localized_region,evolution_stage=evolution_stage(chain['chain'],species['id']) if chain else None)
+        generation = await self.fetch(species["generation"]["url"])
+        region_resource = await self.fetch(generation["main_region"]["url"])
+        chain = (
+            await self.fetch(species["evolution_chain"]["url"])
+            if species.get("evolution_chain")
+            else None
+        )
+        region = region_for(p, species, region_resource["name"])
+        localized_region = (
+            names(region_resource["names"])
+            if region == region_resource["name"]
+            else dict(zip(("es", "en"), REGION_NAMES[region], strict=True))
+        )
+        data.update(
+            region=region,
+            region_names=localized_region,
+            evolution_stage=evolution_stage(chain["chain"], species["id"])
+            if chain
+            else None,
+        )
         offer = calculate_price(data)
         async with engine.begin() as conn:
             await conn.execute(

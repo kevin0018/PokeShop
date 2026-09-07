@@ -1,8 +1,9 @@
 import asyncio
 
-from src.database import database_url
 from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
+
+from src.database import database_url
 
 
 def migrate(connection):

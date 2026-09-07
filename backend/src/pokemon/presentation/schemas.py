@@ -18,7 +18,7 @@ class PokemonResponse(BaseModel):
     description: str
     image_url: str
     region: str | None = None
-    region_names: dict[str,str] = Field(default_factory=dict)
+    region_names: dict[str, str] = Field(default_factory=dict)
     evolution_stage: int | None = None
     base_cents: int = 3000
     pricing_version: str = "legacy"

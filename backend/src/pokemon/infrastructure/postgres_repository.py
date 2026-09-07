@@ -1,9 +1,9 @@
 """PostgreSQL catalog adapter. Offers never enter the upstream payload."""
 
-from src.database import database_url
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
+from src.database import database_url
 from src.pokemon.application.recommendations import recommend
 
 engine = create_async_engine(database_url(), pool_size=4, max_overflow=0)
@@ -38,7 +38,7 @@ class PostgresCatalog:
             params["type"] = pokemon_type
         if region:
             clauses.append("p.data->>'region' = :region")
-            params['region'] = region
+            params["region"] = region
         if generation:
             clauses.append("(p.data->>'generation')::int = :generation")
             params["generation"] = generation
@@ -80,7 +80,14 @@ class PostgresCatalog:
                 )
             ).mappings()
             return [
-                dict(row["data"], price_cents=row["price_cents"], stock=row["stock"],base_cents=row["base_cents"],pricing_version=row["pricing_version"],pricing_breakdown=row["pricing_breakdown"])
+                dict(
+                    row["data"],
+                    price_cents=row["price_cents"],
+                    stock=row["stock"],
+                    base_cents=row["base_cents"],
+                    pricing_version=row["pricing_version"],
+                    pricing_breakdown=row["pricing_breakdown"],
+                )
                 for row in rows
             ], total
 
@@ -114,9 +121,32 @@ class PostgresCatalog:
                     )
                 ).scalars()
             )
-            regions = list((await conn.execute(text("SELECT DISTINCT data->>'region' FROM pokemon WHERE data->>'region' IS NOT NULL ORDER BY 1"))).scalars())
-        from src.pokemon.application.pricing import REGION_NAMES
-        return {"generations": generations, "types": types, "regions":[{'id':r,'names':dict(zip(('es','en'),REGION_NAMES.get(r,(r,r)),strict=True))} for r in regions]}
+            regions = list(
+                (
+                    await conn.execute(
+                        text(
+                            "SELECT DISTINCT data->>'region' FROM pokemon WHERE data->>'region' IS NOT NULL ORDER BY 1"
+                        )
+                    )
+                ).scalars()
+            )
+        from src.pokemon.application.pricing import REGION_NAMES, REGIONS
+
+        return {
+            "generations": generations,
+            "types": types,
+            "regions": [
+                {
+                    "id": r,
+                    "names": dict(
+                        zip(("es", "en"), REGION_NAMES.get(r, (r, r)), strict=True)
+                    ),
+                }
+                for r in sorted(
+                    regions, key=lambda r: REGIONS.index(r) if r in REGIONS else 99
+                )
+            ],
+        }
 
     async def recommendations(self, ids):
         if not ids:

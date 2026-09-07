@@ -19,7 +19,14 @@ async def list_pokemon(
     q: str = Query("", max_length=100),
     pokemon_type: str = Query("", alias="type", max_length=30),
     sort: Literal[
-        "number", "price_asc", "price_desc", "name", "weight_asc", "weight_desc", "height_asc", "height_desc"
+        "number",
+        "price_asc",
+        "price_desc",
+        "name",
+        "weight_asc",
+        "weight_desc",
+        "height_asc",
+        "height_desc",
     ] = "number",
     limit: int = Query(24, ge=1, le=100),
     offset: int = Query(0, ge=0),
