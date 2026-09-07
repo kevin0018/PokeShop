@@ -12,7 +12,11 @@ import {
   SelectIcon,
 } from 'reka-ui'
 import { Check, ChevronDown } from 'lucide-vue-next'
-defineProps<{ modelValue: string; label: string; options: { value: string; label: string }[] }>()
+defineProps<{
+  modelValue: string
+  label: string
+  options: { value: string; label: string; image?: string }[]
+}>()
 defineEmits<{ 'update:modelValue': [value: string] }>()
 </script>
 <template>
@@ -33,7 +37,12 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
             :key="option.value"
             class="select-option"
             :value="option.value || '__all'"
-            ><SelectItemText>{{ option.label }}</SelectItemText
+            ><img
+              v-if="option.image"
+              :src="option.image"
+              alt=""
+              width="32"
+              height="32" /><SelectItemText>{{ option.label }}</SelectItemText
             ><SelectItemIndicator><Check :size="16" /></SelectItemIndicator
           ></SelectItem> </SelectViewport></SelectContent
     ></SelectPortal>

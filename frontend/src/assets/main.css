@@ -1571,3 +1571,18 @@ nav {
     grid-template-columns: 1fr;
   }
 }
+
+html.theme-colors,
+html.theme-colors body,
+html.theme-colors body * {
+  transition-property: background-color, color, border-color, box-shadow;
+  transition-duration: 300ms;
+  transition-timing-function: ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  html.theme-colors,
+  html.theme-colors body,
+  html.theme-colors body * {
+    transition: none;
+  }
+}

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { Languages, Moon, Sun, Monitor } from 'lucide-vue-next'
+import { Languages, Monitor } from 'lucide-vue-next'
 import { useThemeStore } from '@/shared/application/theme'
 import type { Theme } from '@/shared/infrastructure/preferences'
 import AppSelect from './AppSelect.vue'
@@ -29,12 +29,23 @@ function change(value: string) {
       <AppSelect
         :model-value="theme.preference"
         :label="t('theme')"
-        :options="['system', 'light', 'dark'].map((value) => ({ value, label: t(value) }))"
+        :options="
+          ['system', 'light', 'dark'].map((value) => ({
+            value,
+            label: t(value),
+            image:
+              value === 'system'
+                ? undefined
+                : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${value === 'light' ? 196 : 197}.png`,
+          }))
+        "
         @update:model-value="change"
-        ><Monitor v-if="theme.preference === 'system'" :size="16" aria-hidden="true" /><Moon
-          v-else-if="theme.resolved === 'dark'"
-          :size="16"
-          aria-hidden="true" /><Sun v-else :size="16" aria-hidden="true" /></AppSelect
+        ><Monitor v-if="theme.preference === 'system'" :size="16" aria-hidden="true" /><img
+          v-else
+          :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${theme.resolved === 'light' ? 196 : 197}.png`"
+          alt=""
+          width="32"
+          height="32" /></AppSelect
       ><span class="focus-hint">{{ t('theme') }}</span>
     </div>
   </div>

@@ -14,6 +14,7 @@ export const useThemeStore = defineStore('theme', () => {
       revision++
       transition?.skipTransition()
       animation?.cancel()
+      document.documentElement.classList.remove('theme-colors')
     }
     systemDark.value = event.matches
   }
@@ -32,10 +33,14 @@ export const useThemeStore = defineStore('theme', () => {
     | undefined
   let animation: Animation | undefined
   let revision = 0
+  let fallbackTimer: ReturnType<typeof setTimeout> | undefined
+  onScopeDispose(() => clearTimeout(fallbackTimer))
   async function change(value: Theme, origin?: DOMRect) {
     const token = ++revision
     transition?.skipTransition()
     animation?.cancel()
+    clearTimeout(fallbackTimer)
+    document.documentElement.classList.remove('theme-colors')
     if (transition) await transition.finished.catch(() => {})
     if (token !== revision) return
     const root = document.documentElement
@@ -48,10 +53,18 @@ export const useThemeStore = defineStore('theme', () => {
       startViewTransition?: (update: () => Promise<void>) => NonNullable<typeof transition>
     }
     if (!doc.startViewTransition) {
+      root.classList.add('theme-colors')
+      void root.offsetWidth
       preference.value = value
-      animation = root.animate?.([{ opacity: 0.65 }, { opacity: 1 }], { duration: 150 })
+      fallbackTimer = setTimeout(() => root.classList.remove('theme-colors'), 300)
       return
     }
+    // Let Reka close its portal before capturing the old page.
+    await nextTick()
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+    )
+    if (token !== revision) return
     const x = origin ? origin.x + origin.width / 2 : innerWidth / 2
     const y = origin ? origin.y + origin.height / 2 : 0
     const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))
@@ -65,7 +78,7 @@ export const useThemeStore = defineStore('theme', () => {
       if (token !== revision) return
       animation = root.animate(
         { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
-        { duration: 350, easing: 'ease-out', pseudoElement: '::view-transition-new(root)' },
+        { duration: 700, easing: 'ease-in-out', pseudoElement: '::view-transition-new(root)' },
       )
       await animation.finished.catch(() => {})
     } catch {
