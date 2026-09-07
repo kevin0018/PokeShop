@@ -1,4 +1,8 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173'
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('pokeshop.intro.v1', 'seen'))
+})
 test('catalog pages, forms, cart reload and network recovery', async ({ page }) => {
   await page.goto('/catalogo?forms=default')
   await page.getByRole('searchbox').fill('#025')
@@ -39,17 +43,17 @@ test('select keyboard, Escape, theme and locale persistence', async ({ page }) =
   await expect(page.getByRole('option', { name: 'EN', exact: true })).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(page.getByRole('combobox', { name: 'Language', exact: true })).toContainText('EN')
-  const appearance = page.getByRole('combobox', { name: 'Appearance', exact: true })
+  const appearance = page.getByRole('switch', { name: 'Dark', exact: true })
   await appearance.click()
-  await page.getByRole('option', { name: 'Dark', exact: true }).click()
+
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   await page.reload()
   await expect(page.locator('html')).toHaveAttribute('lang', 'en')
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
-  await appearance.click()
-  await page.keyboard.press('Escape')
-  await expect(page.getByRole('listbox')).toHaveCount(0)
-  await expect(appearance).toBeFocused()
+  await appearance.press('Space')
+  await expect(appearance).toHaveAttribute('aria-checked', 'false')
+  await page.getByRole('button', { name: 'Follow system theme' }).click()
+  await expect(page.locator('.theme-auto')).toHaveAttribute('aria-pressed', 'true')
 })
 for (const locale of ['es', 'en'])
   for (const theme of ['light', 'dark'])
@@ -59,6 +63,10 @@ for (const locale of ['es', 'en'])
           ({ locale, theme }) => {
             localStorage.setItem('pokeshop.locale', locale)
             localStorage.setItem('pokeshop.theme', theme)
+            localStorage.setItem(
+              'pokeshop.cart.v1',
+              JSON.stringify(Array.from({ length: 7 }, (_, i) => ({ id: i + 1, quantity: 1 }))),
+            )
           },
           { locale, theme },
         )
@@ -156,14 +164,12 @@ test('hero pause and reduced motion, theme transition duration and latest select
       return original(frames, options)
     }
   })
-  await page.getByRole('combobox', { name: 'Apariencia', exact: true }).click()
-  await page.getByRole('option', { name: 'Oscuro', exact: true }).click()
+  await page.getByRole('switch', { name: 'Oscuro', exact: true }).click()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   await expect
     .poll(() => page.evaluate(() => (window as unknown as { durations: number[] }).durations))
     .toContain(700)
-  await page.getByRole('combobox', { name: 'Apariencia', exact: true }).click()
-  await page.getByRole('option', { name: 'Claro', exact: true }).click()
+  await page.getByRole('switch', { name: 'Oscuro', exact: true }).click()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
 })
 
@@ -188,4 +194,110 @@ test('touch statistics and timed cart notice', async ({ browser }) => {
   await page.clock.fastForward(1000)
   await expect(page.locator('.cart-notice')).toHaveCount(0)
   await context.close()
+})
+
+test('intro can be skipped and runs once per tab session', async ({ browser }) => {
+  const context = await browser.newContext()
+  const page = await context.newPage()
+  await page.goto(baseURL)
+  await page.getByRole('button', { name: 'Saltar entrada →' }).click()
+  await expect(page.locator('.pokeball-intro')).toHaveCount(0)
+  await page.reload()
+  await expect(page.locator('.hero-pikachu')).toBeVisible()
+  await expect(page.locator('.pokeball-intro')).toHaveCount(0)
+  await page.evaluate(() => sessionStorage.removeItem('pokeshop.intro.v1'))
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.reload()
+  await expect(page.locator('.hero-pikachu')).toBeVisible()
+  await expect(page.locator('.pokeball-intro')).toHaveCount(0)
+  await context.close()
+})
+
+test('complete and partial bento blocks keep order without overlapping cards', async ({ page }) => {
+  const response = await page.request.get('/api/v1/pokemon?limit=7')
+  const { items } = await response.json()
+  for (const width of [320, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 })
+    for (const count of [1, 2, 3, 4, 5, 6, 7]) {
+      await page.route('**/api/v1/pokemon?**', (r) =>
+        r.fulfill({ json: { items: items.slice(0, count), total: count } }),
+      )
+      await page.goto('/catalogo')
+      await expect(page.locator('.catalog-bento .pokemon-card')).toHaveCount(count)
+      const ids = await page
+        .locator('.catalog-bento .card-art')
+        .evaluateAll((links) => links.map((l) => Number(l.getAttribute('href')?.split('/').pop())))
+      expect(ids).toEqual(items.slice(0, count).map((p: { id: number }) => p.id))
+      const rects = await page.locator('.catalog-bento .pokemon-card').evaluateAll((cards) =>
+        cards.map((c) => {
+          const r = c.getBoundingClientRect()
+          return { x: r.x, y: r.y, right: r.right, bottom: r.bottom, height: r.height }
+        }),
+      )
+      for (let i = 0; i < rects.length; i++) {
+        expect(rects[i]!.height).toBeLessThanOrEqual(417)
+        for (let j = i + 1; j < rects.length; j++)
+          expect(
+            rects[i]!.right <= rects[j]!.x ||
+              rects[j]!.right <= rects[i]!.x ||
+              rects[i]!.bottom <= rects[j]!.y ||
+              rects[j]!.bottom <= rects[i]!.y,
+          ).toBe(true)
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true,
+      )
+      await page.unroute('**/api/v1/pokemon?**')
+    }
+  }
+})
+
+async function seedCart(page: Page, count: number) {
+  const response = await page.request.get('/api/v1/pokemon?limit=25')
+  const { items } = await response.json()
+  await page.goto('/catalogo')
+  const entries = items.slice(0, count).map((p: { id: number }) => ({ id: p.id, quantity: 1 }))
+  await page.evaluate(
+    (entries) => localStorage.setItem('pokeshop.cart.v1', JSON.stringify(entries)),
+    entries,
+  )
+  await page.goto('/carrito')
+  return items
+    .slice(0, count)
+    .reduce((sum: number, p: { price_cents: number }) => sum + p.price_cents, 0)
+}
+test('empty cart keeps Chansey and recommendations', async ({ page }) => {
+  await seedCart(page, 0)
+  await expect(page.locator('.empty-cart')).toBeVisible()
+  await expect(page.locator('.cart-line')).toHaveCount(0)
+  await expect(page.locator('.chansey-empty')).toBeVisible()
+})
+for (const count of [1, 6, 7, 25])
+  test(`cart of ${count} products shows six at most and the global total`, async ({ page }) => {
+    const total = await seedCart(page, count)
+    await expect(page.locator('.cart-line')).toHaveCount(Math.min(count, 6))
+    await expect(page.locator('.summary-total strong')).toHaveText(
+      new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(total / 100),
+    )
+  })
+test('cart removal clamps pages and quantity changes stay on the current page', async ({
+  page,
+}) => {
+  await seedCart(page, 7)
+  await page.getByRole('button', { name: 'Siguiente', exact: true }).click()
+  await expect(page.locator('.cart-line')).toHaveCount(1)
+  await page.locator('.cart-line .text-button').click()
+  await expect(page.locator('.cart-line')).toHaveCount(6)
+  await expect(page.locator('.cart-pagination')).toHaveCount(0)
+  const total = await seedCart(page, 25)
+  await page.getByRole('button', { name: 'Siguiente', exact: true }).click()
+  await expect(page.locator('.cart-line')).toHaveCount(6)
+  await expect(page.locator('.summary-total strong')).toHaveText(
+    new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(total / 100),
+  )
+  await page.locator('.quantity-control button').nth(1).click()
+  await expect(page.locator('.cart-pagination')).toContainText('2')
+  expect(
+    await page.evaluate(() => JSON.parse(localStorage.getItem('pokeshop.cart.v1')!).length),
+  ).toBe(25)
 })

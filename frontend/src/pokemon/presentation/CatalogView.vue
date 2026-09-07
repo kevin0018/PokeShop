@@ -203,7 +203,7 @@ request<typeof metadata.value>('/metadata')
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-auto-rows: 250px;
   }
-  .bento-block > .pokemon-card:nth-child(n) {
+  .catalog-bento .bento-block > .pokemon-card:nth-child(n) {
     grid-column: span 1;
     grid-row: span 1;
   }
@@ -220,7 +220,7 @@ request<typeof metadata.value>('/metadata')
     grid-template-columns: minmax(0, 1fr);
     grid-auto-rows: 260px;
   }
-  .bento-block > .pokemon-card:nth-child(n) {
+  .catalog-bento .bento-block > .pokemon-card:nth-child(n) {
     grid-column: span 1;
     grid-row: span 1;
   }

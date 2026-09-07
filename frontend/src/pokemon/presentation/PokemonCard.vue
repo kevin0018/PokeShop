@@ -24,12 +24,12 @@ const cart = useCartStore()
       ><PokemonImage :src="pokemon.image_url" :name="pokemonName(pokemon)" />
       <span v-if="!pokemon.stock" class="sold-out">{{ t('soldOut') }}</span>
     </RouterLink>
+    <div class="type-list">
+      <span v-for="type in pokemon.types" :key="type" class="type-tag" :data-type="type">{{
+        typeName(type)
+      }}</span>
+    </div>
     <div class="card-body">
-      <div class="type-list">
-        <span v-for="type in pokemon.types" :key="type" class="type-tag" :data-type="type">{{
-          typeName(type)
-        }}</span>
-      </div>
       <h3>
         <RouterLink :to="`/pokemon/${pokemon.id}`" :title="pokemonName(pokemon)">{{
           pokemonName(pokemon)
@@ -183,8 +183,8 @@ const cart = useCartStore()
   font-size: 0.95rem;
 }
 .illustrated-card .add-button {
-  min-width: 36px;
-  min-height: 36px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 6px 9px;
   border-radius: 50%;
   gap: 0;
@@ -206,7 +206,7 @@ const cart = useCartStore()
   min-height: 0;
 }
 .bento-block .illustrated-card .card-art img {
-  height: 62%;
+  height: 82%;
   width: 72%;
   left: 24%;
   top: 0;
@@ -240,6 +240,22 @@ const cart = useCartStore()
   }
   .illustrated-card .card-art:hover img {
     transform: none;
+  }
+}
+
+.illustrated-card > .type-list,
+.bento-block .illustrated-card > .type-list {
+  position: absolute;
+  top: 14px;
+  left: 18px;
+  bottom: auto;
+  z-index: 2;
+  max-width: calc(100% - 76px);
+}
+@media (min-width: 901px) {
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-body,
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-body {
+    background: none;
   }
 }
 </style>
