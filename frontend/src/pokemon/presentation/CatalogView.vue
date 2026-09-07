@@ -171,10 +171,34 @@ request<typeof metadata.value>('/metadata')
   .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-body,
   .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-body,
   .bento-block[data-count='1'] .card-body {
-    width: 46%;
-    top: 50%;
-    bottom: auto;
-    transform: translateY(-50%);
+    width: 100%;
+    top: 0;
+    bottom: 0;
+    transform: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-body > h3,
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-body > h3,
+  .bento-block[data-count='1'] .card-body > h3,
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-measures,
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-measures,
+  .bento-block[data-count='1'] .card-measures {
+    max-width: 42%;
+  }
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-bottom,
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-bottom,
+  .bento-block[data-count='1'] .card-bottom {
+    min-height: 44px;
+  }
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .add-button,
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .add-button,
+  .bento-block[data-count='1'] .add-button {
+    position: absolute;
+    right: 18px;
+    bottom: 14px;
   }
   .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-art img,
   .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-art img,
