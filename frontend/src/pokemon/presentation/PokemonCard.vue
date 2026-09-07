@@ -11,7 +11,7 @@ const cart = useCartStore()
 </script>
 <template>
   <article
-    class="pokemon-card illustrated-card"
+    class="pokemon-card illustrated-card pokemon-palette"
     :class="{ 'bento-card': bento }"
     :data-type="pokemon.types[0]"
   >
@@ -67,7 +67,6 @@ const cart = useCartStore()
 
 <style>
 .illustrated-card.pokemon-card {
-  --pokemon-tint: #a58aca;
   position: relative;
   isolation: isolate;
   height: 300px;
@@ -84,24 +83,6 @@ const cart = useCartStore()
   transition:
     border-color 0.2s,
     box-shadow 0.2s;
-}
-.illustrated-card[data-type='planta'] {
-  --pokemon-tint: #64b68c;
-}
-.illustrated-card[data-type='fuego'] {
-  --pokemon-tint: #eab06d;
-}
-.illustrated-card[data-type='agua'] {
-  --pokemon-tint: #74bddd;
-}
-.illustrated-card[data-type='electrico'] {
-  --pokemon-tint: #e5c444;
-}
-.illustrated-card[data-type='psiquico'] {
-  --pokemon-tint: #cb8ebd;
-}
-.illustrated-card[data-type='hielo'] {
-  --pokemon-tint: #87d1d0;
 }
 .illustrated-card .card-art {
   position: absolute;

@@ -63,7 +63,10 @@ onMounted(() => {
     <div class="cart-list-panel">
       <div class="cart-lines">
         <article v-for="line in visibleLines" :key="line.pokemon.id" class="cart-line">
-          <RouterLink :to="`/pokemon/${line.pokemon.id}`" class="cart-art"
+          <RouterLink
+            :to="`/pokemon/${line.pokemon.id}`"
+            class="cart-art pokemon-palette"
+            :data-type="line.pokemon.types[0]"
             ><PokemonImage :src="line.pokemon.image_url" :name="pokemonName(line.pokemon)"
           /></RouterLink>
           <div class="cart-item-copy">
@@ -115,7 +118,10 @@ onMounted(() => {
       </nav>
     </div>
     <div class="checkout-scene">
-      <aside class="cart-summary">
+      <aside
+        class="cart-summary pokemon-palette"
+        :data-type="cart.recentLines[0]?.pokemon.types[0]"
+      >
         <p class="ticket-label">{{ t('ticketLabel') }}</p>
 
         <h2>{{ t('summary') }}</h2>

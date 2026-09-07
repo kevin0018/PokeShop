@@ -65,7 +65,7 @@ const inCart = computed(
     <button class="button primary" @click="load">{{ t('retry') }}</button>
   </div>
   <section v-else-if="pokemon" class="detail-layout">
-    <div class="detail-art">
+    <div class="detail-art pokemon-palette" :data-type="pokemon.types[0]">
       <StatsPopover :key="pokemon.id" :stats="pokemon.stats" />
       <span class="dex-number">{{ number(pokemon.species_id ?? pokemon.id) }}</span
       ><PokemonImage :src="pokemon.image_url" :name="pokemonName(pokemon)" />

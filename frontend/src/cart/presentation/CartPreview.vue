@@ -136,7 +136,7 @@ onUnmounted(() => clearTimeout(timer))
           <ul v-if="cart.recentLines.length" class="cart-preview-lines">
             <li v-for="line in cart.recentLines" :key="line.pokemon.id">
               <RouterLink :to="`/pokemon/${line.pokemon.id}`" @click="close()">
-                <div class="cart-preview-art">
+                <div class="cart-preview-art pokemon-palette" :data-type="line.pokemon.types[0]">
                   <PokemonImage :src="line.pokemon.image_url" :name="pokemonName(line.pokemon)" />
                 </div>
                 <div class="cart-preview-copy">

@@ -1,0 +1,86 @@
+.pokemon-palette {
+  --pokemon-tint: #a58aca;
+}
+.pokemon-palette[data-type='planta'] {
+  --pokemon-tint: #64b68c;
+}
+.pokemon-palette[data-type='fuego'] {
+  --pokemon-tint: #eab06d;
+}
+.pokemon-palette[data-type='agua'] {
+  --pokemon-tint: #74bddd;
+}
+.pokemon-palette[data-type='electrico'] {
+  --pokemon-tint: #e5c444;
+}
+.pokemon-palette[data-type='psiquico'] {
+  --pokemon-tint: #cb8ebd;
+}
+.pokemon-palette[data-type='hielo'] {
+  --pokemon-tint: #87d1d0;
+}
+.pokemon-palette[data-type='normal'] {
+  --pokemon-tint: #b5ada0;
+}
+.pokemon-palette[data-type='lucha'] {
+  --pokemon-tint: #cb826c;
+}
+.pokemon-palette[data-type='volador'] {
+  --pokemon-tint: #a1a9d8;
+}
+.pokemon-palette[data-type='veneno'] {
+  --pokemon-tint: #b78cce;
+}
+.pokemon-palette[data-type='tierra'] {
+  --pokemon-tint: #c6a273;
+}
+.pokemon-palette[data-type='roca'] {
+  --pokemon-tint: #b2a575;
+}
+.pokemon-palette[data-type='bicho'] {
+  --pokemon-tint: #a4b965;
+}
+.pokemon-palette[data-type='fantasma'] {
+  --pokemon-tint: #9382ba;
+}
+.pokemon-palette[data-type='dragon'] {
+  --pokemon-tint: #8d87d1;
+}
+.pokemon-palette[data-type='siniestro'] {
+  --pokemon-tint: #998798;
+}
+.pokemon-palette[data-type='acero'] {
+  --pokemon-tint: #91adb4;
+}
+.pokemon-palette[data-type='hada'] {
+  --pokemon-tint: #d6a1c3;
+}
+
+.detail-art.pokemon-palette {
+  background:
+    radial-gradient(
+      ellipse at 65% 25%,
+      color-mix(in srgb, var(--pokemon-tint) 48%, transparent),
+      transparent 80%
+    ),
+    color-mix(in srgb, var(--surface) 92%, var(--pokemon-tint));
+  border: 1px solid color-mix(in srgb, var(--pokemon-tint) 35%, var(--line));
+}
+.cart-art.pokemon-palette,
+.cart-preview-art.pokemon-palette {
+  background:
+    radial-gradient(
+      ellipse at 65% 25%,
+      color-mix(in srgb, var(--pokemon-tint) 45%, transparent),
+      transparent 90%
+    ),
+    var(--surface);
+}
+.checkout-scene .cart-summary.pokemon-palette {
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--pokemon-tint) 18%, var(--surface)),
+    var(--surface) 65%
+  );
+  border-color: color-mix(in srgb, var(--pokemon-tint) 45%, var(--line));
+}
