@@ -5,12 +5,12 @@ import { RouterView } from 'vue-router'
 import BaseHeader from './components/BaseHeader.vue'
 import BaseFooter from './components/BaseFooter.vue'
 import { onMounted } from 'vue'
-import { useCatalogStore } from './pokemon/application/catalogStore'
+
 import { useCartStore } from './cart/application/cartStore'
-const catalog = useCatalogStore()
+
 const cart = useCartStore()
 onMounted(() => {
-  void catalog.load()
+  void cart.hydrate()
 })
 </script>
 

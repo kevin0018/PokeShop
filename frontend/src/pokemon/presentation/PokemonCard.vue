@@ -4,7 +4,7 @@ const { t } = useI18n()
 import { Plus } from 'lucide-vue-next'
 import type { Pokemon } from '../domain/pokemon'
 import { useCartStore } from '@/cart/application/cartStore'
-import { money, number, typeName } from '@/shared/presentation/format'
+import { money, pokemonName, number, typeName } from '@/shared/presentation/format'
 import PokemonImage from '@/components/PokemonImage.vue'
 defineProps<{ pokemon: Pokemon }>()
 const cart = useCartStore()
@@ -14,10 +14,10 @@ const cart = useCartStore()
     <RouterLink
       :to="`/pokemon/${pokemon.id}`"
       class="card-art"
-      :aria-label="t('viewPokemon', { name: pokemon.name })"
+      :aria-label="t('viewPokemon', { name: pokemonName(pokemon) })"
     >
-      <span class="dex-number">{{ number(pokemon.id) }}</span
-      ><PokemonImage :src="pokemon.image_url" :name="pokemon.name" />
+      <span class="dex-number">{{ number(pokemon.species_id ?? pokemon.id) }}</span
+      ><PokemonImage :src="pokemon.image_url" :name="pokemonName(pokemon)" />
       <span v-if="!pokemon.stock" class="sold-out">{{ t('soldOut') }}</span>
     </RouterLink>
     <div class="card-body">
@@ -27,7 +27,7 @@ const cart = useCartStore()
         }}</span>
       </div>
       <h3>
-        <RouterLink :to="`/pokemon/${pokemon.id}`">{{ pokemon.name }}</RouterLink>
+        <RouterLink :to="`/pokemon/${pokemon.id}`">{{ pokemonName(pokemon) }}</RouterLink>
       </h3>
       <div class="card-bottom">
         <strong>{{ money(pokemon.price_cents) }}</strong
@@ -38,7 +38,7 @@ const cart = useCartStore()
             (cart.lines.find((line) => line.pokemon.id === pokemon.id)?.quantity ?? 0) >=
               pokemon.stock
           "
-          :aria-label="t('addPokemon', { name: pokemon.name })"
+          :aria-label="t('addPokemon', { name: pokemonName(pokemon) })"
           @click="cart.add(pokemon.id)"
         >
           <Plus :size="18" />{{ t('add') }}

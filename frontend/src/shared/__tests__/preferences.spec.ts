@@ -3,11 +3,10 @@ import { mount, flushPromises, type VueWrapper } from '@vue/test-utils'
 import { createPinia, disposePinia, type Pinia } from 'pinia'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import App from '@/App.vue'
-import AppSelect from '@/components/AppSelect.vue'
 import CatalogView from '@/pokemon/presentation/CatalogView.vue'
 import CartView from '@/cart/presentation/CartView.vue'
 import PokemonDetailView from '@/pokemon/presentation/PokemonDetailView.vue'
-import { httpPokemonRepository } from '@/pokemon/infrastructure/httpPokemonRepository'
+import AppSelect from '@/components/AppSelect.vue'
 import { i18n, syncLocale } from '@/i18n'
 import { initialLocale, initialTheme } from '../infrastructure/preferences'
 
@@ -22,6 +21,11 @@ const pokemon = {
   price_cents: 2490,
   stock: 2,
   description: 'Descripción de API',
+  descriptions: { es: 'Descripción de API', en: 'A seed grows on its back.' },
+  weight_kg: 6.9,
+  height_m: 0.7,
+  generation: 1,
+  species_id: 1,
   image_url: '',
 }
 
@@ -36,7 +40,19 @@ beforeEach(() => {
     },
     removeEventListener: vi.fn(),
   }))
-  vi.spyOn(httpPokemonRepository, 'list').mockResolvedValue([pokemon])
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url: string) => ({
+      ok: true,
+      status: 200,
+      json: async () =>
+        url.includes('/metadata')
+          ? { types: ['planta', 'veneno'], generations: [1] }
+          : /pokemon\/1$/.test(url)
+            ? pokemon
+            : { items: [pokemon], total: 1 },
+    })),
+  )
 })
 afterEach(() => {
   wrapper?.unmount()
@@ -52,6 +68,7 @@ async function start(path = '/') {
     history: createMemoryHistory(),
     routes: [
       { path: '/', component: CatalogView },
+      { path: '/catalogo', component: CatalogView },
       { path: '/carrito', component: CartView },
       { path: '/pokemon/:id', component: PokemonDetailView },
     ],
@@ -64,12 +81,12 @@ async function start(path = '/') {
   return router
 }
 
-async function language(value:string) {
-  wrapper.findAllComponents(AppSelect)[0]!.vm.$emit('update:modelValue',value)
+async function language(value: string) {
+  wrapper.findAllComponents(AppSelect)[0]!.vm.$emit('update:modelValue', value)
   await flushPromises()
 }
-async function appearance(value:string) {
-  wrapper.findAllComponents(AppSelect)[1]!.vm.$emit('update:modelValue',value)
+async function appearance(value: string) {
+  wrapper.findAllComponents(AppSelect)[1]!.vm.$emit('update:modelValue', value)
   await flushPromises()
 }
 
@@ -77,7 +94,7 @@ describe('appearance and language integration', () => {
   it('switches catalog, accessible labels, active notices and cart prices without losing the cart', async () => {
     const router = await start()
     await language('en')
-    expect(wrapper.text()).toContain('Find your favorite')
+    expect(wrapper.text()).toContain('Catalog')
     expect(wrapper.get('input[type="search"]').attributes('placeholder')).toBe(
       'Name or Pokédex number',
     )
@@ -97,14 +114,12 @@ describe('appearance and language integration', () => {
   it('translates product descriptions and stock on the current detail page', async () => {
     await start('/pokemon/1')
     await language('en')
-    expect(wrapper.get('.description').text()).toBe(
-      'The perfect companion to start your collection. Its bulb grows alongside it.',
-    )
+    expect(wrapper.get('.description').text()).toBe('A seed grows on its back.')
     expect(wrapper.get('.stock-label').text()).toBe('2 units available')
     expect(wrapper.text()).not.toContain('Descripción de API')
   })
   it('translates an already visible API error and its retry control', async () => {
-    vi.mocked(httpPokemonRepository.list).mockRejectedValue(new Error('offline'))
+    vi.mocked(fetch).mockRejectedValue(new Error('offline'))
     await start()
     await language('en')
     expect(wrapper.get('[role="alert"]').text()).toContain('Check your connection and try again.')
@@ -135,7 +150,7 @@ describe('appearance and language integration', () => {
     await start()
     await language('en')
     await appearance('dark')
-    expect(wrapper.text()).toContain('Find your favorite')
+    expect(wrapper.text()).toContain('Catalog')
     expect(document.documentElement.dataset.theme).toBe('dark')
     expect(initialLocale()).toBe('es')
     expect(initialTheme()).toBe('system')

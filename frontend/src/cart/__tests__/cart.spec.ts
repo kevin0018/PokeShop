@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
-import { nextTick } from 'vue'
 import { parseCart } from '../domain/cart'
 import { useCartStore } from '../application/cartStore'
 import { useCatalogStore } from '@/pokemon/application/catalogStore'
@@ -64,7 +63,8 @@ describe('cart', () => {
     )
     const cart = useCartStore()
     loadCatalog()
-    await nextTick()
+    vi.spyOn(useCatalogStore(), 'hydrate').mockResolvedValue()
+    await cart.hydrate()
     expect(cart.count).toBe(2)
     expect(cart.total).toBe(5980)
     expect(JSON.parse(localStorage.getItem('pokeshop.cart.v1')!)).toEqual([{ id: 25, quantity: 2 }])
@@ -86,5 +86,18 @@ describe('cart', () => {
     cart.add(25)
     cart.add(999)
     expect(cart.count).toBe(0)
+  })
+  it('retains stored entries on network failure and on unrelated catalog pages', async () => {
+    loadCatalog()
+    const cart = useCartStore()
+    cart.add(25)
+    const catalog = useCatalogStore()
+    catalog.remember([{ ...pokemon, id: 150 }])
+    expect(cart.lines[0]!.pokemon.id).toBe(25)
+    vi.spyOn(catalog, 'hydrate').mockRejectedValue(new Error('offline'))
+    await cart.hydrate()
+    expect(cart.error).toBe(true)
+    expect(cart.entries).toEqual([{ id: 25, quantity: 1 }])
+    expect(JSON.parse(localStorage.getItem('pokeshop.cart.v1')!)).toEqual([{ id: 25, quantity: 1 }])
   })
 })

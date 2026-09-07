@@ -14,7 +14,8 @@ const cart = useCartStore()
         ><span class="brand-dot">.</span></RouterLink
       >
       <nav :aria-label="t('navigation')">
-        <RouterLink to="/" class="catalog-link">{{ t('catalog') }}</RouterLink
+        <RouterLink to="/" class="catalog-link">{{ t('homeNav') }}</RouterLink
+        ><RouterLink to="/catalogo" class="catalog-link">{{ t('catalog') }}</RouterLink
         ><RouterLink to="/carrito" class="cart-link"
           ><ShoppingBag :size="19" /><span>{{ t('cart') }}</span
           ><span class="cart-count">{{ cart.count }}</span></RouterLink

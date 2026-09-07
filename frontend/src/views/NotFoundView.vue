@@ -7,6 +7,6 @@ const { t } = useI18n()
     <p class="eyebrow">404</p>
     <h1>{{ t('notFound') }}</h1>
     <p>{{ t('notFoundBody') }}</p>
-    <RouterLink class="button primary" to="/">{{ t('backCatalog') }}</RouterLink>
+    <RouterLink class="button primary" to="/catalogo">{{ t('backCatalog') }}</RouterLink>
   </section>
 </template>
