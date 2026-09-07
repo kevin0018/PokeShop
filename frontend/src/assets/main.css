@@ -1045,3 +1045,85 @@ nav {
     min-height: 44px;
   }
 }
+
+.custom-select {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  border: 1px solid var(--control-border);
+  border-radius: 10px;
+  background: var(--control-surface);
+  color: var(--ink);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.custom-select:focus-visible {
+  outline: 3px solid var(--purple);
+  outline-offset: 3px;
+}
+.select-menu {
+  z-index: 100;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--control-border);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 12px 32px #0003;
+  min-width: var(--reka-select-trigger-width);
+  max-height: var(--reka-select-content-available-height);
+  overflow: auto;
+}
+.select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 12px;
+  border-radius: 7px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  outline: none;
+}
+.select-option[data-highlighted] {
+  background: var(--feature);
+  color: var(--ink);
+}
+.select-option[data-state='checked'] {
+  color: var(--purple);
+  font-weight: 700;
+}
+.preference-control {
+  position: relative;
+}
+.focus-hint {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 90;
+}
+.preference-control:focus-within .focus-hint {
+  display: block;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-new(root) {
+  z-index: 1;
+}
+::view-transition-old(root) {
+  z-index: 0;
+}
