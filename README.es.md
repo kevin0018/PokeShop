@@ -4,7 +4,7 @@
 
 ![Despliegue: demo local](https://img.shields.io/badge/despliegue-demo_local-71549a)
 
-Una tienda Pokémon de demostración con portada eléctrica protagonizada por Pikachu, catálogo completo importado y carrito persistente. Creada con Vue 3, TypeScript y FastAPI. Precios y stock ficticios; las cuentas, pagos y pedidos reales quedan fuera de esta fase.
+Una tienda Pokémon de demostración con portada a todo el ancho con los tres iniciales de Kanto, catálogo completo importado y carrito persistente. Creada con Vue 3, TypeScript y FastAPI. Precios y stock ficticios; las cuentas, pagos y pedidos reales quedan fuera de esta fase.
 
 [Demo local](http://localhost:5173) · [Documentación de la API](http://localhost:8000/docs)
 
@@ -14,7 +14,7 @@ Una tienda Pokémon de demostración con portada eléctrica protagonizada por Pi
 
 ## Funcionalidades
 
-- `/`: escena eléctrica violeta/amarilla con Pikachu, pausa y accesos por región. La portada se muestra directamente. El movimiento reducido desactiva las animaciones decorativas; el fondo se detiene fuera de pantalla y con la pestaña oculta.
+- `/`: collage a todo el ancho de Bulbasaur, Charmander y Squirtle, sin marco de tarjeta. Los colores por tipo forman el fondo; se mantienen los accesos al catálogo y Kanto. La portada se muestra directamente. El movimiento reducido desactiva las animaciones decorativas; el fondo se detiene fuera de pantalla y con la pestaña oculta.
 - `/catalogo`: 24 resultados ordenados en bloques compactos de seis: una tarjeta 3×2, dos 3×1 y tres 2×1, sobre seis columnas de escritorio con filas de 200 px y separación de 16 px. Los bloques incompletos forman filas equilibradas. Dos columnas en tablet y una en móvil. El tamaño es editorial, independiente de la altura; las dimensiones siguen visibles. Los filtros provisionales conservan estado en URL y Aplicar/Cancelar.
 - `/pokemon/:id`: biología localizada, dimensiones y origen. Las estadísticas se abren desde la esquina superior derecha de la ilustración con hover, foco o toque; un clic fija el popover y Escape, pulsación fuera o Cerrar lo cierran. Las habilidades permanecen en la API, pero se omiten en la vista.
 - `/carrito`: seis productos distintos por página y totales calculados sobre toda la cesta. Eliminar el último producto de una página ajusta a la última válida; cambiar cantidades mantiene la página. IDs y cantidades persisten, independientemente de la paginación del catálogo y los fallos de red.
@@ -22,6 +22,10 @@ Una tienda Pokémon de demostración con portada eléctrica protagonizada por Pi
 - Español/inglés con Vue I18n, selectores accesibles de Reka UI, iconos Lucide, temas claro/oscuro/sistema y revelación circular de 700 ms para cambios manuales. El movimiento reducido y los cambios automáticos del sistema omiten la animación; los navegadores sin soporte transicionan los colores durante 300 ms, sin atenuar la página.
 
 Chansey aparece con 200–240 px debajo del resumen con aspecto de ticket, tanto en escritorio como en móvil y también acompaña el estado vacío. Los avisos de tres segundos usan un disco que se vacía, se pausan con hover/foco y se reinician con cada acción. Los errores de almacenamiento permanecen visibles. Un switch animado Espeon/Umbreon selecciona claro/oscuro, usando inicialmente la preferencia del navegador y recordando las elecciones manuales. Se conserva la revelación de página de 700 ms.
+
+La cabecera permite previsualizar los tres últimos productos distintos añadidos y el total de toda la cesta con hover, teclado, clic o toque. «Ver carrito completo» abre la lista; «Vaciar carrito» elimina toda la selección guardada. El orden reciente persiste sin reordenar las páginas del carrito.
+
+La paleta por tipo se comparte entre catálogo, fondo de ficha, miniaturas del carrito y preview. El ticket recibe un matiz del último producto añadido.
 
 ## Ejecución local
 
@@ -168,5 +172,3 @@ Las pruebas de integración requieren la migración y sincronización inicial. L
 Compose utiliza servidores de desarrollo. No hay despliegue de producción, cuentas, reservas de stock, compras reales ni pagos. El carrito del navegador no es un pedido autoritativo. `docker compose down -v` elimina los volúmenes locales de base de datos, Redis y dependencias frontend.
 
 Datos: [PokéAPI](https://pokeapi.co/docs/v2). Ilustraciones: [PokéAPI sprites](https://github.com/PokeAPI/sprites). Pokémon y sus ilustraciones pertenecen a sus respectivos titulares. Es un proyecto educativo independiente.
-
-La cabecera permite previsualizar los tres últimos productos distintos añadidos y el total de toda la cesta con hover, teclado, clic o toque. «Ver carrito completo» abre la lista; «Vaciar carrito» elimina toda la selección guardada. El orden reciente persiste sin reordenar las páginas del carrito.

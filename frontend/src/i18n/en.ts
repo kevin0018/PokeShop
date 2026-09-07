@@ -12,6 +12,8 @@ export default {
   heightHigh: 'Height: tallest first',
   heightBento: 'Small, medium and tall: cards follow real height.',
   removeFilter: 'Remove filter',
+  starterHeadline: 'Your story starts here.',
+  originalTrio: 'The original three',
   adventure: 'Your next adventure starts with a companion',
   heroCopy:
     'A little spark. A world to discover. Find the Pokémon that makes your collection yours.',

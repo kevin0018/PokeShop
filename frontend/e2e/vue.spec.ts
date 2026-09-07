@@ -72,7 +72,7 @@ for (const locale of ['es', 'en'])
         )
         await page.setViewportSize({ width, height: 900 })
         for (const [name, path, selector, count] of [
-          ['home', '/', '.hero-pikachu', 1],
+          ['home', '/', '.hero-starter img', 3],
           ['catalog', '/catalogo', '.pokemon-card', 24],
           ['detail', '/pokemon/10100', '.stats-trigger', 1],
           ['cart', '/carrito', '.recommendations .pokemon-card', 4],
@@ -149,9 +149,9 @@ test('hero pause and reduced motion, theme transition duration and latest select
   page,
 }) => {
   await page.goto('/')
-  await expect(page.locator('.pikachu-scene')).toHaveAttribute('data-running', 'true')
+  await expect(page.locator('.starter-scene')).toHaveAttribute('data-running', 'true')
   await page.getByRole('button', { name: 'Pausar animación' }).click()
-  await expect(page.locator('.pikachu-scene')).toHaveAttribute('data-running', 'false')
+  await expect(page.locator('.starter-scene')).toHaveAttribute('data-running', 'false')
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await expect(page.locator('.scene-toggle')).toHaveCount(0)
   await page.emulateMedia({ reducedMotion: 'no-preference' })

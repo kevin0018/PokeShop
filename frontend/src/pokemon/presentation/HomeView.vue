@@ -1,20 +1,24 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ArrowUpRight, ArrowRight, Pause, Play, Zap } from 'lucide-vue-next'
-import { request } from '../infrastructure/httpPokemonRepository'
-const { t, locale } = useI18n()
-const regions = ref<{ id: string; names: Record<string, string> }[]>([])
+import { ArrowUpRight, ArrowRight, Pause, Play } from 'lucide-vue-next'
+const { t } = useI18n()
+const starters = [
+  { id: 1, name: 'Bulbasaur', type: 'planta' },
+  { id: 4, name: 'Charmander', type: 'fuego' },
+  { id: 7, name: 'Squirtle', type: 'agua' },
+]
 const scene = ref<HTMLElement>(),
   paused = ref(false),
   visible = ref(false),
   hidden = ref(document.hidden),
   reduced = ref(true)
 const running = computed(() => !paused.value && visible.value && !hidden.value && !reduced.value)
-let observer: IntersectionObserver | undefined
 const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
+let observer: IntersectionObserver | undefined
 const updateMotion = () => {
   reduced.value = motion.matches
+  reset()
 }
 const visibility = () => {
   hidden.value = document.hidden
@@ -25,13 +29,13 @@ function pointer(event: PointerEvent) {
   scene.value!.style.setProperty('--dx', `${(event.clientX - r.x - r.width / 2) * 0.025}px`)
   scene.value!.style.setProperty('--dy', `${(event.clientY - r.y - r.height / 2) * 0.025}px`)
 }
-function toggle() {
-  paused.value = !paused.value
-  reset()
-}
 function reset() {
   scene.value?.style.setProperty('--dx', '0px')
   scene.value?.style.setProperty('--dy', '0px')
+}
+function toggle() {
+  paused.value = !paused.value
+  reset()
 }
 onMounted(() => {
   updateMotion()
@@ -41,9 +45,6 @@ onMounted(() => {
     visible.value = !!entry?.isIntersecting
   })
   if (scene.value) observer.observe(scene.value)
-  void request<{ regions: typeof regions.value }>('/metadata')
-    .then((r) => (regions.value = r.regions ?? []))
-    .catch(() => {})
 })
 onUnmounted(() => {
   observer?.disconnect()
@@ -54,44 +55,47 @@ onUnmounted(() => {
 <template>
   <section
     ref="scene"
-    class="adventure-hero"
+    class="starter-home"
     :data-running="running"
     @pointermove="pointer"
     @pointerleave="reset"
   >
-    <svg class="hero-traces" viewBox="0 0 1200 650" preserveAspectRatio="none" aria-hidden="true">
-      <path d="M720 -20 620 190 820 190 710 360 1150 290 980 650" />
-      <path d="M-20 580 300 510 400 590 730 440" />
-    </svg>
-    <div class="adventure-copy">
-      <p class="eyebrow"><Zap :size="15" /> POKESHOP · {{ t('spark') }}</p>
-      <h1>{{ t('adventure') }}</h1>
-      <p class="hero-description">{{ t('heroCopy') }}</p>
-      <div class="hero-actions">
-        <RouterLink class="button primary" to="/catalogo"
-          >{{ t('exploreCatalog') }}<ArrowRight :size="18" /></RouterLink
-        ><RouterLink class="hero-kanto" to="/catalogo?region=kanto"
-          >{{ t('visitKanto') }}<ArrowUpRight :size="17"
-        /></RouterLink>
-      </div>
+    <div class="starter-haze" aria-hidden="true" />
+    <div class="starter-heading">
+      <p>POKÉSHOP · {{ t('originalTrio') }}</p>
+      <h1>{{ t('starterHeadline') }}</h1>
     </div>
-    <div class="pikachu-scene" :data-running="running">
-      <div class="scene-orbit" aria-hidden="true" />
-      <span class="scene-word" aria-hidden="true">PIKA!</span>
-      <div class="electric-spark spark-one" aria-hidden="true">ϟ</div>
-      <div class="electric-spark spark-two" aria-hidden="true">ϟ</div>
-      <div class="pikachu-float">
+    <div class="starter-scene" :data-running="running">
+      <span class="starter-landmark" aria-hidden="true">KANTO</span>
+      <RouterLink
+        v-for="starter in starters"
+        :key="starter.id"
+        :to="`/pokemon/${starter.id}`"
+        class="hero-starter pokemon-palette"
+        :data-type="starter.type"
+        :aria-label="t('viewPokemon', { name: starter.name })"
+      >
+        <span class="starter-aura" aria-hidden="true" />
         <img
-          class="hero-pikachu"
-          src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png"
-          alt="Pikachu"
+          :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${starter.id}.png`"
+          :alt="starter.name"
           width="475"
           height="475"
           fetchpriority="high"
         />
-      </div>
-      <div class="scene-ball" aria-hidden="true"><span /></div>
-      <span class="scene-caption">#025 · KANTO</span>
+        <span class="starter-name"
+          ><small>#{{ String(starter.id).padStart(3, '0') }}</small
+          >{{ starter.name }}<ArrowUpRight :size="18"
+        /></span>
+      </RouterLink>
+    </div>
+    <div class="starter-bottom">
+      <RouterLink class="starter-catalog" to="/catalogo"
+        >{{ t('exploreCatalog') }}<ArrowRight :size="22"
+      /></RouterLink>
+      <RouterLink class="starter-kanto" to="/catalogo?region=kanto"
+        >{{ t('visitKanto') }}<ArrowUpRight :size="16"
+      /></RouterLink>
       <button
         v-if="!reduced"
         class="scene-toggle icon-button"
@@ -104,328 +108,260 @@ onUnmounted(() => {
       </button>
     </div>
   </section>
-  <section class="region-discovery">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">{{ t('originIntro') }}</p>
-        <h2>{{ t('chooseRegion') }}</h2>
-      </div>
-      <RouterLink class="back-link" to="/catalogo"
-        >{{ t('viewAll') }}<ArrowRight :size="16"
-      /></RouterLink>
-    </div>
-    <div class="region-path">
-      <RouterLink
-        v-for="(region, index) in regions"
-        :key="region.id"
-        :to="{ path: '/catalogo', query: { region: region.id } }"
-        ><span class="region-index">{{ String(index + 1).padStart(2, '0') }}</span
-        ><strong>{{ region.names[locale] ?? region.id }}</strong
-        ><ArrowUpRight :size="18"
-      /></RouterLink>
-    </div>
-  </section>
 </template>
-<style scoped>
-.adventure-hero {
+<style>
+.main-content.home-main {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.starter-home {
   position: relative;
   isolation: isolate;
-  display: grid;
-  grid-template-columns: 1.05fr 1fr;
-  align-items: center;
-  min-height: 590px;
-  padding: 50px 44px;
-  margin: 0 0 50px;
   overflow: hidden;
-  border-radius: 30px;
-  background:
-    radial-gradient(
-      ellipse at calc(75% + var(--dx, 0px)) calc(35% + var(--dy, 0px)),
-      #775791,
-      transparent 62%
-    ),
-    #2e193f;
-  color: #fff7e7;
+  min-height: calc(100svh - 88px);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: #f0edf6;
+  color: #352644;
+  padding: 42px 0 32px;
 }
-.adventure-hero:before {
-  content: '';
+[data-theme='dark'] .starter-home {
+  background: #21182e;
+  color: #f4edf9;
+}
+.starter-haze {
   position: absolute;
-  inset: -35%;
-  background: repeating-linear-gradient(-25deg, transparent 0 90px, #ffffff05 91px 92px);
+  inset: -12%;
   z-index: -1;
-}
-.adventure-copy {
-  position: relative;
-  z-index: 2;
-}
-.adventure-copy .eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.65rem;
-  letter-spacing: 0.13em;
-  color: #eed35c;
-  max-width: 350px;
-}
-.adventure-copy h1 {
-  font-size: clamp(2.7rem, 4.5vw, 4.6rem);
-  line-height: 1.02;
-  letter-spacing: -0.055em;
-  color: #fff7e7;
-  margin: 24px 0;
-  max-width: 600px;
-}
-.hero-description {
-  max-width: 350px;
-  color: #e4d4ec;
-  line-height: 1.8;
-  font-size: 0.95rem;
-}
-.hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 22px;
-  margin-top: 28px;
-}
-.hero-actions .primary {
-  background: #f2cf54;
-  color: #2e193f;
-}
-.hero-actions .primary:hover {
-  background: #ffe480;
-}
-.hero-kanto {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #fff7e7;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-.pikachu-scene {
-  position: relative;
-  aspect-ratio: 1;
-  align-self: center;
-  min-width: 0;
-}
-.scene-orbit {
-  position: absolute;
-  inset: 6%;
-  border-radius: 50%;
-  background: #f1cf52;
-  box-shadow: 0 0 0 24px #f2cf5412;
-  transform: rotate(-12deg) scaleY(0.9);
-}
-.scene-word {
-  position: absolute;
-  font-size: clamp(5rem, 12vw, 10rem);
-  font-weight: 900;
-  letter-spacing: -0.09em;
-  top: 2%;
-  left: 2%;
-  transform: rotate(-12deg);
-  color: #ffffff1c;
-  z-index: 1;
-}
-.pikachu-float {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-}
-.hero-pikachu {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 20px 12px #170b2744);
-  transform: rotate(-7deg);
-}
-.scene-ball {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 74px;
-  height: 74px;
-  border: 5px solid #2b1939;
-  border-radius: 50%;
-  background: linear-gradient(#a389bd 44%, #2b1939 44%, #2b1939 55%, #fff5df 55%);
-  transform: rotate(-22deg);
-  z-index: 3;
-}
-.scene-ball span {
-  position: absolute;
-  inset: 27%;
-  border: 5px solid #2b1939;
-  border-radius: 50%;
-  background: #fff5df;
-}
-.scene-caption {
-  position: absolute;
-  bottom: -2%;
-  right: 14%;
-  font-size: 0.65rem;
-  letter-spacing: 0.2em;
-  color: #f4df99;
-  font-weight: 800;
-  z-index: 3;
-}
-.scene-toggle {
-  position: absolute;
-  right: 0;
-  bottom: -4%;
-  border: 1px solid #ffffff44;
-  background: #2e193f;
-  color: #fff7e7;
-  border-radius: 50%;
-  z-index: 3;
-}
-.electric-spark {
-  position: absolute;
-  color: #fff5c5;
-  font-size: 70px;
-  font-weight: 900;
-  line-height: 1;
-  z-index: 3;
-  animation: electric-pulse 7s ease-in-out infinite;
+  background:
+    radial-gradient(ellipse at 18% 66%, #64b68c66, transparent 42%),
+    radial-gradient(ellipse at 53% 54%, #eab06d55, transparent 38%),
+    radial-gradient(ellipse at 88% 65%, #74bddd77, transparent 42%);
+  transform: translate(var(--dx, 0px), var(--dy, 0px));
+  animation: starter-light 12s ease-in-out infinite alternate;
   animation-play-state: paused;
 }
-.spark-one {
-  right: 0;
-  top: 5%;
-  transform: rotate(10deg);
-}
-.spark-two {
-  left: 0;
-  bottom: 23%;
-  font-size: 45px;
-  animation-delay: 3s;
-}
-.hero-traces {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-  fill: none;
-  stroke: #f7d653;
-  stroke-width: 3;
-  opacity: 0.18;
-}
-.hero-traces path {
-  stroke-dasharray: 100 1600;
-  animation: electric-travel 9s ease-in-out infinite;
-  animation-play-state: paused;
-}
-.hero-traces path + path {
-  animation-delay: 4s;
-}
-[data-running='true'] > .hero-traces path,
-[data-running='true'] > .electric-spark {
+.starter-home[data-running='true'] .starter-haze {
   animation-play-state: running;
 }
-.region-discovery {
-  padding: 12px 0 50px;
+.starter-heading {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  padding: 0 24px;
 }
-.region-path {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+.starter-heading p {
+  font-family: monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  margin: 0 0 14px;
 }
-.region-path a {
+.starter-heading h1 {
+  font-size: clamp(2.8rem, 5.2vw, 5.5rem);
+  font-weight: 850;
+  line-height: 1.03;
+  letter-spacing: -0.065em;
+  margin: 0 auto;
+  max-width: 1100px;
+  text-wrap: balance;
+  color: inherit;
+}
+.starter-scene {
+  position: relative;
+  width: min(1440px, 100%);
+  justify-self: center;
+  height: clamp(390px, 51vw, 590px);
+  align-self: center;
+}
+.starter-landmark {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  top: 10%;
+  font-size: clamp(7rem, 23vw, 23rem);
+  line-height: 1;
+  letter-spacing: -0.08em;
+  font-weight: 900;
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in srgb, currentColor 15%, #8c76aa55);
+  user-select: none;
+}
+.hero-starter {
+  position: absolute;
+  width: 34%;
+  height: 83%;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  isolation: isolate;
+}
+.hero-starter:nth-of-type(1) {
+  left: 3%;
+  transform: rotate(-5deg);
+}
+.hero-starter:nth-of-type(2) {
+  left: 33%;
+  bottom: 8%;
+  z-index: 2;
+  transform: rotate(4deg);
+}
+.hero-starter:nth-of-type(3) {
+  right: 3%;
+  transform: rotate(5deg);
+}
+.hero-starter img {
+  width: 100%;
+  height: calc(100% - 40px);
+  object-fit: contain;
+  filter: drop-shadow(0 22px 12px #21182e25);
+  transition: transform 0.35s ease;
+}
+.hero-starter:hover img,
+.hero-starter:focus-visible img {
+  transform: scale(1.045) translateY(-6px);
+}
+.starter-aura {
+  position: absolute;
+  width: 78%;
+  aspect-ratio: 1;
+  top: 12%;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--pokemon-tint) 24%, transparent);
+  z-index: -1;
+  filter: blur(24px);
+}
+.starter-name {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 22px 12px;
-  border-bottom: 1px solid var(--line);
-  color: var(--ink);
+  gap: 10px;
+  font-size: clamp(0.85rem, 1.45vw, 1.3rem);
+  font-weight: 750;
 }
-.region-path a:hover {
-  background: var(--lavender);
+.starter-name small {
+  font-family: monospace;
+  font-size: 0.6em;
+  font-weight: 400;
 }
-.region-path svg {
-  margin-left: auto;
-  color: var(--purple);
+.starter-bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 28px;
+  position: relative;
+  padding: 18px 70px 0;
 }
-.region-index {
-  font-size: 0.65rem;
-  color: var(--muted-strong);
+.starter-catalog {
+  display: inline-flex;
+  align-items: center;
+  gap: 30px;
+  padding: 16px 25px;
+  background: #513773;
+  color: #fff;
+  border-radius: 40px;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
-@keyframes electric-pulse {
-  0%,
-  70%,
-  100% {
-    opacity: 0.3;
+[data-theme='dark'] .starter-catalog {
+  background: #cfb5ec;
+  color: #21182e;
+}
+.starter-kanto {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8rem;
+}
+.starter-bottom .scene-toggle {
+  position: absolute;
+  right: 24px;
+  bottom: 4px;
+  background: transparent;
+  color: inherit;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+@keyframes starter-light {
+  from {
+    opacity: 0.65;
   }
-  80% {
+  to {
     opacity: 1;
   }
 }
-@keyframes electric-travel {
-  0%,
-  55% {
-    stroke-dashoffset: 1700;
-  }
-  85%,
-  100% {
-    stroke-dashoffset: -1700;
-  }
-}
-@media (max-width: 1000px) {
-  .adventure-hero {
-    padding: 36px 28px;
-    min-height: 540px;
-  }
-  .adventure-copy h1 {
-    font-size: 3rem;
-  }
-  .region-path {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
 @media (max-width: 700px) {
-  .adventure-hero {
-    grid-template-columns: 1fr;
-    padding: 28px 22px 38px;
-    gap: 24px;
-    border-radius: 22px;
+  .starter-home {
+    min-height: calc(100svh - 133px);
+    padding: 30px 0 24px;
   }
-  .adventure-copy h1 {
-    font-size: clamp(2.45rem, 8.8vw, 3.4rem);
+  .starter-heading h1 {
+    font-size: clamp(2.7rem, 9vw, 4.4rem);
   }
-  .adventure-copy .eyebrow {
+  .starter-heading p {
     font-size: 0.6rem;
   }
-  .hero-actions {
+  .starter-scene {
+    height: clamp(340px, 80vw, 510px);
+  }
+  .hero-starter {
+    width: 45%;
+    height: 65%;
+    bottom: 1%;
+  }
+  .hero-starter:nth-of-type(1) {
+    left: 2%;
+    z-index: 3;
+  }
+  .hero-starter:nth-of-type(2) {
+    width: 53%;
+    left: 24%;
+    bottom: 29%;
+    height: 72%;
+  }
+  .hero-starter:nth-of-type(3) {
+    right: 2%;
+  }
+  .starter-name {
+    gap: 5px;
+    font-size: 0.78rem;
+  }
+  .hero-starter:nth-of-type(2) .starter-name {
+    position: absolute;
+    top: -8px;
+  }
+  .starter-name svg {
+    width: 12px;
+  }
+  .starter-landmark {
+    top: 35%;
+    font-size: 25vw;
+  }
+  .starter-bottom {
     gap: 16px;
+    padding: 18px 52px 0;
   }
-  .pikachu-scene {
-    width: 100%;
-    max-width: 390px;
-    justify-self: center;
+  .starter-catalog {
+    padding: 14px 18px;
+    gap: 14px;
+    font-size: 0.8rem;
   }
-  .scene-word {
-    font-size: 6rem;
-  }
-  .scene-caption {
-    right: 16%;
-    font-size: 0.56rem;
-  }
-  .scene-ball {
-    width: 60px;
-    height: 60px;
-  }
-  .region-path {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .region-path a {
-    padding: 18px 5px;
-    gap: 8px;
+  .starter-bottom .scene-toggle {
+    right: 12px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-traces path,
-  .electric-spark {
+  .starter-haze {
     animation: none;
+  }
+  .hero-starter img {
+    transition: none;
+  }
+  .hero-starter:hover img,
+  .hero-starter:focus-visible img {
+    transform: none;
   }
 }
 </style>

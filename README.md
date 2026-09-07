@@ -4,7 +4,7 @@
 
 ![Deployment: local demo](https://img.shields.io/badge/deployment-local_demo-71549a)
 
-A Pokémon shop demo with an electric Pikachu home, a complete imported catalog, and a persistent cart. Built with Vue 3, TypeScript and FastAPI. Prices and stock are fictional; accounts, payments and real orders are outside this phase.
+A Pokémon shop demo with a full-width Kanto starter collage, a complete imported catalog, and a persistent cart. Built with Vue 3, TypeScript and FastAPI. Prices and stock are fictional; accounts, payments and real orders are outside this phase.
 
 [Local demo](http://localhost:5173) · [API documentation](http://localhost:8000/docs)
 
@@ -14,7 +14,7 @@ A Pokémon shop demo with an electric Pikachu home, a complete imported catalog,
 
 ## Highlights
 
-- `/`: an electric violet/yellow Pikachu scene with pause control and region shortcuts. The homepage opens directly. Reduced motion disables decorative animation; the background stops offscreen and in hidden tabs.
+- `/`: a full-width collage of Bulbasaur, Charmander and Squirtle, without a card frame. Shared type colors shape the background; catalog and Kanto links remain. The homepage opens directly. Reduced motion disables decorative animation; the background stops offscreen and in hidden tabs.
 - `/catalogo`: 24 ordered results in compact blocks of six: one 3×2 card, two 3×1 cards and three 2×1 cards, on six desktop columns with 200 px rows and 16 px gaps. Partial blocks fill balanced rows. Tablet uses two columns and mobile one. Size is editorial, independent of height; dimensions remain visible. Draft filters retain URL state and explicit Apply/Cancel.
 - `/pokemon/:id`: localized biology, dimensions and origin. Statistics open from the top-right corner of the illustration on hover, keyboard focus or tap; click pins the popover and Escape/outside/close dismiss it. Abilities remain in the API but are omitted from the view.
 - `/carrito`: six distinct products per page, with totals calculated over the complete cart. Removing the final item on a page selects the last valid page; quantity changes retain the page. IDs and quantities persist, independently of catalog pagination and network failures.
@@ -22,6 +22,10 @@ A Pokémon shop demo with an electric Pikachu home, a complete imported catalog,
 - Spanish/English through Vue I18n, accessible Reka UI selects, Lucide icons, light/dark/system themes, and a 700 ms circular manual theme transition. Reduced motion and automatic system changes skip animation; unsupported browsers transition colors for 300 ms without fading the page.
 
 Chansey appears at 200–240 px below the receipt-style summary on desktop and mobile, and accompanies the empty state. Three-second notices use a disappearing pie indicator, pause on hover/focus and restart with each action. Storage errors remain visible. An animated Espeon/Umbreon switch selects light/dark, using the browser preference initially and remembering manual selections. The existing 700 ms page reveal is preserved.
+
+The header previews the three most recently added distinct products and the complete cart total on hover, keyboard focus, click or tap. “View full cart” opens the list; “Empty cart” clears the saved selection. Recent order persists without rearranging cart pages.
+
+Type colors are shared across catalog cards, detail artwork, cart thumbnails and cart preview. The receipt takes a subtle tint from the most recently added product.
 
 ## Run locally
 
@@ -168,5 +172,3 @@ Integration tests require the migration and initial sync above. Browser tests us
 This Compose stack uses development servers. No production deployment, accounts, reservations, real checkout or payments are configured. The browser cart is not an authoritative order. `docker compose down -v` deletes local database, Redis and frontend dependency volumes.
 
 Data: [PokéAPI](https://pokeapi.co/docs/v2). Artwork: [PokéAPI sprites](https://github.com/PokeAPI/sprites). Pokémon and character artwork belong to their respective rights holders. This is an independent educational demo.
-
-The header previews the three most recently added distinct products and the complete cart total on hover, keyboard focus, click or tap. “View full cart” opens the list; “Empty cart” clears the saved selection. Recent order persists without rearranging cart pages.
