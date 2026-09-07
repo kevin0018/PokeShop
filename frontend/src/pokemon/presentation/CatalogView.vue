@@ -22,6 +22,11 @@ const metadata = ref<{
   generations: number[]
   regions?: { id: string; names: Record<string, string> }[]
 }>({ types: [], generations: [] })
+const blocks = computed(() =>
+  Array.from({ length: Math.ceil(items.value.length / 6) }, (_, i) =>
+    items.value.slice(i * 6, i * 6 + 6),
+  ),
+)
 const page = computed(() => Math.max(1, Number(route.query.page) || 1))
 const pages = computed(() => Math.max(1, Math.ceil(total.value / 24)))
 const value = (key: string) => String(route.query[key] || '')
@@ -80,7 +85,7 @@ request<typeof metadata.value>('/metadata')
       /></label>
       <CatalogFilters :metadata="metadata" />
     </div>
-    <p class="bento-caption">{{ t('heightBento') }}</p>
+
     <p v-if="loading" role="status" class="state-box">{{ t('loadingCatalog') }}</p>
     <div v-else-if="error" role="alert" class="state-box">
       <p>{{ t('catalogError') }}</p>
@@ -94,13 +99,14 @@ request<typeof metadata.value>('/metadata')
         </button>
       </div>
       <div v-if="items.length" class="catalog-bento">
-        <PokemonCard
-          v-for="p in items"
-          :key="p.id"
-          :pokemon="p"
-          bento
-          :class="(p.height_m ?? 0) > 2 ? 'tall' : (p.height_m ?? 0) > 1 ? 'medium' : 'small'"
-        />
+        <div
+          v-for="(block, index) in blocks"
+          :key="index"
+          class="bento-block"
+          :data-count="block.length"
+        >
+          <PokemonCard v-for="p in block" :key="p.id" :pokemon="p" bento />
+        </div>
       </div>
       <div v-else class="state-box">{{ t('noMatches') }}</div>
       <nav class="pagination" :aria-label="t('pagination')">
@@ -134,60 +140,89 @@ request<typeof metadata.value>('/metadata')
 }
 .catalog-bento {
   display: grid;
+  gap: 16px;
+}
+.bento-block {
+  display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 24px;
-  grid-auto-flow: row;
-  grid-auto-rows: 390px;
+  gap: 16px;
+  grid-auto-rows: 200px;
 }
-.catalog-bento .pokemon-card {
+.bento-block > .pokemon-card {
   grid-column: span 2;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
 }
-.catalog-bento .medium,
-.catalog-bento .tall {
+.bento-block[data-count='6'] > .pokemon-card:first-child {
   grid-column: span 3;
-}
-.catalog-bento .tall {
   grid-row: span 2;
 }
-.catalog-bento .card-art {
-  flex: 1;
-  min-height: 0;
-  height: auto;
+.bento-block[data-count='6'] > .pokemon-card:nth-child(2),
+.bento-block[data-count='6'] > .pokemon-card:nth-child(3) {
+  grid-column: span 3;
 }
-.catalog-bento .card-art img {
-  width: 80%;
-  padding: 18px;
-  height: 100%;
-  max-height: 100%;
-  object-fit: contain;
+.bento-block[data-count='1'] > .pokemon-card {
+  grid-column: span 6;
 }
-.catalog-bento .card-body {
-  flex: none;
+.bento-block[data-count='2'] > .pokemon-card,
+.bento-block[data-count='4'] > .pokemon-card,
+.bento-block[data-count='5'] > .pokemon-card:nth-child(-n + 2) {
+  grid-column: span 3;
 }
-.card-measures {
-  display: flex;
-  gap: 16px;
-  color: var(--muted-strong);
-  font-size: 0.8rem;
-  margin: 10px 0;
-}
-@media (max-width: 900px) {
-  .catalog-bento {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+@media (min-width: 901px) {
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-body,
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-body,
+  .bento-block[data-count='1'] .card-body {
+    width: 46%;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
   }
-  .catalog-bento .pokemon-card {
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-art img,
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-art img,
+  .bento-block[data-count='1'] .card-art img {
+    width: 54%;
+    height: 95%;
+    left: auto;
+    right: 0;
+    top: 2%;
+  }
+  .bento-block[data-count='6'] > .pokemon-card:first-child .card-art img {
+    height: 76%;
+    width: 88%;
+    left: 6%;
+    top: 0;
+  }
+  .bento-block[data-count='6'] > .pokemon-card:first-child h3 {
+    font-size: 1.6rem;
+  }
+  .bento-block[data-count='6'] > .pokemon-card:first-child .card-body {
+    padding: 24px;
+  }
+}
+@media (min-width: 541px) and (max-width: 900px) {
+  .bento-block {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 250px;
+  }
+  .bento-block > .pokemon-card:nth-child(n) {
     grid-column: span 1;
     grid-row: span 1;
   }
+  .bento-block[data-count='6'] > .pokemon-card:first-child,
+  .bento-block[data-count='6'] > .pokemon-card:last-child,
+  .bento-block[data-count='1'] > .pokemon-card,
+  .bento-block[data-count='3'] > .pokemon-card:last-child,
+  .bento-block[data-count='5'] > .pokemon-card:last-child {
+    grid-column: span 2;
+  }
 }
 @media (max-width: 540px) {
-  .catalog-bento {
+  .bento-block {
     grid-template-columns: minmax(0, 1fr);
-    grid-auto-rows: 410px;
-    gap: 18px;
+    grid-auto-rows: 260px;
+  }
+  .bento-block > .pokemon-card:nth-child(n) {
+    grid-column: span 1;
+    grid-row: span 1;
   }
 }
 </style>
