@@ -4,11 +4,24 @@ import unittest
 
 from fastapi.testclient import TestClient
 from main import create_app
+from src.pokemon.presentation.pokemon_routes import get_catalog
+from src.pokemon.application.catalog import Catalog
+from src.pokemon.infrastructure.demo_repository import DemoPokemonRepository
+
+
+class FixtureCatalog:
+    async def search(self, q='', pokemon_type='', sort='number', limit=24, offset=0, generation=0, forms='all'):
+        return Catalog(DemoPokemonRepository()).search(q, pokemon_type, sort, limit, offset)
+
+    async def get(self, pokemon_id):
+        return DemoPokemonRepository().get(pokemon_id)
 
 
 class CatalogTests(unittest.TestCase):
     def setUp(self):
-        self.client = TestClient(create_app(), base_url="http://localhost")
+        app = create_app()
+        app.dependency_overrides[get_catalog] = FixtureCatalog
+        self.client = TestClient(app, base_url="http://localhost")
         self.addCleanup(self.client.close)
 
     def test_catalog_and_detail_agree(self):

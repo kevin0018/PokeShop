@@ -1,53 +1,43 @@
-"""HTTP adapter and dependency composition for the demonstration catalog."""
-
+"""HTTP adapter for the persistent catalog."""
 from typing import Literal
-
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, ConfigDict
-
-from src.pokemon.application.catalog import Catalog
-from src.pokemon.infrastructure.demo_repository import DemoPokemonRepository
-
+from src.pokemon.infrastructure.postgres_repository import PostgresCatalog
 router = APIRouter()
-_catalog = Catalog(DemoPokemonRepository())
 
+def get_catalog():
+    return PostgresCatalog()
 
-def get_catalog() -> Catalog:
-    return _catalog
+@router.get('')
+async def list_pokemon(q: str = Query('', max_length=100), pokemon_type: str = Query('', alias='type', max_length=30), sort: Literal['number','price_asc','price_desc','name','weight_asc','weight_desc']='number', limit: int=Query(24,ge=1,le=100), offset: int=Query(0,ge=0), generation: int=Query(0,ge=0,le=20), forms: Literal['all','default','alternative']='all', catalog=Depends(get_catalog)):
+    items, total = await catalog.search(q,pokemon_type,sort,limit,offset,generation,forms)
+    return {'items':items,'total':total}
 
+@router.get('/metadata')
+async def metadata(catalog=Depends(get_catalog)):
+    return await catalog.metadata()
 
-class PokemonResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    id: int
-    name: str
-    types: list[str]
-    price_cents: int
-    stock: int
-    description: str
-    image_url: str
+@router.get('/featured')
+async def featured(catalog=Depends(get_catalog)):
+    return {'items': await catalog.featured()}
 
+def parse_ids(ids):
+    values = ids.split(',') if ids else []
+    if len(values)>100 or any(not v.isdigit() or int(v)<1 for v in values):
+        raise HTTPException(422, 'Expected up to 100 positive IDs')
+    return list(dict.fromkeys(map(int, values)))
 
-class CatalogResponse(BaseModel):
-    items: list[PokemonResponse]
-    total: int
+@router.get('/batch')
+async def batch(ids: str=Query('',max_length=1200), catalog=Depends(get_catalog)):
+    items, total = await catalog.search(ids=parse_ids(ids),limit=100)
+    return {'items':items,'total':total}
 
+@router.get('/recommendations')
+async def recommendations(ids: str=Query('',max_length=1200),catalog=Depends(get_catalog)):
+    return {'items':await catalog.recommendations(parse_ids(ids))}
 
-@router.get("", response_model=CatalogResponse)
-def list_pokemon(
-    q: str = Query("", max_length=100),
-    pokemon_type: str = Query("", alias="type", max_length=30),
-    sort: Literal["number", "price_asc", "price_desc", "name"] = "number",
-    limit: int = Query(24, ge=1, le=100),
-    offset: int = Query(0, ge=0),
-    catalog: Catalog = Depends(get_catalog),
-):
-    items, total = catalog.search(q, pokemon_type, sort, limit, offset)
-    return {"items": items, "total": total}
-
-
-@router.get("/{pokemon_id}", response_model=PokemonResponse)
-def get_pokemon(pokemon_id: int, catalog: Catalog = Depends(get_catalog)):
-    pokemon = catalog.get(pokemon_id)
+@router.get('/{pokemon_id}')
+async def get_pokemon(pokemon_id: int,catalog=Depends(get_catalog)):
+    pokemon = await catalog.get(pokemon_id)
     if pokemon is None:
-        raise HTTPException(status_code=404, detail="Pokémon no encontrado")
+        raise HTTPException(404, 'Pokémon no encontrado')
     return pokemon
