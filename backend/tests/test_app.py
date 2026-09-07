@@ -11,10 +11,13 @@ from main import create_app
 
 class AppTests(unittest.TestCase):
     def setUp(self):
-        with patch.dict(os.environ, {
-            "ALLOWED_HOSTS": '["localhost", "backend"]',
-            "ALLOWED_ORIGINS": '["http://localhost:5173"]',
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "ALLOWED_HOSTS": '["localhost", "backend"]',
+                "ALLOWED_ORIGINS": '["http://localhost:5173"]',
+            },
+        ):
             self.client = TestClient(create_app(), base_url="http://localhost")
         self.addCleanup(self.client.close)
 
@@ -27,15 +30,22 @@ class AppTests(unittest.TestCase):
         self.assertEqual(self.client.get("http://backend/health").status_code, 200)
 
     def test_untrusted_hostname(self):
-        self.assertEqual(self.client.get("http://untrusted.invalid/health").status_code, 400)
+        self.assertEqual(
+            self.client.get("http://untrusted.invalid/health").status_code, 400
+        )
 
     def test_frontend_cors(self):
-        response = self.client.options("/health", headers={
-            "Origin": "http://localhost:5173",
-            "Access-Control-Request-Method": "GET",
-        })
+        response = self.client.options(
+            "/health",
+            headers={
+                "Origin": "http://localhost:5173",
+                "Access-Control-Request-Method": "GET",
+            },
+        )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.headers["access-control-allow-origin"], "http://localhost:5173")
+        self.assertEqual(
+            response.headers["access-control-allow-origin"], "http://localhost:5173"
+        )
 
 
 if __name__ == "__main__":

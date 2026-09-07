@@ -19,9 +19,11 @@ class Catalog:
     ) -> tuple[list[Pokemon], int]:
         query = query.strip().casefold().lstrip("#")
         items = [
-            item for item in self.repository.list_all()
+            item
+            for item in self.repository.list_all()
             if (
-                not query or query in item.name.casefold()
+                not query
+                or query in item.name.casefold()
                 or (query.isdecimal() and int(query) == item.id)
             )
             and (not pokemon_type or pokemon_type in item.types)

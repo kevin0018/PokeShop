@@ -1,36 +1,87 @@
 """PostgreSQL catalog adapter. Offers never enter the upstream payload."""
 import os
+
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
-engine = create_async_engine(os.getenv('DATABASE_URL', 'postgresql+asyncpg://postgres:pokeshop_local@db/pokeshop_db'), pool_size=4, max_overflow=0)
+from src.pokemon.application.recommendations import recommend
+
+engine = create_async_engine(
+    os.getenv(
+        "DATABASE_URL", "postgresql+asyncpg://postgres:pokeshop_local@db/pokeshop_db"
+    ),
+    pool_size=4,
+    max_overflow=0,
+)
 FEATURED = [143, 448, 10100, 25, 133, 722]
 
+
 class PostgresCatalog:
-    async def search(self, q='', pokemon_type='', sort='number', limit=24, offset=0, generation=0, forms='all', ids=None):
-        clauses, params = [], {'limit': limit, 'offset': offset}
+    async def search(
+        self,
+        q="",
+        pokemon_type="",
+        sort="number",
+        limit=24,
+        offset=0,
+        generation=0,
+        forms="all",
+        ids=None,
+    ):
+        clauses, params = [], {"limit": limit, "offset": offset}
         if q:
-            params['q'] = '%' + q.strip().lower().replace('%', r'\%').replace('_', r'\_') + '%'
-            clauses.append("(lower(p.data->>'name') LIKE :q OR p.data->'names'->>'es' ILIKE :q OR p.data->>'species_id' = :dex)")
-            params['dex'] = str(int(q.lstrip('#'))) if q.lstrip('#').isdigit() else ''
+            params["q"] = (
+                "%" + q.strip().lower().replace("%", r"\%").replace("_", r"\_") + "%"
+            )
+            clauses.append(
+                "(lower(p.data->>'name') LIKE :q OR p.data->'names'->>'es' ILIKE :q OR p.data->>'species_id' = :dex)"
+            )
+            params["dex"] = str(int(q.lstrip("#"))) if q.lstrip("#").isdigit() else ""
         if pokemon_type:
             clauses.append("p.data->'types' ? :type")
-            params['type'] = pokemon_type
+            params["type"] = pokemon_type
         if generation:
             clauses.append("(p.data->>'generation')::int = :generation")
-            params['generation'] = generation
-        if forms != 'all':
+            params["generation"] = generation
+        if forms != "all":
             clauses.append("(p.data->>'is_default')::boolean = :default")
-            params['default'] = forms == 'default'
+            params["default"] = forms == "default"
         if ids is not None:
-            clauses.append('p.id = ANY(:ids)')
-            params['ids'] = ids
-        where = ' WHERE ' + ' AND '.join(clauses) if clauses else ''
-        order = {'number': 'p.id', 'name': "p.data->>'name'", 'price_asc': 'o.price_cents', 'price_desc': 'o.price_cents DESC', 'weight_asc': "(p.data->>'weight_kg')::float", 'weight_desc': "(p.data->>'weight_kg')::float DESC"}[sort]
+            clauses.append("p.id = ANY(:ids)")
+            params["ids"] = ids
+        where = " WHERE " + " AND ".join(clauses) if clauses else ""
+        order = {
+            "number": "p.id",
+            "name": "p.data->>'name'",
+            "price_asc": "o.price_cents",
+            "price_desc": "o.price_cents DESC",
+            "weight_asc": "(p.data->>'weight_kg')::float",
+            "weight_desc": "(p.data->>'weight_kg')::float DESC",
+        }[sort]
         async with engine.connect() as conn:
-            total = await conn.scalar(text('SELECT count(*) FROM pokemon p JOIN offers o ON o.pokemon_id=p.id' + where), params)
-            rows = (await conn.execute(text('SELECT p.data, o.price_cents, o.stock FROM pokemon p JOIN offers o ON o.pokemon_id=p.id' + where + ' ORDER BY ' + order + ', p.id LIMIT :limit OFFSET :offset'), params)).mappings()
-            return [dict(row['data'], price_cents=row['price_cents'], stock=row['stock']) for row in rows], total
+            total = await conn.scalar(
+                text(
+                    "SELECT count(*) FROM pokemon p JOIN offers o ON o.pokemon_id=p.id"
+                    + where
+                ),
+                params,
+            )
+            rows = (
+                await conn.execute(
+                    text(
+                        "SELECT p.data, o.price_cents, o.stock FROM pokemon p JOIN offers o ON o.pokemon_id=p.id"
+                        + where
+                        + " ORDER BY "
+                        + order
+                        + ", p.id LIMIT :limit OFFSET :offset"
+                    ),
+                    params,
+                )
+            ).mappings()
+            return [
+                dict(row["data"], price_cents=row["price_cents"], stock=row["stock"])
+                for row in rows
+            ], total
 
     async def get(self, pokemon_id):
         items, _ = await self.search(ids=[pokemon_id])
@@ -38,17 +89,35 @@ class PostgresCatalog:
 
     async def featured(self):
         items, _ = await self.search(ids=FEATURED)
-        return sorted((p for p in items if p['stock'] > 0), key=lambda p: FEATURED.index(p['id']))
+        return sorted(
+            (p for p in items if p["stock"] > 0), key=lambda p: FEATURED.index(p["id"])
+        )
 
     async def metadata(self):
         async with engine.connect() as conn:
-            generations = list((await conn.execute(text("SELECT DISTINCT (data->>'generation')::int FROM pokemon ORDER BY 1"))).scalars())
-            types = list((await conn.execute(text("SELECT DISTINCT jsonb_array_elements_text(data->'types') FROM pokemon ORDER BY 1"))).scalars())
-        return {'generations': generations, 'types': types}
+            generations = list(
+                (
+                    await conn.execute(
+                        text(
+                            "SELECT DISTINCT (data->>'generation')::int FROM pokemon ORDER BY 1"
+                        )
+                    )
+                ).scalars()
+            )
+            types = list(
+                (
+                    await conn.execute(
+                        text(
+                            "SELECT DISTINCT jsonb_array_elements_text(data->'types') FROM pokemon ORDER BY 1"
+                        )
+                    )
+                ).scalars()
+            )
+        return {"generations": generations, "types": types}
 
     async def recommendations(self, ids):
         if not ids:
-            return [dict(p, reason='featured') for p in (await self.featured())[:4]]
+            return [dict(p, reason="featured") for p in (await self.featured())[:4]]
         seeds, _ = await self.search(ids=ids, limit=100)
         if not seeds:
             return []
@@ -57,19 +126,3 @@ class PostgresCatalog:
             page, _ = await self.search(limit=100, offset=offset)
             items.extend(page)
         return recommend(items, seeds)
-
-def recommend(items, seeds):
-    species = {p['species_id'] for p in seeds}
-    types = {t for p in seeds for t in p['types']}
-    generations = {p['generation'] for p in seeds}
-    def rank(p):
-        return (not bool(types.intersection(p['types'])), p['generation'] not in generations, min(abs(p['price_cents'] - s['price_cents']) for s in seeds), p['id'])
-    result = []
-    for p in sorted((p for p in items if p['stock'] > 0 and p['species_id'] not in species), key=rank):
-        if p['species_id'] in species:
-            continue
-        species.add(p['species_id'])
-        result.append(dict(p, reason='sharedType' if types.intersection(p['types']) else 'sameGeneration' if p['generation'] in generations else 'similarPrice'))
-        if len(result) == 4:
-            break
-    return result
