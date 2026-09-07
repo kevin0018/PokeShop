@@ -6,6 +6,7 @@ import { useCartStore } from '../application/cartStore'
 
 import { money, pokemonName, number } from '@/shared/presentation/format'
 import PokemonImage from '@/components/PokemonImage.vue'
+import RecommendationsPanel from '@/pokemon/presentation/RecommendationsPanel.vue'
 const cart = useCartStore()
 </script>
 <template>
@@ -90,4 +91,5 @@ const cart = useCartStore()
       <RouterLink class="button secondary" to="/catalogo">{{ t('keepExploring') }}</RouterLink>
     </aside>
   </div>
+  <RecommendationsPanel :ids="cart.entries.map((entry) => entry.id)" />
 </template>

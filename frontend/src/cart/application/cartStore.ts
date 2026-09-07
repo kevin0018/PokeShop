@@ -38,7 +38,12 @@ export const useCartStore = defineStore('cart', () => {
       return [{ pokemon, quantity: Math.min(entry.quantity, pokemon.stock) }]
     }),
   )
-  const count = computed(() => lines.value.reduce((sum, line) => sum + line.quantity, 0))
+  const count = computed(() =>
+    entries.value.reduce((sum, entry) => {
+      const product = catalog.items.find((p) => p.id === entry.id)
+      return sum + Math.min(entry.quantity, product?.stock ?? entry.quantity)
+    }, 0),
+  )
   const total = computed(() =>
     lines.value.reduce((sum, line) => sum + line.quantity * line.pokemon.price_cents, 0),
   )
@@ -51,8 +56,15 @@ export const useCartStore = defineStore('cart', () => {
     loading.value = true
     error.value = false
     try {
-      await catalog.hydrate(entries.value.map((e) => e.id))
-      const updated = lines.value.map((line) => ({ id: line.pokemon.id, quantity: line.quantity }))
+      const requested = new Set(entries.value.map((e) => e.id))
+      const fresh = await catalog.hydrate([...requested])
+      const updated = entries.value.flatMap((entry) => {
+        if (!requested.has(entry.id)) return [entry]
+        const product = fresh.find((p) => p.id === entry.id)
+        return product && product.stock > 0
+          ? [{ id: entry.id, quantity: Math.min(entry.quantity, product.stock) }]
+          : []
+      })
       if (JSON.stringify(updated) !== JSON.stringify(entries.value)) {
         entries.value = updated
         noticeEvent.value = { key: 'adjusted' }

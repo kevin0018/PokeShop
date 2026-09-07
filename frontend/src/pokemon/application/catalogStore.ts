@@ -15,9 +15,10 @@ export const useCatalogStore = defineStore('catalog', () => {
     items.value = [...entities.values()]
   }
   async function hydrate(ids: number[]) {
-    if (!ids.length) return
+    if (!ids.length) return []
     const result = await request<{ items: Pokemon[] }>(`/batch?ids=${ids.join(',')}`)
     remember(result.items)
+    return result.items
   }
   async function load() {
     if (loading.value || loaded.value) return

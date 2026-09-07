@@ -1358,6 +1358,114 @@ nav {
     transition: none;
   }
 }
+.pokemon-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 24px 0;
+  border-block: 1px solid var(--line);
+  margin: 24px 0;
+}
+.pokemon-facts dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.pokemon-facts dd {
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin: 10px 0 0;
+}
+.abilities h2 {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+.abilities > span {
+  display: inline-block;
+  background: var(--art-surface);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 0 8px 8px 0;
+  font-size: 0.85rem;
+}
+.stats-section {
+  padding: 32px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  margin: 40px 0;
+  background: var(--surface);
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px 40px;
+  margin-top: 24px;
+}
+.stat > div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+.stat meter {
+  width: 100%;
+  height: 12px;
+  margin-top: 10px;
+  appearance: none;
+  border: 0;
+  background: var(--line);
+  border-radius: 6px;
+}
+.stat meter::-webkit-meter-bar {
+  background: var(--line);
+  border: 0;
+  border-radius: 6px;
+}
+.stat meter::-webkit-meter-optimum-value {
+  background: var(--purple);
+  border-radius: 6px;
+}
+.stat meter::-moz-meter-bar {
+  background: var(--purple);
+}
+.recommendations {
+  margin: 64px 0 32px;
+}
+.recommendations > p {
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+.recommendation-reason {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--purple);
+  margin-bottom: 10px;
+}
+.recommendations .pokemon-card {
+  height: calc(100% - 28px);
+}
+@media (max-width: 540px) {
+  .stats-section {
+    padding: 22px;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .pokemon-facts {
+    gap: 6px;
+  }
+  .pokemon-facts dd {
+    font-size: 1rem;
+  }
+  .pokemon-facts dt {
+    font-size: 0.7rem;
+  }
+  .detail-copy h1 {
+    overflow-wrap: anywhere;
+  }
+}
 .preference-control {
   position: relative;
 }

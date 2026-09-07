@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
+const { t, locale } = useI18n()
 import { computed, ref, watch, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { ArrowLeft, Plus, ArrowRight } from 'lucide-vue-next'
+import { ArrowLeft, Plus, ArrowRight, Weight, Ruler } from 'lucide-vue-next'
 import { useCatalogStore } from '../application/catalogStore'
 import { useCartStore } from '@/cart/application/cartStore'
 import {
@@ -15,6 +15,7 @@ import {
   description,
 } from '@/shared/presentation/format'
 import PokemonImage from '@/components/PokemonImage.vue'
+import RecommendationsPanel from './RecommendationsPanel.vue'
 import type { Pokemon } from '../domain/pokemon'
 const route = useRoute()
 const catalog = useCatalogStore()
@@ -76,6 +77,37 @@ const inCart = computed(
         }}</span>
       </div>
       <p class="description">{{ description(pokemon) }}</p>
+      <dl class="pokemon-facts">
+        <div>
+          <dt><Weight :size="18" />{{ t('weight') }}</dt>
+          <dd>
+            {{
+              pokemon.weight_kg === undefined
+                ? t('missingData')
+                : decimal(pokemon.weight_kg) + ' kg'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt><Ruler :size="18" />{{ t('height') }}</dt>
+          <dd>
+            {{
+              pokemon.height_m === undefined ? t('missingData') : decimal(pokemon.height_m) + ' m'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>{{ t('generationLabel') }}</dt>
+          <dd>{{ pokemon.generation ?? t('missingData') }}</dd>
+        </div>
+      </dl>
+      <div class="abilities">
+        <h2>{{ t('abilities') }}</h2>
+        <span v-for="ability in pokemon.abilities" :key="ability.name"
+          >{{ ability.names[locale] || ability.name }}
+          <small v-if="ability.hidden">· {{ t('hiddenAbility') }}</small></span
+        >
+      </div>
       <p class="detail-price">{{ money(pokemon.price_cents) }}</p>
       <p class="stock-label">
         {{ pokemon.stock ? t('stock', pokemon.stock) : t('soldOutNow') }}
@@ -95,6 +127,21 @@ const inCart = computed(
       <p class="demo-note">{{ t('demoCatalog') }}</p>
     </div>
   </section>
+  <section v-if="pokemon && !loading && !error" class="stats-section">
+    <h2>{{ t('baseStats') }}</h2>
+    <div class="stats-grid">
+      <div v-for="(value, key) in pokemon.stats" :key="key" class="stat">
+        <div>
+          <span>{{ t(String(key)) }}</span
+          ><strong>{{ value }}</strong>
+        </div>
+        <meter min="0" max="255" :value="value" :aria-label="t(String(key))">
+          {{ value }} / 255
+        </meter>
+      </div>
+    </div>
+  </section>
+  <RecommendationsPanel v-if="pokemon && !error" :ids="[pokemon.id]" />
   <div v-if="!loading && !error && !pokemon" class="state-box">
     <h1>{{ t('pokemonMissing') }}</h1>
     <p>{{ t('pokemonMissingBody') }}</p>
