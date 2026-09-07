@@ -4,7 +4,7 @@
 
 ![Deployment: local demo](https://img.shields.io/badge/deployment-local_demo-71549a)
 
-A Pokémon shop demo with a 2D animated Pikachu home, a complete imported catalog, and a persistent cart. Built with Vue 3, TypeScript and FastAPI. Prices and stock are fictional; accounts, payments and real orders are outside this phase.
+A Pokémon shop demo with an electric Pikachu home, a complete imported catalog, and a persistent cart. Built with Vue 3, TypeScript and FastAPI. Prices and stock are fictional; accounts, payments and real orders are outside this phase.
 
 [Local demo](http://localhost:5173) · [API documentation](http://localhost:8000/docs)
 
@@ -14,14 +14,14 @@ A Pokémon shop demo with a 2D animated Pikachu home, a complete imported catalo
 
 ## Highlights
 
-- `/`: an asymmetric Pikachu scene, pause control and region shortcuts. Animation stops offscreen, in hidden tabs and with reduced motion.
-- `/catalogo`: all 24 results use a height-based CSS Grid bento (≤1 m: 2×1; ≤2 m: 3×1; >2 m: 3×2 on six desktop columns), retaining sorted order. Two columns on tablet, one on mobile. A draft filter drawer contains type, origin region, generation, form and ordering; Apply updates the URL and resets pagination, Cancel discards edits.
-- `/pokemon/:id`: localized biology, dimensions, origin and abilities. Base statistics open on hover/keyboard focus or tap; clicking pins the popover, Escape/outside/close dismiss it.
-- `/carrito`: IDs and quantities persist across reloads. Entity storage is independent from catalog pages; failed requests never erase the selection or imply unavailable stock.
+- `/`: an electric violet/yellow Pikachu scene with pause control and region shortcuts. A skippable 1.2-second Poké Ball opening runs once per tab session. Reduced motion skips the intro and decorative animation; the background stops offscreen and in hidden tabs.
+- `/catalogo`: 24 ordered results in compact blocks of six: one 3×2 card, two 3×1 cards and three 2×1 cards, on six desktop columns with 200 px rows and 16 px gaps. Partial blocks fill balanced rows. Tablet uses two columns and mobile one. Size is editorial, independent of height; dimensions remain visible. Draft filters retain URL state and explicit Apply/Cancel.
+- `/pokemon/:id`: localized biology, dimensions and origin. Statistics open from the top-right corner of the illustration on hover, keyboard focus or tap; click pins the popover and Escape/outside/close dismiss it. Abilities remain in the API but are omitted from the view.
+- `/carrito`: six distinct products per page, with totals calculated over the complete cart. Removing the final item on a page selects the last valid page; quantity changes retain the page. IDs and quantities persist, independently of catalog pagination and network failures.
 - Four available recommendations prioritize shared types, then generation, then price proximity. Species are unique and species already selected are excluded. An empty cart shows featured Pokémon.
 - Spanish/English through Vue I18n, accessible Reka UI selects, Lucide icons, light/dark/system themes, and a 700 ms circular manual theme transition. Reduced motion and automatic system changes skip animation; unsupported browsers transition colors for 300 ms without fading the page.
 
-Chansey accompanies the cart summary and empty state. Action notices expire after three seconds, pause on hover/focus and restart with each action. Storage errors remain visible. Espeon and Umbreon identify the light and dark themes.
+Chansey appears at 200–240 px beside a receipt-style summary, moving above it on narrow screens, and accompanies the empty state. Three-second notices use a disappearing pie indicator, pause on hover/focus and restart with each action. Storage errors remain visible. An animated Espeon/Umbreon switch selects light/dark, with a separate Auto button for system preference. The existing 700 ms page reveal is preserved.
 
 ## Run locally
 
@@ -159,7 +159,7 @@ docker compose logs -f
 docker compose down
 ```
 
-Verified on 2026-09-07: 21 backend tests and 18 frontend unit tests; type checks, ESLint, production build and Ruff. The full Chromium suite passed against the production preview; core interactions were also checked against the development server. Browser coverage comprises five interaction regressions and 20 responsive scenarios, each visiting all four routes at 320/375/414/768/1280 px in Spanish/English and light/dark (80 captures). The suite checks successful loading and horizontal overflow; screenshots are generated under the ignored `frontend/test-results/` directory for visual review. Keyboard selection, Escape/focus restoration, cart paging/reload/network recovery and preference persistence are covered. Import repeat, controlled interruption and successful recovery were also exercised.
+Verified on 2026-09-07: 21 backend tests and 18 frontend unit tests; type checks, ESLint, production build and Ruff. The full Chromium suite passed against the production preview; core interactions were also checked against the development server. Browser coverage comprises 13 interaction regressions and 20 responsive scenarios, each visiting all four routes at 320/375/414/768/1280 px in Spanish/English and light/dark (80 captures, including a populated seven-product cart). The suite checks successful loading and horizontal overflow; screenshots are generated under the ignored `frontend/test-results/` directory for visual review. Keyboard selection, Escape/focus restoration, cart paging/reload/network recovery and preference persistence are covered. Import repeat, controlled interruption and successful recovery were also exercised.
 
 Integration tests require the migration and initial sync above. Browser tests use Chromium and the running dev server; set `PLAYWRIGHT_BASE_URL` for an external server. Other browser engines are not verified. `pnpm build` also runs type checking and bundling sequentially.
 
