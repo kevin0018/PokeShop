@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30">
+  <style>
+    :root { --outline: #543c7c; --surface: #fff; }
+    @media (prefers-color-scheme: dark) {
+      :root { --outline: #c4a5ed; --surface: #211b29; }
+    }
+  </style>
+  <defs>
+    <clipPath id="ball"><circle cx="15" cy="15" r="13"/></clipPath>
+  </defs>
+  <circle cx="15" cy="15" r="14" fill="var(--surface)" stroke="var(--outline)" stroke-width="2"/>
+  <path d="M2 2h26v12H2z" fill="#977bb8" clip-path="url(#ball)"/>
+  <path d="M2 15h26" stroke="var(--outline)" stroke-width="2"/>
+  <circle cx="15" cy="15" r="4" fill="var(--surface)" stroke="var(--outline)" stroke-width="2"/>
+</svg>
