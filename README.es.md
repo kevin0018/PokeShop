@@ -21,7 +21,7 @@ Una tienda Pokémon de demostración con portada eléctrica protagonizada por Pi
 - Cuatro recomendaciones disponibles priorizan tipos compartidos, después generación y proximidad de precio. No repiten especie y excluyen las especies seleccionadas. El carrito vacío muestra destacados.
 - Español/inglés con Vue I18n, selectores accesibles de Reka UI, iconos Lucide, temas claro/oscuro/sistema y revelación circular de 700 ms para cambios manuales. El movimiento reducido y los cambios automáticos del sistema omiten la animación; los navegadores sin soporte transicionan los colores durante 300 ms, sin atenuar la página.
 
-Chansey aparece con 200–240 px junto a un resumen con aspecto de ticket; en pantallas estrechas pasa encima y también acompaña el estado vacío. Los avisos de tres segundos usan un disco que se vacía, se pausan con hover/foco y se reinician con cada acción. Los errores de almacenamiento permanecen visibles. Un switch animado Espeon/Umbreon selecciona claro/oscuro, con un botón Auto separado para seguir el sistema. Se conserva la revelación de página de 700 ms.
+Chansey aparece con 200–240 px junto a un resumen con aspecto de ticket; en pantallas estrechas pasa encima y también acompaña el estado vacío. Los avisos de tres segundos usan un disco que se vacía, se pausan con hover/foco y se reinician con cada acción. Los errores de almacenamiento permanecen visibles. Un switch animado Espeon/Umbreon selecciona claro/oscuro, usando inicialmente la preferencia del navegador y recordando las elecciones manuales. Se conserva la revelación de página de 700 ms.
 
 ## Ejecución local
 

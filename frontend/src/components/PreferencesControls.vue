@@ -13,12 +13,6 @@ function toggle() {
     control.value?.getBoundingClientRect(),
   )
 }
-function automatic() {
-  void theme.change(
-    theme.preference === 'system' ? theme.resolved : 'system',
-    control.value?.getBoundingClientRect(),
-  )
-}
 </script>
 <template>
   <div class="preferences-controls">
@@ -57,14 +51,6 @@ function automatic() {
           width="40"
           height="40"
         /></button
-      ><button
-        class="theme-auto"
-        :aria-pressed="theme.preference === 'system'"
-        :aria-label="t('automaticTheme')"
-        :title="t('automaticTheme')"
-        @click="automatic"
-      >
-        Auto</button
       ><span class="focus-hint">{{ t(theme.resolved) }}</span>
     </div>
   </div>
@@ -121,21 +107,6 @@ function automatic() {
   opacity: 0.4;
   transform: scale(0.85);
 }
-.theme-auto {
-  border: 1px solid var(--control-border);
-  border-radius: 10px;
-  background: var(--control-surface);
-  color: var(--muted-strong);
-  font-size: 0.65rem;
-  min-height: 44px;
-  padding: 0 7px;
-  cursor: pointer;
-}
-.theme-auto[aria-pressed='true'] {
-  color: var(--purple);
-  border-color: var(--purple);
-  background: var(--lavender);
-}
 .theme-controls:focus-within .focus-hint {
   opacity: 1;
   visibility: visible;
@@ -154,10 +125,6 @@ function automatic() {
   }
   .pokemon-switch[data-theme='dark'] .switch-thumb {
     transform: translateX(34px);
-  }
-  .theme-auto {
-    padding: 0 5px;
-    font-size: 0.6rem;
   }
   .theme-controls {
     gap: 4px;

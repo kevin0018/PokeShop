@@ -21,7 +21,7 @@ A Pokémon shop demo with an electric Pikachu home, a complete imported catalog,
 - Four available recommendations prioritize shared types, then generation, then price proximity. Species are unique and species already selected are excluded. An empty cart shows featured Pokémon.
 - Spanish/English through Vue I18n, accessible Reka UI selects, Lucide icons, light/dark/system themes, and a 700 ms circular manual theme transition. Reduced motion and automatic system changes skip animation; unsupported browsers transition colors for 300 ms without fading the page.
 
-Chansey appears at 200–240 px beside a receipt-style summary, moving above it on narrow screens, and accompanies the empty state. Three-second notices use a disappearing pie indicator, pause on hover/focus and restart with each action. Storage errors remain visible. An animated Espeon/Umbreon switch selects light/dark, with a separate Auto button for system preference. The existing 700 ms page reveal is preserved.
+Chansey appears at 200–240 px beside a receipt-style summary, moving above it on narrow screens, and accompanies the empty state. Three-second notices use a disappearing pie indicator, pause on hover/focus and restart with each action. Storage errors remain visible. An animated Espeon/Umbreon switch selects light/dark, using the browser preference initially and remembering manual selections. The existing 700 ms page reveal is preserved.
 
 ## Run locally
 

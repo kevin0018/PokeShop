@@ -85,8 +85,8 @@ async function language(value: string) {
   wrapper.findAllComponents(AppSelect)[0]!.vm.$emit('update:modelValue', value)
   await flushPromises()
 }
-async function appearance(value: string) {
-  await wrapper.get(value === 'system' ? '.theme-auto' : '.pokemon-switch').trigger('click')
+async function appearance() {
+  await wrapper.get('.pokemon-switch').trigger('click')
   await flushPromises()
 }
 
@@ -125,18 +125,21 @@ describe('appearance and language integration', () => {
     expect(wrapper.get('[role="alert"]').text()).toContain('Check your connection and try again.')
     expect(wrapper.get('[role="alert"] button').text()).toBe('Try again')
   })
-  it('persists locale/theme, updates document language, and follows system changes only in automatic mode', async () => {
+  it('persists locale/theme, updates document language, and follows browser theme until a manual selection', async () => {
     await start()
+    expect(document.documentElement.dataset.theme).toBe('light')
+    expect(wrapper.find('.theme-auto').exists()).toBe(false)
+    systemChange({ matches: true })
+    expect(document.documentElement.dataset.theme).toBe('dark')
+    systemChange({ matches: false })
     await language('en')
-    await appearance('dark')
+    await appearance()
     expect(initialLocale()).toBe('en')
     expect(initialTheme()).toBe('dark')
     expect(document.documentElement.lang).toBe('en')
     expect(document.title).toBe('PokeShop · Your Pokémon collection')
     systemChange({ matches: false })
     expect(document.documentElement.dataset.theme).toBe('dark')
-    await appearance('system')
-    expect(document.documentElement.dataset.theme).toBe('light')
     systemChange({ matches: true })
     expect(document.documentElement.dataset.theme).toBe('dark')
   })
@@ -149,7 +152,7 @@ describe('appearance and language integration', () => {
     })
     await start()
     await language('en')
-    await appearance('dark')
+    await appearance()
     expect(wrapper.text()).toContain('Catalog')
     expect(document.documentElement.dataset.theme).toBe('dark')
     expect(initialLocale()).toBe('es')
