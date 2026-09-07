@@ -153,7 +153,7 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 .cart-layout {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
   gap: 28px;
 }
 .cart-list-panel {
@@ -169,13 +169,13 @@ onMounted(() => {
 }
 .checkout-scene {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 200px;
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
   position: sticky;
   top: 24px;
 }
 .chansey-summary {
-  padding: 40px 0 0;
+  padding: 20px 0 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -183,7 +183,7 @@ onMounted(() => {
 }
 .chansey-summary img {
   width: 220px;
-  max-width: 110%;
+  max-width: 100%;
   height: auto;
   object-fit: contain;
   filter: drop-shadow(0 10px 8px #0002);
@@ -272,8 +272,7 @@ onMounted(() => {
     grid-template-columns: 1fr;
   }
   .chansey-summary {
-    grid-row: 1;
-    padding: 0 0 14px;
+    padding: 20px 0 0;
   }
   .chansey-summary img {
     width: 180px;
@@ -282,9 +281,6 @@ onMounted(() => {
   .chansey-summary p {
     max-width: 280px;
     margin: 0;
-  }
-  .cart-summary {
-    grid-row: 2;
   }
 }
 @media (max-width: 760px) {
