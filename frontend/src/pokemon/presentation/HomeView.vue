@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ArrowUpRight, ArrowRight, Pause, Play, Zap } from 'lucide-vue-next'
+import PokeballIntro from '@/components/PokeballIntro.vue'
 import { request } from '../infrastructure/httpPokemonRepository'
 const { t, locale } = useI18n()
 const regions = ref<{ id: string; names: Record<string, string> }[]>([])
@@ -52,7 +53,18 @@ onUnmounted(() => {
 })
 </script>
 <template>
-  <section class="adventure-hero">
+  <PokeballIntro />
+  <section
+    ref="scene"
+    class="adventure-hero"
+    :data-running="running"
+    @pointermove="pointer"
+    @pointerleave="reset"
+  >
+    <svg class="hero-traces" viewBox="0 0 1200 650" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M720 -20 620 190 820 190 710 360 1150 290 980 650" />
+      <path d="M-20 580 300 510 400 590 730 440" />
+    </svg>
     <div class="adventure-copy">
       <p class="eyebrow"><Zap :size="15" /> POKESHOP · {{ t('spark') }}</p>
       <h1>{{ t('adventure') }}</h1>
@@ -65,13 +77,7 @@ onUnmounted(() => {
         /></RouterLink>
       </div>
     </div>
-    <div
-      ref="scene"
-      class="pikachu-scene"
-      :data-running="running"
-      @pointermove="pointer"
-      @pointerleave="reset"
-    >
+    <div class="pikachu-scene" :data-running="running">
       <div class="scene-orbit" aria-hidden="true" />
       <span class="scene-word" aria-hidden="true">PIKA!</span>
       <div class="electric-spark spark-one" aria-hidden="true">ϟ</div>
@@ -124,12 +130,31 @@ onUnmounted(() => {
 </template>
 <style scoped>
 .adventure-hero {
+  position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: 1.05fr 1fr;
   align-items: center;
-  gap: 20px;
-  min-height: 640px;
-  padding: 60px 0 70px;
+  min-height: 590px;
+  padding: 50px 44px;
+  margin: 0 0 50px;
+  overflow: hidden;
+  border-radius: 30px;
+  background:
+    radial-gradient(
+      ellipse at calc(75% + var(--dx, 0px)) calc(35% + var(--dy, 0px)),
+      #775791,
+      transparent 62%
+    ),
+    #2e193f;
+  color: #fff7e7;
+}
+.adventure-hero:before {
+  content: '';
+  position: absolute;
+  inset: -35%;
+  background: repeating-linear-gradient(-25deg, transparent 0 90px, #ffffff05 91px 92px);
+  z-index: -1;
 }
 .adventure-copy {
   position: relative;
@@ -139,158 +164,174 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.67rem;
-  letter-spacing: 0.09em;
+  font-size: 0.65rem;
+  letter-spacing: 0.13em;
+  color: #eed35c;
+  max-width: 350px;
 }
 .adventure-copy h1 {
-  font-size: clamp(2.6rem, 4.7vw, 4.6rem);
-  line-height: 1.04;
+  font-size: clamp(2.7rem, 4.5vw, 4.6rem);
+  line-height: 1.02;
   letter-spacing: -0.055em;
-  max-width: 680px;
-  color: var(--heading);
+  color: #fff7e7;
   margin: 24px 0;
+  max-width: 600px;
 }
 .hero-description {
-  max-width: 390px;
-  color: var(--muted-strong);
-  font-size: 1.05rem;
+  max-width: 350px;
+  color: #e4d4ec;
   line-height: 1.8;
+  font-size: 0.95rem;
 }
 .hero-actions {
   display: flex;
-  gap: 24px;
   flex-wrap: wrap;
   align-items: center;
-  margin-top: 32px;
+  gap: 22px;
+  margin-top: 28px;
+}
+.hero-actions .primary {
+  background: #f2cf54;
+  color: #2e193f;
+}
+.hero-actions .primary:hover {
+  background: #ffe480;
 }
 .hero-kanto {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.85rem;
+  color: #fff7e7;
+  font-size: 0.8rem;
   font-weight: 700;
-  color: var(--purple);
 }
 .pikachu-scene {
   position: relative;
-  isolation: isolate;
-  animation: scene-arrive 0.8s ease-out both;
   aspect-ratio: 1;
-  --dx: 0px;
-  --dy: 0px;
+  align-self: center;
+  min-width: 0;
 }
 .scene-orbit {
   position: absolute;
-  inset: 8%;
-  border: 1px solid var(--purple);
+  inset: 6%;
   border-radius: 50%;
-  background: radial-gradient(ellipse, #f6d64e44, transparent 70%);
-  transform: rotate(-15deg);
-  box-shadow: 0 0 0 22px color-mix(in srgb, var(--purple) 5%, transparent);
-}
-.scene-orbit:after {
-  content: '';
-  position: absolute;
-  inset: 14%;
-  border-radius: 50%;
-  border: 1px dashed var(--purple);
-  opacity: 0.3;
+  background: #f1cf52;
+  box-shadow: 0 0 0 24px #f2cf5412;
+  transform: rotate(-12deg) scaleY(0.9);
 }
 .scene-word {
   position: absolute;
-  top: 8%;
-  left: 10%;
-  font-size: clamp(4rem, 10vw, 9rem);
+  font-size: clamp(5rem, 12vw, 10rem);
   font-weight: 900;
-  letter-spacing: -0.08em;
-  color: var(--purple);
-  opacity: 0.12;
+  letter-spacing: -0.09em;
+  top: 2%;
+  left: 2%;
   transform: rotate(-12deg);
+  color: #ffffff1c;
+  z-index: 1;
 }
 .pikachu-float {
   position: absolute;
-  inset: 5%;
-  animation: pika-float 5s ease-in-out infinite;
-  animation-play-state: paused;
+  inset: 0;
+  z-index: 2;
 }
 .hero-pikachu {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 28px 20px #3c215b33);
-  transform: translate(var(--dx), var(--dy)) rotate(-8deg);
-  transition: transform 0.4s ease;
+  filter: drop-shadow(0 20px 12px #170b2744);
+  transform: rotate(-7deg);
 }
 .scene-ball {
   position: absolute;
-  bottom: 4%;
-  left: 4%;
-  width: 76px;
-  height: 76px;
-  border: 5px solid #332842;
+  bottom: 0;
+  left: 0;
+  width: 74px;
+  height: 74px;
+  border: 5px solid #2b1939;
   border-radius: 50%;
-  background: linear-gradient(#a387d1 44%, #332842 44%, #332842 55%, #fff5df 55%);
+  background: linear-gradient(#a389bd 44%, #2b1939 44%, #2b1939 55%, #fff5df 55%);
   transform: rotate(-22deg);
-  box-shadow: 5px 10px 0 #3c215b18;
+  z-index: 3;
 }
 .scene-ball span {
   position: absolute;
   inset: 27%;
-  border: 5px solid #332842;
+  border: 5px solid #2b1939;
   border-radius: 50%;
   background: #fff5df;
 }
 .scene-caption {
   position: absolute;
-  bottom: 4%;
-  right: 13%;
-  font-size: 0.7rem;
-  letter-spacing: 0.22em;
+  bottom: -2%;
+  right: 14%;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: #f4df99;
   font-weight: 800;
-  color: var(--muted-strong);
-}
-.electric-spark {
-  position: absolute;
-  color: #edbe24;
-  font-size: 90px;
-  line-height: 1;
-  font-weight: 900;
-  animation: spark-glow 6s ease-in-out infinite;
-  animation-play-state: paused;
-}
-.spark-one {
-  top: 12%;
-  right: 0;
-  transform: rotate(12deg);
-}
-.spark-two {
-  bottom: 17%;
-  left: 0;
-  transform: rotate(-18deg);
-  font-size: 55px;
-  animation-delay: 2s;
+  z-index: 3;
 }
 .scene-toggle {
   position: absolute;
   right: 0;
-  bottom: 0;
-  border: 1px solid var(--line);
+  bottom: -4%;
+  border: 1px solid #ffffff44;
+  background: #2e193f;
+  color: #fff7e7;
   border-radius: 50%;
-  background: var(--surface);
+  z-index: 3;
 }
-[data-running='true'] .pikachu-float,
-[data-running='true'] .electric-spark {
+.electric-spark {
+  position: absolute;
+  color: #fff5c5;
+  font-size: 70px;
+  font-weight: 900;
+  line-height: 1;
+  z-index: 3;
+  animation: electric-pulse 7s ease-in-out infinite;
+  animation-play-state: paused;
+}
+.spark-one {
+  right: 0;
+  top: 5%;
+  transform: rotate(10deg);
+}
+.spark-two {
+  left: 0;
+  bottom: 23%;
+  font-size: 45px;
+  animation-delay: 3s;
+}
+.hero-traces {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  fill: none;
+  stroke: #f7d653;
+  stroke-width: 3;
+  opacity: 0.18;
+}
+.hero-traces path {
+  stroke-dasharray: 100 1600;
+  animation: electric-travel 9s ease-in-out infinite;
+  animation-play-state: paused;
+}
+.hero-traces path + path {
+  animation-delay: 4s;
+}
+[data-running='true'] > .hero-traces path,
+[data-running='true'] > .electric-spark {
   animation-play-state: running;
 }
 .region-discovery {
-  padding-bottom: 70px;
-  border-top: 1px solid var(--line);
-  padding-top: 36px;
+  padding: 12px 0 50px;
 }
 .region-path {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0;
 }
 .region-path a {
   display: flex;
@@ -311,35 +352,33 @@ onUnmounted(() => {
   font-size: 0.65rem;
   color: var(--muted-strong);
 }
-@keyframes scene-arrive {
-  from {
-    opacity: 0;
-    translate: 0 16px;
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
-  }
-}
-@keyframes pika-float {
-  50% {
-    transform: translateY(-12px) rotate(2deg);
-  }
-}
-@keyframes spark-glow {
+@keyframes electric-pulse {
   0%,
   70%,
   100% {
-    opacity: 0.35;
+    opacity: 0.3;
   }
   80% {
     opacity: 1;
   }
 }
-@media (max-width: 900px) {
+@keyframes electric-travel {
+  0%,
+  55% {
+    stroke-dashoffset: 1700;
+  }
+  85%,
+  100% {
+    stroke-dashoffset: -1700;
+  }
+}
+@media (max-width: 1000px) {
   .adventure-hero {
-    grid-template-columns: 1fr 1fr;
-    min-height: 530px;
+    padding: 36px 28px;
+    min-height: 540px;
+  }
+  .adventure-copy h1 {
+    font-size: 3rem;
   }
   .region-path {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -348,20 +387,34 @@ onUnmounted(() => {
 @media (max-width: 700px) {
   .adventure-hero {
     grid-template-columns: 1fr;
-    padding: 36px 0;
-    gap: 10px;
+    padding: 28px 22px 38px;
+    gap: 24px;
+    border-radius: 22px;
   }
   .adventure-copy h1 {
-    font-size: clamp(2.5rem, 9vw, 3.5rem);
-    max-width: 550px;
+    font-size: clamp(2.45rem, 8.8vw, 3.4rem);
   }
-  .pikachu-scene {
-    max-width: 420px;
-    width: 100%;
-    justify-self: center;
+  .adventure-copy .eyebrow {
+    font-size: 0.6rem;
   }
   .hero-actions {
-    gap: 20px;
+    gap: 16px;
+  }
+  .pikachu-scene {
+    width: 100%;
+    max-width: 390px;
+    justify-self: center;
+  }
+  .scene-word {
+    font-size: 6rem;
+  }
+  .scene-caption {
+    right: 16%;
+    font-size: 0.56rem;
+  }
+  .scene-ball {
+    width: 60px;
+    height: 60px;
   }
   .region-path {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -370,18 +423,11 @@ onUnmounted(() => {
     padding: 18px 5px;
     gap: 8px;
   }
-  .scene-word {
-    font-size: 6rem;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .pikachu-scene,
-  .pikachu-float,
+  .hero-traces path,
   .electric-spark {
     animation: none;
-  }
-  .hero-pikachu {
-    transition: none;
   }
 }
 </style>

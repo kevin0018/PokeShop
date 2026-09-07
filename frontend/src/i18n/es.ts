@@ -1,5 +1,11 @@
 import type en from './en'
 export default {
+  welcomeIntro: 'Bienvenido a PokeShop',
+  skipIntro: 'Saltar entrada',
+  automaticTheme: 'Seguir el tema del sistema',
+  cartPage: 'Productos del carrito',
+  ticketLabel: 'PASE DE COMPAÑEROS',
+
   filters: 'Filtros',
   region: 'Región de origen',
   allRegions: 'Todas las regiones',

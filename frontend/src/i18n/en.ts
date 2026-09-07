@@ -1,4 +1,10 @@
 export default {
+  welcomeIntro: 'Welcome to PokeShop',
+  skipIntro: 'Skip intro',
+  automaticTheme: 'Follow system theme',
+  cartPage: 'Cart products',
+  ticketLabel: 'COMPANION PASS',
+
   filters: 'Filters',
   region: 'Origin region',
   allRegions: 'All regions',
