@@ -6,6 +6,26 @@
   --lavender: #977bb8;
   --paper: #faf9fc;
   --line: #e7e1ec;
+  --surface: #fff;
+  --on-accent: #fff;
+  --badge: #ede6f5;
+  --feature: #eee7f6;
+  --heading: #37244e;
+  --muted-strong: #665773;
+  --button-hover: #40285f;
+  --surface-hover: #f1eaf7;
+  --border-strong: #c8b6de;
+  --orbit-inner: #d5c6e5;
+  --hero-mark: #e0d4ec;
+  --art-surface: #f3f1f6;
+  --control-border: #d9cde7;
+  --control-surface: #faf8fd;
+  --control-hover: #ede4f6;
+  --empty-border: #d7cbe3;
+  --panel: #f0ebf6;
+  --panel-border: #e5dbef;
+  --panel-divider: #d6c9e2;
+  color-scheme: light;
   color: var(--ink);
   background: var(--paper);
   font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
@@ -82,7 +102,7 @@ h3,
   padding: 32px 0 72px;
 }
 .site-header {
-  background: white;
+  background: var(--surface);
   border-bottom: 1px solid var(--line);
 }
 .header-inner {
@@ -110,7 +130,12 @@ h3,
   border: 2px solid var(--purple);
   border-radius: 50%;
   position: relative;
-  background: linear-gradient(var(--lavender) 46%, var(--purple) 46%, var(--purple) 54%, white 54%);
+  background: linear-gradient(
+    var(--lavender) 46%,
+    var(--purple) 46%,
+    var(--purple) 54%,
+    var(--surface) 54%
+  );
 }
 .pokeball::after {
   content: '';
@@ -119,7 +144,7 @@ h3,
   height: 10px;
   border: 2px solid var(--purple);
   border-radius: 50%;
-  background: white;
+  background: var(--surface);
   top: 8px;
   left: 8px;
 }
@@ -149,13 +174,13 @@ nav {
   min-width: 25px;
   height: 25px;
   padding: 0 6px;
-  background: #ede6f5;
+  background: var(--badge);
   color: var(--purple);
   border-radius: 50%;
   font-size: 12px;
 }
 .hero {
-  background: #eee7f6;
+  background: var(--feature);
   min-height: 350px;
   border-radius: 18px;
   display: grid;
@@ -178,12 +203,12 @@ nav {
   line-height: 1.12;
   letter-spacing: -1.8px;
   margin: 14px 0 18px;
-  color: #37244e;
+  color: var(--heading);
 }
 .hero-copy > p:not(.eyebrow) {
   font-size: 14px;
   line-height: 1.75;
-  color: #665773;
+  color: var(--muted-strong);
   margin-bottom: 25px;
 }
 .button {
@@ -201,19 +226,19 @@ nav {
 }
 .primary {
   background: var(--purple);
-  color: white;
+  color: var(--on-accent);
 }
 .primary:hover:not(:disabled) {
-  background: #40285f;
-  color: white;
+  background: var(--button-hover);
+  color: var(--on-accent);
 }
 .secondary {
   border-color: var(--line);
-  background: white;
+  background: var(--surface);
   color: var(--purple);
 }
 .secondary:hover {
-  background: #f1eaf7;
+  background: var(--surface-hover);
 }
 .hero-art {
   position: relative;
@@ -237,7 +262,7 @@ nav {
 .hero-orbit {
   width: 280px;
   height: 280px;
-  border: 1px solid #c8b6de;
+  border: 1px solid var(--border-strong);
   border-radius: 50%;
   position: absolute;
 }
@@ -245,7 +270,7 @@ nav {
   content: '';
   position: absolute;
   inset: 25px;
-  border: 1px solid #d5c6e5;
+  border: 1px solid var(--orbit-inner);
   border-radius: 50%;
 }
 .hero-number {
@@ -253,7 +278,7 @@ nav {
   font:
     800 130px 'Trebuchet MS',
     sans-serif;
-  color: #e0d4ec;
+  color: var(--hero-mark);
   top: 15px;
   right: 30px;
   letter-spacing: -8px;
@@ -272,7 +297,7 @@ nav {
   font-size: 11px;
   letter-spacing: 0;
   font-weight: 400;
-  color: #665773;
+  color: var(--muted-strong);
 }
 .catalog-section {
   padding-top: 46px;
@@ -307,7 +332,7 @@ nav {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0 15px;
@@ -349,13 +374,13 @@ nav {
   border: 1px solid var(--line);
   border-radius: 12px;
   overflow: hidden;
-  background: white;
+  background: var(--surface);
   transition:
     border-color 0.15s,
     box-shadow 0.15s;
 }
 .pokemon-card:hover {
-  border-color: #c8b6de;
+  border-color: var(--border-strong);
   box-shadow: 0 5px 18px #543c7c0a;
 }
 .card-art {
@@ -364,7 +389,7 @@ nav {
   justify-content: center;
   height: 195px;
   position: relative;
-  background: #f3f1f6;
+  background: var(--art-surface);
 }
 .card-art img {
   width: 155px;
@@ -390,7 +415,7 @@ nav {
   position: absolute;
   right: 12px;
   bottom: 12px;
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 4px;
   padding: 3px 8px;
@@ -452,9 +477,9 @@ nav {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  border: 1px solid #d9cde7;
+  border: 1px solid var(--control-border);
   color: var(--purple);
-  background: #faf8fd;
+  background: var(--control-surface);
   border-radius: 6px;
   padding: 7px 9px;
   min-height: 40px;
@@ -462,7 +487,7 @@ nav {
   font-weight: 600;
 }
 .add-button:hover:not(:disabled) {
-  background: #ede4f6;
+  background: var(--control-hover);
 }
 .site-footer {
   width: min(1180px, calc(100% - 80px));
@@ -489,8 +514,8 @@ nav {
 .state-box {
   text-align: center;
   padding: 70px 24px;
-  background: white;
-  border: 1px dashed #d7cbe3;
+  background: var(--surface);
+  border: 1px dashed var(--empty-border);
   border-radius: 12px;
   margin: 25px 0;
 }
@@ -540,7 +565,7 @@ nav {
   align-items: center;
 }
 .detail-art {
-  background: #eee7f6;
+  background: var(--feature);
   border-radius: 16px;
   padding: 30px;
   position: relative;
@@ -602,7 +627,7 @@ nav {
 }
 .cart-art {
   flex: 0 0 110px;
-  background: #f0ebf6;
+  background: var(--panel);
   border-radius: 10px;
 }
 .cart-art img {
@@ -628,7 +653,7 @@ nav {
   border: 1px solid var(--line);
   border-radius: 7px;
   margin-top: 12px;
-  background: white;
+  background: var(--surface);
 }
 .quantity-control button {
   display: grid;
@@ -651,8 +676,8 @@ nav {
   align-items: end;
 }
 .cart-summary {
-  background: #f0ebf6;
-  border: 1px solid #e5dbef;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
   padding: 25px;
   border-radius: 12px;
 }
@@ -668,14 +693,14 @@ nav {
   font-size: 12px;
 }
 .cart-summary .summary-total {
-  border-top: 1px solid #d6c9e2;
+  border-top: 1px solid var(--panel-divider);
   padding-top: 20px;
   margin-top: 20px;
   font-size: 19px;
 }
 .cart-summary > p {
   font-size: 12px;
-  color: #665773;
+  color: var(--muted-strong);
   line-height: 1.8;
   margin-top: 24px;
 }
@@ -738,7 +763,7 @@ nav {
   top: -80px;
   left: 20px;
   z-index: 20;
-  background: white;
+  background: var(--surface);
   padding: 15px;
 }
 .skip-link:focus {
@@ -925,5 +950,98 @@ nav {
   *::after {
     transition: none !important;
     scroll-behavior: auto !important;
+  }
+}
+
+:root[data-theme='dark'] {
+  --ink: #f2edf7;
+  --muted: #b8adbf;
+  --purple: #c4a5ed;
+  --lavender: #977bb8;
+  --paper: #17131d;
+  --line: #39303f;
+  --surface: #211b29;
+  --on-accent: #24172e;
+  --badge: #3a2c48;
+  --feature: #2c2138;
+  --heading: #f0e6fb;
+  --muted-strong: #c6b8d1;
+  --button-hover: #d4b9f6;
+  --surface-hover: #382a46;
+  --border-strong: #71588c;
+  --orbit-inner: #4e3b62;
+  --hero-mark: #443153;
+  --art-surface: #2a2232;
+  --control-border: #5c4771;
+  --control-surface: #30233e;
+  --control-hover: #433052;
+  --empty-border: #645075;
+  --panel: #2b2137;
+  --panel-border: #443250;
+  --panel-divider: #574267;
+  color-scheme: dark;
+}
+:root[data-theme='dark'] .storage-warning {
+  background: #493d20;
+  color: #f8e8b5;
+}
+.header-inner {
+  gap: 24px;
+}
+.header-inner nav {
+  margin-left: auto;
+  gap: 24px;
+}
+.preferences-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.preference-field {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--muted);
+  background: var(--surface);
+}
+.preference-field select {
+  min-height: 42px;
+  max-width: 100px;
+  background: transparent;
+  color: var(--ink);
+  border: 0;
+  font-size: 12px;
+  cursor: pointer;
+}
+@media (max-width: 850px) {
+  .header-inner nav {
+    gap: 14px;
+  }
+  .header-inner {
+    gap: 14px;
+  }
+}
+@media (max-width: 700px) {
+  .header-inner {
+    height: auto;
+    min-height: 74px;
+    flex-wrap: wrap;
+    padding: 14px 0;
+    gap: 12px;
+  }
+  .preferences-controls {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .preference-field {
+    flex: 1;
+    justify-content: center;
+  }
+  .preference-field select {
+    max-width: none;
+    min-height: 44px;
   }
 }

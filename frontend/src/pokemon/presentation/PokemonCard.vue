@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 import { Plus } from 'lucide-vue-next'
 import type { Pokemon } from '../domain/pokemon'
 import { useCartStore } from '@/cart/application/cartStore'
@@ -9,10 +11,14 @@ const cart = useCartStore()
 </script>
 <template>
   <article class="pokemon-card">
-    <RouterLink :to="`/pokemon/${pokemon.id}`" class="card-art" :aria-label="`Ver ${pokemon.name}`">
+    <RouterLink
+      :to="`/pokemon/${pokemon.id}`"
+      class="card-art"
+      :aria-label="t('viewPokemon', { name: pokemon.name })"
+    >
       <span class="dex-number">{{ number(pokemon.id) }}</span
       ><PokemonImage :src="pokemon.image_url" :name="pokemon.name" />
-      <span v-if="!pokemon.stock" class="sold-out">Agotado</span>
+      <span v-if="!pokemon.stock" class="sold-out">{{ t('soldOut') }}</span>
     </RouterLink>
     <div class="card-body">
       <div class="type-list">
@@ -32,10 +38,10 @@ const cart = useCartStore()
             (cart.lines.find((line) => line.pokemon.id === pokemon.id)?.quantity ?? 0) >=
               pokemon.stock
           "
-          :aria-label="`Añadir ${pokemon.name} al carrito`"
+          :aria-label="t('addPokemon', { name: pokemon.name })"
           @click="cart.add(pokemon.id)"
         >
-          <Plus :size="18" /> Añadir
+          <Plus :size="18" />{{ t('add') }}
         </button>
       </div>
     </div>

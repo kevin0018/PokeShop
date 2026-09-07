@@ -33,6 +33,9 @@ on Windows/WSL. Vue dependencies live in a separate Linux volume.
   are reconciled with catalog stock; prices always come from the current catalog.
 - Loading, API failure/retry, missing product/page and image fallback states.
 - Responsive desktop/mobile layout, labeled controls, keyboard focus and reduced motion.
+- Light, dark and system appearance, plus Spanish/English via Vue I18n. Both
+  preferences persist in the browser. Language changes update product descriptions,
+  types, prices, accessibility labels and active cart/error messages without reloading.
 
 The catalog uses a **read-only demo repository** with deterministic data. PostgreSQL
 and Redis are available in Compose but are not used by the catalog yet. There are
@@ -71,7 +74,7 @@ The `user` contexts remain placeholders for a later accounts feature.
 ## Stack and resources
 
 Python 3.12 / Poetry 2.1.3; Vue 3 / TypeScript / Vite 7 / Pinia / Vue Router /
-Tailwind CSS 4; Node 22 / pnpm 10.10.0. Both dependency lockfiles are committed.
+Tailwind CSS 4 / Vue I18n 11; Node 22 / pnpm 10.10.0. Both dependency lockfiles are committed.
 
 | Container | Memory limit |
 | --- | --- |
@@ -104,9 +107,9 @@ docker compose up --build --wait
 docker compose down
 ```
 
-Verified: 9 backend tests, 7 frontend unit tests, type checking, production build,
-ESLint and browser checks for search, filtering, detail, cart quantities and reload
-persistence. Desktop and mobile layouts were inspected in the browser.
+Verified: 9 backend tests, 12 frontend unit tests, type checking, production build,
+ESLint and browser checks for search, filtering, detail, cart quantities, theme/language
+switching and reload persistence. Desktop and mobile layouts were inspected in the browser.
 A Playwright regression scenario is included under `frontend/e2e`; running it
 requires installed browser binaries (see the frontend README).
 
@@ -122,3 +125,21 @@ Artwork is loaded from [PokéAPI sprites](https://github.com/PokeAPI/sprites) an
 requires network access; catalog data does not depend on the external PokéAPI service.
 Pokémon and character artwork belong to their respective rights holders.
 This is an independent educational demo with fictional prices and stock.
+
+
+## Language and appearance
+
+Use the two selectors in the header. Spanish is the default language; appearance
+initially follows the operating system, unless you choose light or dark explicitly.
+If browser storage is blocked, preferences still work for the current page session.
+
+Translations live in `frontend/src/i18n/en.ts` and `es.ts`; TypeScript checks that
+Spanish implements the English key schema. All twelve demo descriptions are
+translated in these dictionaries, keyed by Pokémon ID. Future catalog records
+need matching translations; unknown IDs fall back to the API description.
+Monetary amounts remain EUR and are formatted for the selected locale.
+
+Theme colors use CSS variables in `frontend/src/assets/main.css`. A small public
+startup script applies appearance before Vue loads. The application tracks OS
+appearance changes only in system mode. `build` runs type checking and bundling
+sequentially to stay within the existing frontend memory limit.

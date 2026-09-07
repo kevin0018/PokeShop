@@ -1,13 +1,18 @@
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+</script>
 <template>
   <footer class="site-footer">
     <div>
       <strong>pokéshop.</strong>
-      <p>Una pequeña tienda para una gran aventura.</p>
+      <p>{{ t('footerTagline') }}</p>
     </div>
     <p>
-      Proyecto de demostración, sin compras reales.<br />Pokémon pertenece a sus respectivos
-      titulares. Ilustraciones de
-      <a href="https://github.com/PokeAPI/sprites" target="_blank" rel="noopener noreferrer"
+      {{ t('footerDemo') }}<br />{{ t('attribution') }}&nbsp;<a
+        href="https://github.com/PokeAPI/sprites"
+        target="_blank"
+        rel="noopener noreferrer"
         >PokéAPI</a
       >.
     </p>

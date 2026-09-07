@@ -17,8 +17,7 @@ export const useCatalogStore = defineStore('catalog', () => {
       items.value = await httpPokemonRepository.list()
       loaded.value = true
     } catch {
-      error.value =
-        'No hemos podido cargar el catálogo. Comprueba tu conexión y vuelve a intentarlo.'
+      error.value = 'catalogError'
     } finally {
       loading.value = false
     }

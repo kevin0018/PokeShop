@@ -34,6 +34,9 @@ también en Windows/WSL. Las dependencias de Vue usan un volumen Linux separado.
   Al restaurar, las cantidades se ajustan al stock y los precios se toman del catálogo.
 - Estados de carga, error con reintento, imagen no disponible, Pokémon o página inexistentes.
 - Diseño adaptable a escritorio/móvil, controles etiquetados, foco de teclado y movimiento reducido.
+- Apariencia clara, oscura o del sistema, y español/inglés con Vue I18n. Ambas
+  preferencias persisten en el navegador. El idioma cambia descripciones, tipos,
+  precios, etiquetas accesibles y avisos ya visibles sin recargar ni perder el carrito.
 
 El catálogo usa un **repositorio de demostración de solo lectura**. PostgreSQL y
 Redis están preparados en Compose, pero todavía no se utilizan para el catálogo.
@@ -72,7 +75,7 @@ Los contextos `user` siguen reservados para la futura funcionalidad de cuentas.
 ## Stack y recursos
 
 Python 3.12 / Poetry 2.1.3; Vue 3 / TypeScript / Vite 7 / Pinia / Vue Router /
-Tailwind CSS 4; Node 22 / pnpm 10.10.0. Ambos lockfiles están versionados.
+Tailwind CSS 4 / Vue I18n 11; Node 22 / pnpm 10.10.0. Ambos lockfiles están versionados.
 
 | Contenedor | Límite de memoria |
 | --- | --- |
@@ -106,7 +109,7 @@ docker compose up --build --wait
 docker compose down
 ```
 
-Verificados: 9 tests del backend, 7 tests unitarios del frontend, tipos, build de
+Verificados: 9 tests del backend, 12 tests unitarios del frontend, tipos, build de
 producción, ESLint y comprobaciones en navegador de búsqueda, filtros, ficha,
 cantidades y persistencia al recargar. Se revisaron las vistas de escritorio y móvil.
 Se incluye un escenario de regresión Playwright en `frontend/e2e`; ejecutarlo
@@ -124,3 +127,21 @@ Las ilustraciones proceden de [PokéAPI sprites](https://github.com/PokeAPI/spri
 y necesitan conexión; los datos del catálogo no dependen del servicio externo PokéAPI.
 Pokémon y sus ilustraciones pertenecen a sus respectivos titulares.
 Este es un proyecto educativo independiente con precios y stock ficticios.
+
+
+## Idioma y apariencia
+
+Los selectores están en la cabecera. El idioma inicial es español y el tema sigue
+al sistema operativo hasta elegir explícitamente claro u oscuro. Si el navegador
+bloquea el almacenamiento, las preferencias funcionan durante la sesión actual.
+
+Las traducciones están en `frontend/src/i18n/en.ts` y `es.ts`; TypeScript comprueba
+que español implemente las claves del inglés. Los diccionarios traducen las doce
+descripciones de demostración por ID. Los futuros registros necesitan traducciones;
+para identificadores desconocidos se utiliza la descripción de la API.
+Los importes siguen siendo EUR, con el formato del idioma seleccionado.
+
+Los colores utilizan variables CSS en `frontend/src/assets/main.css`. Un pequeño
+script público aplica el tema antes de cargar Vue. La aplicación solo sigue los
+cambios de apariencia del sistema en modo automático. `build` ejecuta tipos y
+compilación secuencialmente para respetar el límite de memoria del frontend.

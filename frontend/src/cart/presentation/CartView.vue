@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag } from 'lucide-vue-next'
 import { useCartStore } from '../application/cartStore'
 import { useCatalogStore } from '@/pokemon/application/catalogStore'
@@ -8,24 +10,24 @@ const cart = useCartStore()
 const catalog = useCatalogStore()
 </script>
 <template>
-  <RouterLink class="back-link" to="/"><ArrowLeft :size="16" /> Seguir explorando</RouterLink>
+  <RouterLink class="back-link" to="/"><ArrowLeft :size="16" />{{ t('keepExploring') }}</RouterLink>
   <div class="section-heading">
     <div>
-      <p class="eyebrow">TU SELECCIÓN</p>
-      <h1>Mi carrito</h1>
+      <p class="eyebrow">{{ t('selection') }}</p>
+      <h1>{{ t('cart') }}</h1>
     </div>
-    <span>{{ cart.count }} {{ cart.count === 1 ? 'unidad' : 'unidades' }}</span>
+    <span>{{ t('units', cart.count) }}</span>
   </div>
-  <p v-if="catalog.loading" role="status" class="state-box">Cargando tu selección…</p>
+  <p v-if="catalog.loading" role="status" class="state-box">{{ t('loadingCart') }}</p>
   <div v-else-if="catalog.error" role="alert" class="state-box">
-    <p>{{ catalog.error }}</p>
-    <button class="button primary" @click="catalog.load">Volver a intentar</button>
+    <p>{{ t(catalog.error) }}</p>
+    <button class="button primary" @click="catalog.load">{{ t('retry') }}</button>
   </div>
   <div v-else-if="!cart.lines.length" class="state-box empty-cart">
     <ShoppingBag :size="44" />
-    <h2>Tu equipo está por descubrir</h2>
-    <p>Añade tus favoritos del catálogo y los guardaremos aquí.</p>
-    <RouterLink class="button primary" to="/">Explorar Pokémon</RouterLink>
+    <h2>{{ t('emptyCart') }}</h2>
+    <p>{{ t('emptyCartBody') }}</p>
+    <RouterLink class="button primary" to="/">{{ t('explore') }}</RouterLink>
   </div>
   <div v-else class="cart-layout">
     <div class="cart-lines">
@@ -38,17 +40,19 @@ const catalog = useCatalogStore()
           <h2>
             <RouterLink :to="`/pokemon/${line.pokemon.id}`">{{ line.pokemon.name }}</RouterLink>
           </h2>
-          <p>{{ money(line.pokemon.price_cents) }} / unidad</p>
+          <p>{{ t('perUnit', { price: money(line.pokemon.price_cents) }) }}</p>
           <div class="quantity-control">
             <button
-              :aria-label="`Reducir cantidad de ${line.pokemon.name}`"
+              :aria-label="t('decrease', { name: line.pokemon.name })"
               :disabled="line.quantity === 1"
               @click="cart.setQuantity(line.pokemon.id, line.quantity - 1)"
             >
               <Minus :size="15" /></button
-            ><span :aria-label="`Cantidad de ${line.pokemon.name}`">{{ line.quantity }}</span
+            ><span :aria-label="t('quantity', { name: line.pokemon.name })">{{
+              line.quantity
+            }}</span
             ><button
-              :aria-label="`Aumentar cantidad de ${line.pokemon.name}`"
+              :aria-label="t('increase', { name: line.pokemon.name })"
               :disabled="line.quantity >= line.pokemon.stock"
               @click="cart.setQuantity(line.pokemon.id, line.quantity + 1)"
             >
@@ -60,30 +64,27 @@ const catalog = useCatalogStore()
           <strong>{{ money(line.pokemon.price_cents * line.quantity) }}</strong
           ><button
             class="text-button"
-            :aria-label="`Eliminar ${line.pokemon.name}`"
+            :aria-label="t('removePokemon', { name: line.pokemon.name })"
             @click="cart.remove(line.pokemon.id)"
           >
-            <Trash2 :size="16" /> Eliminar
+            <Trash2 :size="16" />{{ t('remove') }}
           </button>
         </div>
       </article>
     </div>
     <aside class="cart-summary">
-      <h2>Tu selección, de un vistazo</h2>
+      <h2>{{ t('summary') }}</h2>
       <div>
-        <span>Subtotal ({{ cart.count }} {{ cart.count === 1 ? 'unidad' : 'unidades' }})</span
+        <span>{{ t('subtotal', { units: t('units', cart.count) }) }}</span
         ><strong>{{ money(cart.total) }}</strong>
       </div>
       <div class="summary-total">
-        <span>Total</span><strong>{{ money(cart.total) }}</strong>
+        <span>{{ t('total') }}</span
+        ><strong>{{ money(cart.total) }}</strong>
       </div>
-      <p>
-        Tu carrito se guarda en este navegador para que puedas seguir explorando cuando quieras.
-      </p>
-      <p class="demo-note">
-        Esta es una tienda de demostración. Los pedidos y pagos todavía no están disponibles.
-      </p>
-      <RouterLink class="button secondary" to="/">Seguir explorando</RouterLink>
+      <p>{{ t('cartSaved') }}</p>
+      <p class="demo-note">{{ t('demoCart') }}</p>
+      <RouterLink class="button secondary" to="/">{{ t('keepExploring') }}</RouterLink>
     </aside>
   </div>
 </template>
