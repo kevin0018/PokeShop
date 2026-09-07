@@ -23,4 +23,4 @@ API, Alembic and sync share `src/database.py`: use backend-only `POSTGRES_*` var
 
 ## Deployment status
 
-**Live at [http://62.171.169.187](http://62.171.169.187)** on the Contabo VPS. Domain and HTTPS are pending. Production uses the standalone root `compose.production.yaml`; the default Compose remains for development. See the [deployment runbook](../docs/deployment.md) for routing, private configuration, data and release procedures.
+**Live at [https://pokeshop-app.duckdns.org](https://pokeshop-app.duckdns.org)** on the Contabo VPS. HTTPS is enabled with automatic certificate renewal. Production uses the standalone root `compose.production.yaml`; the default Compose remains for development. See the [deployment runbook](../docs/deployment.md) for routing, private configuration, data and release procedures.

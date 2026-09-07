@@ -2,11 +2,11 @@
 
 [English](README.md) · [Español](README.es.md)
 
-![Deployment: VPS / HTTP](https://img.shields.io/badge/deployment-VPS_HTTP-71549a)
+![Deployment: VPS / HTTPS](https://img.shields.io/badge/deployment-VPS_HTTPS-71549a)
 
 A Pokémon shop demo with a full-width Kanto starter collage, a complete imported catalog, and a persistent cart. Built with Vue 3, TypeScript and FastAPI. Prices and stock are fictional; accounts, payments and real orders are outside this phase.
 
-[Repository](https://github.com/kevin0018/PokeShop) · [Live demo (HTTP)](http://62.171.169.187) · [API documentation](http://localhost:8000/docs)
+[Repository](https://github.com/kevin0018/PokeShop) · [Live demo](https://pokeshop-app.duckdns.org) · [API documentation](http://localhost:8000/docs)
 
 [![Actual PokeShop interface](docs/home.png)](docs/home.png)
 
@@ -171,13 +171,13 @@ Integration tests require the migration and initial sync above. Browser tests us
 
 ## Deployment
 
-**Live on the Contabo VPS: [http://62.171.169.187](http://62.171.169.187). Domain and HTTPS are pending.**
+**Live on the Contabo VPS: [https://pokeshop-app.duckdns.org](https://pokeshop-app.duckdns.org). HTTPS is enabled with automatic certificate renewal.**
 
 The standalone `compose.production.yaml` serves the compiled Vue frontend with Nginx and runs FastAPI without reload. Host Nginx forwards to a loopback-only port; `/api` stays on the same origin, and Vue deep links fall back to `index.html`. PostgreSQL and the API expose no host ports. The existing website remains running.
 
 Production containers are capped at 896 MiB total (frontend 128, API 512, PostgreSQL 256), with no additional swap. The unused Redis service is omitted. Development Compose and its limits remain unchanged.
 
-The initial deployment transferred all 1,351 products, offers and cached upstream data, preserving prices and stock. Secrets live only in a private server environment file. See the [deployment runbook](docs/deployment.md) for paths, release commands, migrations, backups and verification. Domain/TLS, scheduled off-server backups and CI/CD remain pending; GitHub pushes do not deploy automatically.
+The initial deployment transferred all 1,351 products, offers and cached upstream data, preserving prices and stock. Secrets live only in a private server environment file. See the [deployment runbook](docs/deployment.md) for paths, release commands, migrations, backups and verification. Scheduled off-server backups and CI/CD remain pending; GitHub pushes do not deploy automatically.
 
 ## Scope and attribution
 

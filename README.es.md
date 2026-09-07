@@ -2,11 +2,11 @@
 
 [English](README.md) · [Español](README.es.md)
 
-![Despliegue: VPS / HTTP](https://img.shields.io/badge/despliegue-VPS_HTTP-71549a)
+![Despliegue: VPS / HTTPS](https://img.shields.io/badge/despliegue-VPS_HTTPS-71549a)
 
 Una tienda Pokémon de demostración con portada a todo el ancho con los tres iniciales de Kanto, catálogo completo importado y carrito persistente. Creada con Vue 3, TypeScript y FastAPI. Precios y stock ficticios; las cuentas, pagos y pedidos reales quedan fuera de esta fase.
 
-[Repositorio](https://github.com/kevin0018/PokeShop) · [Demo pública (HTTP)](http://62.171.169.187) · [Documentación de la API](http://localhost:8000/docs)
+[Repositorio](https://github.com/kevin0018/PokeShop) · [Demo pública](https://pokeshop-app.duckdns.org) · [Documentación de la API](http://localhost:8000/docs)
 
 [![Interfaz real de PokeShop](docs/home.png)](docs/home.png)
 
@@ -171,13 +171,13 @@ Las pruebas de integración requieren la migración y sincronización inicial. L
 
 ## Despliegue
 
-**Publicado en la VPS de Contabo: [http://62.171.169.187](http://62.171.169.187). Dominio y HTTPS pendientes.**
+**Publicado en la VPS de Contabo: [https://pokeshop-app.duckdns.org](https://pokeshop-app.duckdns.org). HTTPS activo con renovación automática del certificado.**
 
 El archivo independiente `compose.production.yaml` sirve Vue compilado con Nginx y ejecuta FastAPI sin recarga. El Nginx del host conecta con un puerto limitado a loopback; `/api` utiliza el mismo origen y las rutas de Vue tienen fallback a `index.html`. PostgreSQL y la API no publican puertos del host. La otra web sigue funcionando.
 
 Los contenedores de producción tienen un límite conjunto de 896 MiB (frontend 128, API 512, PostgreSQL 256), sin swap adicional. Redis se omite porque la aplicación no lo utiliza. Compose de desarrollo y sus límites se mantienen.
 
-El primer despliegue trasladó los 1.351 productos, ofertas y caché, conservando precios y stock. Los secretos solo están en un archivo privado del servidor. El [manual de despliegue](docs/deployment.md) recoge rutas, comandos, migraciones, copias y verificaciones. Quedan pendientes dominio/TLS, copias periódicas externas y CI/CD; un push a GitHub no despliega automáticamente.
+El primer despliegue trasladó los 1.351 productos, ofertas y caché, conservando precios y stock. Los secretos solo están en un archivo privado del servidor. El [manual de despliegue](docs/deployment.md) recoge rutas, comandos, migraciones, copias y verificaciones. Quedan pendientes copias periódicas externas y CI/CD; un push a GitHub no despliega automáticamente.
 
 ## Alcance y atribución
 

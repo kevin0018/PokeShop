@@ -2,15 +2,15 @@
 
 [English README](../README.md) · [README en español](../README.es.md)
 
-PokeShop is deployed at **http://62.171.169.187** on the existing Contabo VPS.
-Domain selection and HTTPS are still pending. This is a demonstration store with
+PokeShop is deployed at **https://pokeshop-app.duckdns.org** on the existing Contabo VPS.
+HTTPS is enabled with automatic certificate renewal. This is a demonstration store with
 no accounts, checkout or payment processing. Deployment is manual; GitHub pushes
 do not deploy automatically.
 
 ## Runtime
 
 ```text
-Internet :80 → host Nginx → 127.0.0.1:8091 → frontend Nginx
+Internet :443 → host Nginx → 127.0.0.1:8091 → frontend Nginx
                                             ├─ Vue static files / SPA fallback
                                             └─ /api → FastAPI → PostgreSQL
 ```
@@ -114,13 +114,30 @@ loss of the VPS.
 
 [Actual capture from the deployed site](deployment-home.png).
 
-## Next: domain and HTTPS
+## Domain and HTTPS
 
-Choose a domain/subdomain, point its DNS to the VPS, extend the separate PokeShop
-Nginx server name, and configure TLS and an HTTP-to-HTTPS redirect. Update allowed
-origins and README demo links, then verify the certificate and routes. No domain
-has been purchased and HTTPS is not currently configured for PokeShop.
+`pokeshop-app.duckdns.org` points to `62.171.169.187`. Host Nginx serves the
+domain over HTTPS; HTTP requests to either the domain or IP redirect to the
+canonical HTTPS domain, preserving path and query. The allowed API origin is
+`https://pokeshop-app.duckdns.org`. The other website retains its own certificate.
+
+Certbot issued a Let's Encrypt certificate on 2026-09-07, initially valid through
+2026-12-06. `certbot.timer` handles renewal. Certificate files are under
+`/etc/letsencrypt/live/pokeshop-app.duckdns.org/`; never copy the private key into Git.
+The committed host configuration requires that certificate to exist first. For
+a fresh server, first serve the domain on port 80 and run
+`certbot --nginx -d pokeshop-app.duckdns.org --redirect`, then install the final
+configuration. Check syntax with `nginx -t` before reloading Nginx.
+
+The renewal dry run passed on 2026-09-07. Three targeted Chromium regressions
+also passed against HTTPS: catalog/cart recovery, locale/theme persistence and
+the cart preview. Both HTTP redirects preserved paths and query strings; the
+catalog still returned 1,351 entries and the other website remained available.
+
+To verify renewal without a random delay:
+`certbot renew --cert-name pokeshop-app.duckdns.org --dry-run --no-random-sleep-on-renew`.
+Keep DuckDNS pointing at the VPS and port 80 reachable for HTTP validation.
 
 Browser storage is scoped to the origin: a cart saved on localhost, the IP, or a
-future HTTPS domain is separate. Deployments preserve the server catalog; they do
+HTTPS domain is separate. Deployments preserve the server catalog; they do
 not copy a user's browser cart between origins.
