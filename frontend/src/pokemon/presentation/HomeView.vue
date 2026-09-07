@@ -2,7 +2,6 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ArrowUpRight, ArrowRight, Pause, Play, Zap } from 'lucide-vue-next'
-import PokeballIntro from '@/components/PokeballIntro.vue'
 import { request } from '../infrastructure/httpPokemonRepository'
 const { t, locale } = useI18n()
 const regions = ref<{ id: string; names: Record<string, string> }[]>([])
@@ -53,7 +52,6 @@ onUnmounted(() => {
 })
 </script>
 <template>
-  <PokeballIntro />
   <section
     ref="scene"
     class="adventure-hero"

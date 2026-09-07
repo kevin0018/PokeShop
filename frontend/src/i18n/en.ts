@@ -1,6 +1,4 @@
 export default {
-  welcomeIntro: 'Welcome to PokeShop',
-  skipIntro: 'Skip intro',
   cartPage: 'Cart products',
   ticketLabel: 'COMPANION PASS',
 

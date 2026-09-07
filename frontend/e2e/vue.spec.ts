@@ -1,8 +1,5 @@
 import { test, expect, type Page } from '@playwright/test'
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173'
-test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => sessionStorage.setItem('pokeshop.intro.v1', 'seen'))
-})
 test('catalog pages, forms, cart reload and network recovery', async ({ page }) => {
   await page.goto('/catalogo?forms=default')
   await page.getByRole('searchbox').fill('#025')
@@ -196,23 +193,6 @@ test('touch statistics and timed cart notice', async ({ browser }) => {
   await expect(page.locator('.cart-notice')).toBeVisible()
   await page.clock.fastForward(1000)
   await expect(page.locator('.cart-notice')).toHaveCount(0)
-  await context.close()
-})
-
-test('intro can be skipped and runs once per tab session', async ({ browser }) => {
-  const context = await browser.newContext()
-  const page = await context.newPage()
-  await page.goto(baseURL)
-  await page.getByRole('button', { name: 'Saltar entrada →' }).click()
-  await expect(page.locator('.pokeball-intro')).toHaveCount(0)
-  await page.reload()
-  await expect(page.locator('.hero-pikachu')).toBeVisible()
-  await expect(page.locator('.pokeball-intro')).toHaveCount(0)
-  await page.evaluate(() => sessionStorage.removeItem('pokeshop.intro.v1'))
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.reload()
-  await expect(page.locator('.hero-pikachu')).toBeVisible()
-  await expect(page.locator('.pokeball-intro')).toHaveCount(0)
   await context.close()
 })
 

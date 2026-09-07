@@ -1,7 +1,5 @@
 import type en from './en'
 export default {
-  welcomeIntro: 'Bienvenido a PokeShop',
-  skipIntro: 'Saltar entrada',
   cartPage: 'Productos del carrito',
   ticketLabel: 'PASE DE COMPAÑEROS',
 
