@@ -17,6 +17,9 @@ export interface Pokemon {
   form_names?: Record<string, string>
   abilities?: { name: string; names: Record<string, string>; hidden: boolean }[]
   stats?: Record<string, number>
+  region?: string
+  region_names?: Record<string, string>
+  evolution_stage?: number
   reason?: string
 }
 export interface PokemonRepository {
@@ -29,3 +32,5 @@ export type CatalogSort =
   | 'name'
   | 'weight_asc'
   | 'weight_desc'
+  | 'height_asc'
+  | 'height_desc'

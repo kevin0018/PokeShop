@@ -4,9 +4,9 @@ const { t } = useI18n()
 import { Plus } from 'lucide-vue-next'
 import type { Pokemon } from '../domain/pokemon'
 import { useCartStore } from '@/cart/application/cartStore'
-import { money, pokemonName, number, typeName } from '@/shared/presentation/format'
+import { money, pokemonName, number, typeName, decimal } from '@/shared/presentation/format'
 import PokemonImage from '@/components/PokemonImage.vue'
-defineProps<{ pokemon: Pokemon }>()
+defineProps<{ pokemon: Pokemon; bento?: boolean }>()
 const cart = useCartStore()
 </script>
 <template>
@@ -29,6 +29,17 @@ const cart = useCartStore()
       <h3>
         <RouterLink :to="`/pokemon/${pokemon.id}`">{{ pokemonName(pokemon) }}</RouterLink>
       </h3>
+      <p v-if="bento" class="card-measures">
+        <span
+          >{{ t('height') }}:
+          {{ pokemon.height_m == null ? t('missingData') : decimal(pokemon.height_m) + ' m' }}</span
+        ><span
+          >{{ t('weight') }}:
+          {{
+            pokemon.weight_kg == null ? t('missingData') : decimal(pokemon.weight_kg) + ' kg'
+          }}</span
+        >
+      </p>
       <div class="card-bottom">
         <strong>{{ money(pokemon.price_cents) }}</strong
         ><button

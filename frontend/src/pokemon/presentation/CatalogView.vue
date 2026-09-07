@@ -3,11 +3,11 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Search, ArrowLeft, ArrowRight } from 'lucide-vue-next'
-import AppSelect from '@/components/AppSelect.vue'
+import CatalogFilters from './CatalogFilters.vue'
 import PokemonCard from './PokemonCard.vue'
 import { request } from '../infrastructure/httpPokemonRepository'
 import { useCatalogStore } from '../application/catalogStore'
-import { typeName } from '@/shared/presentation/format'
+
 import type { Pokemon } from '../domain/pokemon'
 const { t } = useI18n()
 const route = useRoute(),
@@ -17,7 +17,11 @@ const items = ref<Pokemon[]>([]),
   total = ref(0),
   loading = ref(true),
   error = ref(false)
-const metadata = ref<{ types: string[]; generations: number[] }>({ types: [], generations: [] })
+const metadata = ref<{
+  types: string[]
+  generations: number[]
+  regions?: { id: string; names: Record<string, string> }[]
+}>({ types: [], generations: [] })
 const page = computed(() => Math.max(1, Number(route.query.page) || 1))
 const pages = computed(() => Math.max(1, Math.ceil(total.value / 24)))
 const value = (key: string) => String(route.query[key] || '')
@@ -31,7 +35,7 @@ async function load() {
   loading.value = true
   error.value = false
   const params = new URLSearchParams({ limit: '24', offset: String((page.value - 1) * 24) })
-  for (const key of ['q', 'type', 'generation', 'forms', 'sort'])
+  for (const key of ['q', 'type', 'region', 'generation', 'forms', 'sort'])
     if (value(key)) params.set(key, value(key))
   try {
     const result = await request<{ items: Pokemon[]; total: number }>(`?${params}`, current.signal)
@@ -74,53 +78,9 @@ request<typeof metadata.value>('/metadata')
           maxlength="100"
           @input="change('q', ($event.target as HTMLInputElement).value)"
       /></label>
-      <AppSelect
-        :model-value="value('type')"
-        :label="t('filterType')"
-        :options="[
-          { value: '', label: t('allTypes') },
-          ...metadata.types.map((type) => ({ value: type, label: typeName(type) })),
-        ]"
-        @update:model-value="change('type', $event)"
-      />
-      <AppSelect
-        :model-value="value('generation')"
-        :label="t('generationLabel')"
-        :options="[
-          { value: '', label: t('allGenerations') },
-          ...metadata.generations.map((g) => ({
-            value: String(g),
-            label: t('generationNumber', { n: g }),
-          })),
-        ]"
-        @update:model-value="change('generation', $event)"
-      />
-      <AppSelect
-        :model-value="value('forms')"
-        :label="t('forms')"
-        :options="[
-          { value: '', label: t('allForms') },
-          { value: 'default', label: t('defaultForms') },
-          { value: 'alternative', label: t('alternativeForms') },
-        ]"
-        @update:model-value="change('forms', $event)"
-      />
-      <AppSelect
-        :model-value="value('sort') || 'number'"
-        :label="t('sort')"
-        :options="
-          ['number', 'price_asc', 'price_desc', 'name', 'weight_asc', 'weight_desc'].map(
-            (v, i) => ({
-              value: v,
-              label: t(
-                ['sortNumber', 'sortLow', 'sortHigh', 'sortName', 'weightLow', 'weightHigh'][i]!,
-              ),
-            }),
-          )
-        "
-        @update:model-value="change('sort', $event)"
-      />
+      <CatalogFilters :metadata="metadata" />
     </div>
+    <p class="bento-caption">{{ t('heightBento') }}</p>
     <p v-if="loading" role="status" class="state-box">{{ t('loadingCatalog') }}</p>
     <div v-else-if="error" role="alert" class="state-box">
       <p>{{ t('catalogError') }}</p>
@@ -133,8 +93,14 @@ request<typeof metadata.value>('/metadata')
           {{ t('clearFilters') }}
         </button>
       </div>
-      <div v-if="items.length" class="pokemon-grid">
-        <PokemonCard v-for="p in items" :key="p.id" :pokemon="p" />
+      <div v-if="items.length" class="catalog-bento">
+        <PokemonCard
+          v-for="p in items"
+          :key="p.id"
+          :pokemon="p"
+          bento
+          :class="(p.height_m ?? 0) > 2 ? 'tall' : (p.height_m ?? 0) > 1 ? 'medium' : 'small'"
+        />
       </div>
       <div v-else class="state-box">{{ t('noMatches') }}</div>
       <nav class="pagination" :aria-label="t('pagination')">
@@ -156,3 +122,62 @@ request<typeof metadata.value>('/metadata')
     </template>
   </section>
 </template>
+
+<style>
+.catalog-bento {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 24px;
+  grid-auto-flow: row;
+  grid-auto-rows: 390px;
+}
+.catalog-bento .pokemon-card {
+  grid-column: span 2;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.catalog-bento .medium,
+.catalog-bento .tall {
+  grid-column: span 3;
+}
+.catalog-bento .tall {
+  grid-row: span 2;
+}
+.catalog-bento .card-art {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+.catalog-bento .card-art img {
+  height: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.catalog-bento .card-body {
+  flex: none;
+}
+.card-measures {
+  display: flex;
+  gap: 16px;
+  color: var(--muted-strong);
+  font-size: 0.8rem;
+  margin: 10px 0;
+}
+@media (max-width: 900px) {
+  .catalog-bento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .catalog-bento .pokemon-card {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
+}
+@media (max-width: 540px) {
+  .catalog-bento {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: 410px;
+    gap: 18px;
+  }
+}
+</style>

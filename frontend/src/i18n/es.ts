@@ -1,5 +1,27 @@
 import type en from './en'
 export default {
+  filters: 'Filtros',
+  region: 'Región de origen',
+  allRegions: 'Todas las regiones',
+  apply: 'Aplicar',
+  cancel: 'Cancelar',
+  close: 'Cerrar',
+  heightLow: 'Altura: menor primero',
+  heightHigh: 'Altura: mayor primero',
+  heightBento: 'Pequeños, medianos y altos: las tarjetas siguen su altura real.',
+  removeFilter: 'Quitar filtro',
+  adventure: 'Tu próxima aventura empieza con un compañero',
+  heroCopy:
+    'Una pequeña chispa. Todo un mundo por descubrir. Encuentra el Pokémon que hace tu colección tuya.',
+  visitKanto: 'Volver a Kanto',
+  chooseRegion: '¿Dónde empieza tu aventura?',
+  pauseScene: 'Pausar animación',
+  resumeScene: 'Reanudar animación',
+  viewStats: 'Ver estadísticas',
+  chanseyCopy: 'Chansey cuida de tus compañeros. ¿Todo listo para la próxima aventura?',
+  originIntro: 'Explora sus orígenes',
+  spark: 'Toda aventura empieza con una chispa.',
+
   homeNav: 'Inicio',
   homeEyebrow: 'UN EQUIPO CON PERSONALIDAD',
   homeTitle: 'Pequeños favoritos.',
@@ -58,7 +80,6 @@ export default {
   light: 'Claro',
   dark: 'Oscuro',
   system: 'Sistema',
-  close: 'Cerrar notificación',
   pageTitle: 'PokeShop · Tu colección Pokémon',
   pageDescription:
     'Descubre Pokémon de todas las generaciones y crea tu colección en PokeShop, una tienda de demostración.',

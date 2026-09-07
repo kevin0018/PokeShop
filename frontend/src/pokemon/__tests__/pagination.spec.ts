@@ -4,6 +4,8 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import { afterEach, expect, it, vi } from 'vitest'
 import CatalogView from '../presentation/CatalogView.vue'
 import { i18n } from '@/i18n'
+import CatalogFilters from '../presentation/CatalogFilters.vue'
+import { DialogRoot } from 'reka-ui'
 import AppSelect from '@/components/AppSelect.vue'
 afterEach(() => vi.unstubAllGlobals())
 it('stores filters and pagination in the URL and aborts stale requests', async () => {
@@ -35,7 +37,13 @@ it('stores filters and pagination in the URL and aborts stale requests', async (
   expect(router.currentRoute.value.query).toMatchObject({ q: 'Pika' })
   expect(router.currentRoute.value.query.page).toBeUndefined()
   expect(previous.aborted).toBe(true)
-  wrapper.findAllComponents(AppSelect)[1]!.vm.$emit('update:modelValue', '2')
+  wrapper.getComponent(CatalogFilters).getComponent(DialogRoot).vm.$emit('update:open', true)
+  await flushPromises()
+  wrapper.findAllComponents(AppSelect)[2]!.vm.$emit('update:modelValue', '2')
+  await flushPromises()
+  expect(router.currentRoute.value.query.generation).toBeUndefined()
+  const apply = document.querySelector('.filter-actions .primary') as HTMLButtonElement
+  apply.click()
   await flushPromises()
   expect(router.currentRoute.value.query).toMatchObject({ q: 'Pika', generation: '2' })
   wrapper.unmount()
