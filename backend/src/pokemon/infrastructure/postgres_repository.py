@@ -22,6 +22,7 @@ class PostgresCatalog:
         generation=0,
         forms="all",
         ids=None,
+        region="",
     ):
         clauses, params = [], {"limit": limit, "offset": offset}
         if q:
@@ -35,6 +36,9 @@ class PostgresCatalog:
         if pokemon_type:
             clauses.append("p.data->'types' ? :type")
             params["type"] = pokemon_type
+        if region:
+            clauses.append("p.data->>'region' = :region")
+            params['region'] = region
         if generation:
             clauses.append("(p.data->>'generation')::int = :generation")
             params["generation"] = generation
@@ -50,6 +54,8 @@ class PostgresCatalog:
             "name": "p.data->>'name'",
             "price_asc": "o.price_cents",
             "price_desc": "o.price_cents DESC",
+            "height_asc": "(p.data->>'height_m')::float",
+            "height_desc": "(p.data->>'height_m')::float DESC",
             "weight_asc": "(p.data->>'weight_kg')::float",
             "weight_desc": "(p.data->>'weight_kg')::float DESC",
         }[sort]
@@ -64,7 +70,7 @@ class PostgresCatalog:
             rows = (
                 await conn.execute(
                     text(
-                        "SELECT p.data, o.price_cents, o.stock FROM pokemon p JOIN offers o ON o.pokemon_id=p.id"
+                        "SELECT p.data, o.price_cents, o.stock, o.base_cents, o.pricing_version, o.pricing_breakdown FROM pokemon p JOIN offers o ON o.pokemon_id=p.id"
                         + where
                         + " ORDER BY "
                         + order
@@ -74,7 +80,7 @@ class PostgresCatalog:
                 )
             ).mappings()
             return [
-                dict(row["data"], price_cents=row["price_cents"], stock=row["stock"])
+                dict(row["data"], price_cents=row["price_cents"], stock=row["stock"],base_cents=row["base_cents"],pricing_version=row["pricing_version"],pricing_breakdown=row["pricing_breakdown"])
                 for row in rows
             ], total
 
@@ -108,7 +114,9 @@ class PostgresCatalog:
                     )
                 ).scalars()
             )
-        return {"generations": generations, "types": types}
+            regions = list((await conn.execute(text("SELECT DISTINCT data->>'region' FROM pokemon WHERE data->>'region' IS NOT NULL ORDER BY 1"))).scalars())
+        from src.pokemon.application.pricing import REGION_NAMES
+        return {"generations": generations, "types": types, "regions":[{'id':r,'names':dict(zip(('es','en'),REGION_NAMES.get(r,(r,r)),strict=True))} for r in regions]}
 
     async def recommendations(self, ids):
         if not ids:

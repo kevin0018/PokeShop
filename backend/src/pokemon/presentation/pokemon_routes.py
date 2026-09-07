@@ -19,16 +19,17 @@ async def list_pokemon(
     q: str = Query("", max_length=100),
     pokemon_type: str = Query("", alias="type", max_length=30),
     sort: Literal[
-        "number", "price_asc", "price_desc", "name", "weight_asc", "weight_desc"
+        "number", "price_asc", "price_desc", "name", "weight_asc", "weight_desc", "height_asc", "height_desc"
     ] = "number",
     limit: int = Query(24, ge=1, le=100),
     offset: int = Query(0, ge=0),
     generation: int = Query(0, ge=0, le=20),
     forms: Literal["all", "default", "alternative"] = "all",
+    region: str = Query("", max_length=30),
     catalog=Depends(get_catalog),
 ):
     items, total = await catalog.search(
-        q, pokemon_type, sort, limit, offset, generation, forms
+        q, pokemon_type, sort, limit, offset, generation, forms, region=region
     )
     return {"items": items, "total": total}
 

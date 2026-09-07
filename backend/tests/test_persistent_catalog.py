@@ -27,7 +27,7 @@ class PersistentCatalogTests(unittest.TestCase):
             p = await repo.get(25)
             self.assertEqual(
                 (p["weight_kg"], p["height_m"], p["price_cents"], p["stock"]),
-                (6, 0.4, 2990, 15),
+                (6, 0.4, 11200, 15),
             )
             p = await repo.get(10100)
             self.assertEqual(p["species_id"], 26)
@@ -92,3 +92,4 @@ class PersistentCatalogTests(unittest.TestCase):
         result = recommend(candidates, [seed])
         self.assertEqual([p["id"] for p in result], [3, 4, 5, 6])
         self.assertTrue(all(p["reason"] == "sharedType" for p in result))
+

@@ -19,7 +19,7 @@ class FixtureCatalog:
         limit=24,
         offset=0,
         generation=0,
-        forms="all",
+        forms="all", region="",
     ):
         return Catalog(DemoPokemonRepository()).search(
             q, pokemon_type, sort, limit, offset

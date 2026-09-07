@@ -7,7 +7,7 @@ from collections import defaultdict
 import httpx
 from sqlalchemy import text
 
-from .demo_repository import DemoPokemonRepository
+from ..application.pricing import calculate_price, evolution_stage, region_for, REGION_NAMES
 from .postgres_repository import engine
 
 TYPE_NAMES = dict(
@@ -121,7 +121,13 @@ class Importer:
         form = await self.fetch(p["forms"][0]["url"]) if p["forms"] else {}
         abilities = [await self.fetch(a["ability"]["url"]) for a in p["abilities"]]
         data = normalize(p, species, form, abilities)
-        old = DemoPokemonRepository().get(p["id"])
+        generation = await self.fetch(species['generation']['url'])
+        region_resource = await self.fetch(generation['main_region']['url'])
+        chain = await self.fetch(species['evolution_chain']['url']) if species.get('evolution_chain') else None
+        region = region_for(p,species,region_resource['name'])
+        localized_region = names(region_resource['names']) if region == region_resource['name'] else dict(zip(('es','en'),REGION_NAMES[region],strict=True))
+        data.update(region=region,region_names=localized_region,evolution_stage=evolution_stage(chain['chain'],species['id']) if chain else None)
+        offer = calculate_price(data)
         async with engine.begin() as conn:
             await conn.execute(
                 text(
@@ -131,12 +137,14 @@ class Importer:
             )
             await conn.execute(
                 text(
-                    "INSERT INTO offers(pokemon_id,price_cents,stock) VALUES (:id,:price,:stock) ON CONFLICT(pokemon_id) DO NOTHING"
+                    "INSERT INTO offers(pokemon_id,price_cents,stock,base_cents,pricing_version,pricing_breakdown) VALUES (:id,:price,10,:base,:version,CAST(:breakdown AS jsonb)) ON CONFLICT(pokemon_id) DO NOTHING"
                 ),
                 {
                     "id": p["id"],
-                    "price": old.price_cents if old else 2990,
-                    "stock": old.stock if old else 10,
+                    "price": offer["price_cents"],
+                    "base": offer["base_cents"],
+                    "version": offer["pricing_version"],
+                    "breakdown": json.dumps(offer["pricing_breakdown"]),
                 },
             )
 
