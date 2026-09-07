@@ -25,6 +25,7 @@ function pointer(event: PointerEvent) {
   scene.value!.style.setProperty('--dx', `${(event.clientX - r.x - r.width / 2) * 0.025}px`)
   scene.value!.style.setProperty('--dy', `${(event.clientY - r.y - r.height / 2) * 0.025}px`)
 }
+function toggle() { paused.value=!paused.value; reset() }
 function reset() {
   scene.value?.style.setProperty('--dx', '0px')
   scene.value?.style.setProperty('--dy', '0px')
@@ -90,10 +91,7 @@ onUnmounted(() => {
         :aria-label="t(paused ? 'resumeScene' : 'pauseScene')"
         :title="t(paused ? 'resumeScene' : 'pauseScene')"
         :aria-pressed="paused"
-        @click="
-          paused = !paused
-          reset()
-        "
+        @click="toggle"
       >
         <Play v-if="paused" :size="18" /><Pause v-else :size="18" />
       </button>

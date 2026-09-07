@@ -15,6 +15,7 @@ import {
   description,
 } from '@/shared/presentation/format'
 import PokemonImage from '@/components/PokemonImage.vue'
+import StatsPopover from './StatsPopover.vue'
 import RecommendationsPanel from './RecommendationsPanel.vue'
 import type { Pokemon } from '../domain/pokemon'
 const route = useRoute()
@@ -100,6 +101,10 @@ const inCart = computed(
           <dt>{{ t('generationLabel') }}</dt>
           <dd>{{ pokemon.generation ?? t('missingData') }}</dd>
         </div>
+        <div>
+          <dt>{{ t('region') }}</dt>
+          <dd>{{ pokemon.region_names?.[locale] ?? pokemon.region ?? t('missingData') }}</dd>
+        </div>
       </dl>
       <div class="abilities">
         <h2>{{ t('abilities') }}</h2>
@@ -108,6 +113,7 @@ const inCart = computed(
           <small v-if="ability.hidden">· {{ t('hiddenAbility') }}</small></span
         >
       </div>
+      <StatsPopover :key="pokemon.id" :stats="pokemon.stats" />
       <p class="detail-price">{{ money(pokemon.price_cents) }}</p>
       <p class="stock-label">
         {{ pokemon.stock ? t('stock', pokemon.stock) : t('soldOutNow') }}
@@ -125,20 +131,6 @@ const inCart = computed(
         >{{ t('viewCart', { count: inCart }) }} <ArrowRight :size="16"
       /></RouterLink>
       <p class="demo-note">{{ t('demoCatalog') }}</p>
-    </div>
-  </section>
-  <section v-if="pokemon && !loading && !error" class="stats-section">
-    <h2>{{ t('baseStats') }}</h2>
-    <div class="stats-grid">
-      <div v-for="(value, key) in pokemon.stats" :key="key" class="stat">
-        <div>
-          <span>{{ t(String(key)) }}</span
-          ><strong>{{ value }}</strong>
-        </div>
-        <meter min="0" max="255" :value="value" :aria-label="t(String(key))">
-          {{ value }} / 255
-        </meter>
-      </div>
     </div>
   </section>
   <RecommendationsPanel v-if="pokemon && !error" :ids="[pokemon.id]" />

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
-import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag } from 'lucide-vue-next'
+import { ArrowLeft, Minus, Plus, Trash2 } from 'lucide-vue-next'
 import { useCartStore } from '../application/cartStore'
 
 import { money, pokemonName, number } from '@/shared/presentation/format'
@@ -26,7 +26,13 @@ const cart = useCartStore()
     <button class="button primary" @click="cart.hydrate">{{ t('retry') }}</button>
   </div>
   <div v-else-if="!cart.lines.length" class="state-box empty-cart">
-    <ShoppingBag :size="44" />
+    <img
+      class="chansey-empty"
+      src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/113.png"
+      alt="Chansey"
+      width="180"
+      height="180"
+    />
     <h2>{{ t('emptyCart') }}</h2>
     <p>{{ t('emptyCartBody') }}</p>
     <RouterLink class="button primary" to="/catalogo">{{ t('explore') }}</RouterLink>
@@ -77,6 +83,15 @@ const cart = useCartStore()
       </article>
     </div>
     <aside class="cart-summary">
+      <div class="chansey-summary">
+        <img
+          src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/113.png"
+          alt="Chansey"
+          width="86"
+          height="86"
+        />
+        <p>{{ t('chanseyCopy') }}</p>
+      </div>
       <h2>{{ t('summary') }}</h2>
       <div>
         <span>{{ t('subtotal', { units: t('units', cart.count) }) }}</span
@@ -93,3 +108,28 @@ const cart = useCartStore()
   </div>
   <RecommendationsPanel :ids="cart.entries.map((entry) => entry.id)" />
 </template>
+
+<style scoped>
+.chansey-empty {
+  display: block;
+  object-fit: contain;
+  margin: 0 auto 12px;
+}
+.cart-summary .chansey-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.chansey-summary img {
+  flex-shrink: 0;
+  object-fit: contain;
+}
+.chansey-summary p {
+  font-size: 0.78rem;
+  margin: 0;
+  line-height: 1.6;
+}
+</style>

@@ -111,6 +111,7 @@ export const useCartStore = defineStore('cart', () => {
     count,
     total,
     notice,
+    noticeEvent,
     storageWarning,
     dismissNotice,
     add,

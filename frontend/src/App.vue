@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 import { RouterView } from 'vue-router'
 import BaseHeader from './components/BaseHeader.vue'
+import CartNotice from './cart/presentation/CartNotice.vue'
 import BaseFooter from './components/BaseFooter.vue'
 import { onMounted } from 'vue'
 
@@ -21,10 +22,7 @@ onMounted(() => {
     <main id="contenido" class="main-content">
       <RouterView />
     </main>
-    <p v-if="cart.notice" class="cart-notice" role="status">
-      {{ cart.notice }}
-      <button :aria-label="t('close')" @click="cart.dismissNotice()">×</button>
-    </p>
+    <CartNotice :message="cart.notice" :event="cart.noticeEvent" @dismiss="cart.dismissNotice" />
     <p v-if="cart.storageWarning" class="storage-warning" role="alert">{{ cart.storageWarning }}</p>
     <BaseFooter />
   </div>
