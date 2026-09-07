@@ -2,14 +2,28 @@
 import { RouterView } from 'vue-router'
 import BaseHeader from './components/BaseHeader.vue'
 import BaseFooter from './components/BaseFooter.vue'
+import { onMounted } from 'vue'
+import { useCatalogStore } from './pokemon/application/catalogStore'
+import { useCartStore } from './cart/application/cartStore'
+const catalog = useCatalogStore()
+const cart = useCartStore()
+onMounted(() => {
+  void catalog.load()
+})
 </script>
 
 <template>
-  <div style="min-height: 100vh; display: flex; flex-direction: column;">
+  <div class="app-shell">
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
     <BaseHeader />
-    <main style="flex: 1;">
+    <main id="contenido" class="main-content">
       <RouterView />
     </main>
+    <p v-if="cart.notice" class="cart-notice" role="status">
+      {{ cart.notice }}
+      <button aria-label="Cerrar notificación" @click="cart.notice = ''">×</button>
+    </p>
+    <p v-if="cart.storageWarning" class="storage-warning" role="alert">{{ cart.storageWarning }}</p>
     <BaseFooter />
   </div>
 </template>

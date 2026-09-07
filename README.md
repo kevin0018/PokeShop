@@ -1,165 +1,124 @@
 # PokeShop
 
-Proyecto de e-commerce de Pokémon implementado con Domain Driven Design (DDD), Bounded Context y Arquitectura Hexagonal.
+[English](README.md) · [Español](README.es.md)
 
-## Estructura del Proyecto
+A Pokémon shop demo built with Vue 3, TypeScript and FastAPI. Explore a Kanto
+catalog, filter by name, Pokédex number or type, inspect a Pokémon and keep a
+cart across browser reloads. No accounts, checkout or real payments yet.
 
-El proyecto está organizado siguiendo los principios de DDD con Bounded Contexts bien definidos:
+## Run locally with Docker
 
-### Backend (Python/FastAPI)
-```
-backend/
-├── main.py                    # Punto de entrada de la aplicación
-├── pyproject.toml            # Configuración y dependencias
-├── .env.example              # Variables de entorno de ejemplo
-└── src/
-    ├── pokemon/              # Bounded Context: Gestión de Pokémon
-    │   ├── domain/
-    │   ├── application/
-    │   ├── infrastructure/
-    │   └── presentation/
-    ├── user/                 # Bounded Context: Gestión de Usuarios
-    │   ├── domain/
-    │   ├── application/
-    │   ├── infrastructure/
-    │   └── presentation/
-    └── shared/               # Código compartido entre contextos
-        ├── domain/
-        ├── infrastructure/
-        └── presentation/
-```
-
-### Frontend (Vue.js/TypeScript)
-```
-frontend/
-├── src/
-│   ├── App.vue               # Componente raíz de la aplicación
-│   ├── main.ts               # Punto de entrada de la aplicación
-│   ├── pokemon/              # Bounded Context: Gestión de Pokémon
-│   │   ├── domain/
-│   │   ├── application/
-│   │   ├── infrastructure/
-│   │   └── presentation/
-│   ├── cart/                 # Bounded Context: Carrito de Compras
-│   │   ├── domain/
-│   │   ├── application/
-│   │   ├── infrastructure/
-│   │   └── presentation/
-│   ├── user/                 # Bounded Context: Gestión de Usuarios
-│   │   ├── domain/
-│   │   ├── application/
-│   │   ├── infrastructure/
-│   │   └── presentation/
-│   ├── shared/               # Código compartido entre contextos
-│   │   ├── domain/
-│   │   ├── infrastructure/
-│   │   └── presentation/
-│   ├── components/           # Componentes Vue reutilizables
-│   ├── views/                # Páginas de la aplicación
-│   ├── router/               # Configuración de rutas
-│   └── stores/               # Estados globales (Pinia)
-├── package.json              # Dependencias y scripts de pnpm
-├── vite.config.ts            # Configuración de Vite
-├── tailwind.config.js        # Configuración de TailwindCSS
-└── tsconfig.json             # Configuración de TypeScript
-```
-
-## Arquitectura por Bounded Context
-
-Cada Bounded Context sigue la arquitectura hexagonal con las siguientes capas:
-
-- **Domain**: Entidades, Value Objects, Servicios de Dominio y Reglas de Negocio
-- **Application**: Casos de Uso, Commands, Queries y Application Services  
-- **Infrastructure**: Implementaciones de repositorios, APIs externas, base de datos
-- **Presentation**: Controllers, DTOs, Interfaces de usuario
-
-## Bounded Contexts Definidos
-
-### 1. Pokemon Context
-Responsable de la gestión del catálogo de Pokémon, sus características, tipos, evoluciones, etc.
-
-### 2. User Context  
-Gestiona el registro, autenticación, perfiles de usuario y preferencias.
-
-### 3. Cart Context (Frontend)
-Maneja el carrito de compras, añadir/quitar productos, cálculos de precio.
-
-### 4. Shared Context
-Contiene código compartido como Value Objects comunes, servicios de infraestructura compartidos, etc.
-
-## Tecnologías Utilizadas
-
-### Backend
-- **Python 3.11+**
-- **FastAPI** - Framework web moderno y rápido
-- **Pydantic** - Validación de datos y settings
-
-### Frontend  
-- **Vue.js 3** - Framework JavaScript progresivo
-- **TypeScript** - Superset tipado de JavaScript
-- **Vite** - Build tool y dev server
-- **TailwindCSS** - Framework CSS utility-first
-- **Pinia** - Store management
-- **Vue Router** - Routing
-
-
-## Desarrollo con Docker
-
-Requisito: Docker Desktop con contenedores Linux y Docker Compose v2.
-No necesitas instalar Python, Node.js ni pnpm en el host.
-Si un puerto est� ocupado, copia `.env.example` a `.env` en la ra�z y cambia
-`FRONTEND_PORT` o `BACKEND_PORT`; las URLs siguientes muestran los valores por defecto.
-Compose adapta CORS autom�ticamente al puerto del frontend.
+Requires Docker Desktop with Linux containers and Docker Compose v2.
 
 ```sh
 docker compose up --build --wait
 ```
 
-- Frontend Vue/Vite: http://localhost:5173
-- API FastAPI: http://localhost:8000
-- Swagger: http://localhost:8000/docs
-- Health check: http://localhost:8000/health
+- Frontend: http://localhost:5173
+- API documentation: http://localhost:8000/docs
+- API health: http://localhost:8000/health
 
-Compose arranca frontend, backend, PostgreSQL 16 y Redis 7, esperando a que
-sus health checks pasen. Los puertos web solo se publican en localhost;
-PostgreSQL y Redis son accesibles dentro de la red de Compose como `db:5432`
-y `redis:6379`. Sus datos se conservan en vol�menes entre reinicios.
-Las credenciales de Compose son exclusivamente para desarrollo local.
+If a port is occupied, copy `.env.example` to `.env` at the repository root and
+change `FRONTEND_PORT` or `BACKEND_PORT`. CORS follows the frontend port.
+The `.env` file is ignored by Git. Source edits reload automatically, including
+on Windows/WSL. Vue dependencies live in a separate Linux volume.
 
-El c�digo se monta en los contenedores y se recarga al editarlo. Se activa
-polling para detectar cambios tambi�n en Windows/WSL. Las dependencias de
-Vue se guardan en un volumen Linux separado del `node_modules` del host.
-El frontend usa pnpm 10.10.0 y su lockfile; Python conserva Poetry y su lockfile.
+## What is implemented
 
-El backend est� en fase de estructura inicial: actualmente solo implementa
-`/health` y la documentaci�n de FastAPI. Los contextos contienen marcadores
-`.keep`; todav�a no hay rutas de usuarios/Pok�mon, modelos ni migraciones.
-PostgreSQL y Redis quedan preparados mediante `DATABASE_URL` y `REDIS_URL`,
-pero el health check de la API no verifica conexiones a estos servicios.
-No se crean tablas ni se cargan datos autom�ticamente.
+- Twelve demo Pokémon with artwork, types, descriptions, fictional EUR prices
+  and availability. The catalog is served by FastAPI, not embedded in the UI.
+- Search by name or number (`#025`), type filters and sorting by price/name/number.
+- Product detail routes, stock-aware cart controls, integer-cent totals and empty states.
+- Versioned local storage containing only IDs and quantities. Restored quantities
+  are reconciled with catalog stock; prices always come from the current catalog.
+- Loading, API failure/retry, missing product/page and image fallback states.
+- Responsive desktop/mobile layout, labeled controls, keyboard focus and reduced motion.
+
+The catalog uses a **read-only demo repository** with deterministic data. PostgreSQL
+and Redis are available in Compose but are not used by the catalog yet. There are
+no models, migrations, automatic seeds, stock reservations or order endpoints.
+The cart is local to a browser; it is not an authoritative order or stock reservation.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  UI[Vue views] --> Stores[Pinia application stores]
+  Stores --> HTTP[HTTP repository]
+  HTTP --> API[FastAPI routes and DTOs]
+  API --> Catalog[Catalog use cases]
+  Catalog --> Port[PokemonRepository port]
+  Demo[Read-only demo adapter] -. implements .-> Port
+  Stores --> Storage[Versioned local storage adapter]
+```
+
+Backend domain entities and repository ports do not depend on FastAPI. Application
+use cases implement filtering and pagination; the presentation adapter composes
+the demo repository and validates the HTTP contract. On the frontend, domain types,
+filtering/cart logic, HTTP/storage adapters and Vue views are separated by context.
+The frontend loads the small demo catalog once and filters it locally; the API also
+supports server-side filtering and pagination for a future larger catalog.
+
+```text
+backend/src/pokemon/{domain,application,infrastructure,presentation}
+frontend/src/pokemon/{domain,application,infrastructure,presentation}
+frontend/src/cart/{domain,application,infrastructure,presentation}
+frontend/src/shared/presentation/  # formatting
+```
+
+The `user` contexts remain placeholders for a later accounts feature.
+
+## Stack and resources
+
+Python 3.12 / Poetry 2.1.3; Vue 3 / TypeScript / Vite 7 / Pinia / Vue Router /
+Tailwind CSS 4; Node 22 / pnpm 10.10.0. Both dependency lockfiles are committed.
+
+| Container | Memory limit |
+| --- | --- |
+| Frontend | 1 GiB |
+| Backend | 512 MiB |
+| PostgreSQL 16 | 256 MiB |
+| Redis 7 | 128 MiB |
+
+Total: **1,920 MiB**, without additional container swap. Redis limits cached data
+to 64 MiB with LRU eviction. These limits exclude Docker Desktop and image builds.
+See [development resources](docs/development.md). Only web ports are published,
+bound to localhost. Database/cache data persist in named volumes.
+
+## Commands and verification
 
 ```sh
-# Estado y logs
 docker compose ps
+docker stats --no-stream
 docker compose logs -f
 
-# Verificar dentro de los contenedores
 docker compose exec frontend pnpm build
+docker compose exec frontend pnpm test:unit --run
+docker compose exec frontend pnpm exec eslint .
 docker compose exec backend python -m unittest discover -s tests -v
 
-# A�adir una dependencia de Vue y actualizar el lockfile
-docker compose exec frontend pnpm add <paquete>
-
-# Tras modificar dependencias o Dockerfiles
+docker compose exec frontend pnpm add <package>
 docker compose up --build --wait
 
-# Detener el stack conservando los datos
+# Stop without deleting data
 docker compose down
 ```
 
-Este Compose usa servidores de desarrollo, no es una configuraci�n de producci�n.
-No utilices `docker compose down -v` si quieres conservar los datos: elimina
-los vol�menes de PostgreSQL, Redis y dependencias del frontend.
+Verified: 9 backend tests, 7 frontend unit tests, type checking, production build,
+ESLint and browser checks for search, filtering, detail, cart quantities and reload
+persistence. Desktop and mobile layouts were inspected in the browser.
+A Playwright regression scenario is included under `frontend/e2e`; running it
+requires installed browser binaries (see the frontend README).
 
-Para desarrollo sin Docker, consulta [frontend/README.md](frontend/README.md)
-y [backend/README.md](backend/README.md).
+Local setup without Docker: [frontend](frontend/README.md), [backend](backend/README.md).
+For local frontend use, set `API_PROXY_TARGET` if the API is not on port 8000.
+
+## Scope and attribution
+
+Compose runs development servers; no production deployment is configured.
+`docker compose down -v` deletes database, Redis and frontend dependency volumes.
+
+Artwork is loaded from [PokéAPI sprites](https://github.com/PokeAPI/sprites) and
+requires network access; catalog data does not depend on the external PokéAPI service.
+Pokémon and character artwork belong to their respective rights holders.
+This is an independent educational demo with fictional prices and stock.

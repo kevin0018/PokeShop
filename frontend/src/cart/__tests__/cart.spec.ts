@@ -1,0 +1,90 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
+import { nextTick } from 'vue'
+import { parseCart } from '../domain/cart'
+import { useCartStore } from '../application/cartStore'
+import { useCatalogStore } from '@/pokemon/application/catalogStore'
+
+const pokemon = {
+  id: 25,
+  name: 'Pikachu',
+  types: ['electrico'],
+  price_cents: 2990,
+  stock: 2,
+  description: '',
+  image_url: '',
+}
+beforeEach(() => {
+  localStorage.clear()
+  setActivePinia(createPinia())
+  vi.restoreAllMocks()
+})
+function loadCatalog() {
+  const catalog = useCatalogStore()
+  catalog.items = [{ ...pokemon }]
+  catalog.loaded = true
+}
+
+describe('cart', () => {
+  it('discards malformed storage, invalid quantities and duplicate IDs', () => {
+    expect(parseCart('{broken')).toEqual([])
+    expect(
+      parseCart(
+        JSON.stringify([
+          { id: 25, quantity: 2, price_cents: 1 },
+          { id: 25, quantity: 1 },
+          { id: 7, quantity: -1 },
+          null,
+        ]),
+      ),
+    ).toEqual([{ id: 25, quantity: 2 }])
+  })
+  it('adds, totals in cents and enforces available stock', () => {
+    loadCatalog()
+    const cart = useCartStore()
+    cart.add(25)
+    cart.add(25)
+    cart.add(25)
+    expect(cart.count).toBe(2)
+    expect(cart.total).toBe(5980)
+    cart.setQuantity(25, 1)
+    expect(cart.total).toBe(2990)
+    cart.setQuantity(25, -1)
+    expect(cart.count).toBe(1)
+    cart.remove(25)
+    expect(cart.count).toBe(0)
+  })
+  it('restores IDs and quantities but takes prices and stock from the catalog', async () => {
+    localStorage.setItem(
+      'pokeshop.cart.v1',
+      JSON.stringify([
+        { id: 25, quantity: 80 },
+        { id: 999, quantity: 1 },
+      ]),
+    )
+    const cart = useCartStore()
+    loadCatalog()
+    await nextTick()
+    expect(cart.count).toBe(2)
+    expect(cart.total).toBe(5980)
+    expect(JSON.parse(localStorage.getItem('pokeshop.cart.v1')!)).toEqual([{ id: 25, quantity: 2 }])
+  })
+  it('keeps the cart usable when storage is unavailable', () => {
+    loadCatalog()
+    const cart = useCartStore()
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('Quota exceeded')
+    })
+    cart.add(25)
+    expect(cart.count).toBe(1)
+    expect(cart.storageWarning).not.toBe('')
+  })
+  it('does not add sold out or unknown products', () => {
+    loadCatalog()
+    useCatalogStore().items[0]!.stock = 0
+    const cart = useCartStore()
+    cart.add(25)
+    cart.add(999)
+    expect(cart.count).toBe(0)
+  })
+})

@@ -9,6 +9,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
+from src.pokemon.presentation.pokemon_routes import router as pokemon_router
+
 
 def create_app() -> FastAPI:
     """Create and configure FastAPI application."""
@@ -53,7 +55,7 @@ def create_app() -> FastAPI:
         """Health check endpoint."""
         return {"status": "healthy", "service": "pokemon-ecommerce-api"}
 
-    # Register business routers here when their implementations are added.
+    app.include_router(pokemon_router, prefix="/api/v1/pokemon", tags=["pokemon"])
 
     return app
 
