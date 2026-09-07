@@ -86,7 +86,7 @@ async function language(value: string) {
   await flushPromises()
 }
 async function appearance(value: string) {
-  wrapper.findAllComponents(AppSelect)[1]!.vm.$emit('update:modelValue', value)
+  await wrapper.get(value === 'system' ? '.theme-auto' : '.pokemon-switch').trigger('click')
   await flushPromises()
 }
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Clock3, X } from 'lucide-vue-next'
+import { X } from 'lucide-vue-next'
 const props = defineProps<{ message: string; event: object | null }>()
 const emit = defineEmits<{ dismiss: [] }>(),
   { t } = useI18n()
@@ -58,14 +58,8 @@ function blur(event: FocusEvent) {
     @focusin="focused = true"
     @focusout="blur"
   >
-    <span class="notice-clock" aria-hidden="true"
-      ><Clock3 :size="18" /><svg
-        :key="sequence"
-        class="notice-progress"
-        :class="{ paused }"
-        viewBox="0 0 36 36"
-      >
-        <circle cx="18" cy="18" r="16" /></svg></span
+    <span class="notice-disc" aria-hidden="true"
+      ><span :key="sequence" class="notice-pie" :class="{ paused }" /></span
     ><span>{{ message }}</span
     ><button class="icon-button" :aria-label="t('close')" @click="emit('dismiss')">
       <X :size="18" />
@@ -73,48 +67,51 @@ function blur(event: FocusEvent) {
   </div>
 </template>
 <style>
+@property --notice-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 360deg;
+}
 .cart-notice {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
-.notice-clock {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
+.notice-disc {
+  width: 25px;
+  height: 25px;
   flex-shrink: 0;
+  border-radius: 50%;
+  background: #ffffff26;
+  overflow: hidden;
 }
-.notice-progress {
-  position: absolute;
-  inset: 0;
-  width: 36px;
-  height: 36px;
-  transform: rotate(-90deg);
+.notice-pie {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(currentColor var(--notice-angle), transparent 0);
+  animation: notice-slice 3s linear forwards;
 }
-.notice-progress circle {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-dasharray: 100.53;
-  stroke-dashoffset: 0;
-  animation: notice-countdown 3s linear forwards;
-}
-.notice-progress.paused circle {
+.notice-pie.paused {
   animation-play-state: paused;
 }
 .cart-notice .icon-button {
   flex-shrink: 0;
 }
-@keyframes notice-countdown {
+@keyframes notice-slice {
+  from {
+    --notice-angle: 360deg;
+  }
   to {
-    stroke-dashoffset: 100.53;
+    --notice-angle: 0deg;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .notice-progress {
-    display: none;
+  .notice-pie {
+    animation: none;
+    background: currentColor;
+    opacity: 0.65;
   }
 }
 </style>
