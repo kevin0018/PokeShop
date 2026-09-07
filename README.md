@@ -6,7 +6,7 @@
 
 A Pokémon shop demo with a full-width Kanto starter collage, a complete imported catalog, and a persistent cart. Built with Vue 3, TypeScript and FastAPI. Prices and stock are fictional; accounts, payments and real orders are outside this phase.
 
-[Repository](https://github.com/kevin0018/PokeShop) · [Live demo](https://pokeshop-app.duckdns.org) · [API documentation](http://localhost:8000/docs)
+[Repository](https://github.com/kevin0018/PokeShop) · [Live demo](https://pokeshop-app.duckdns.org) · [Local API documentation](http://localhost:8000/docs)
 
 [![Actual PokeShop interface](docs/home.png)](docs/home.png)
 
@@ -172,6 +172,8 @@ Integration tests require the migration and initial sync above. Browser tests us
 ## Deployment
 
 **Live on the Contabo VPS: [https://pokeshop-app.duckdns.org](https://pokeshop-app.duckdns.org). HTTPS is enabled with automatic certificate renewal.**
+
+HTTP requests to the domain or server IP redirect to the HTTPS domain. Certificate renewal was verified with a successful Certbot dry run; three targeted Chromium regressions also passed over HTTPS (catalog/cart recovery, language/theme persistence and cart preview). Browser carts are stored per origin, so a cart saved on localhost or the IP does not transfer to the domain.
 
 The standalone `compose.production.yaml` serves the compiled Vue frontend with Nginx and runs FastAPI without reload. Host Nginx forwards to a loopback-only port; `/api` stays on the same origin, and Vue deep links fall back to `index.html`. PostgreSQL and the API expose no host ports. The existing website remains running.
 
