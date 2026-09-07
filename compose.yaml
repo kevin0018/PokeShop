@@ -3,6 +3,8 @@ name: pokeshop
 services:
   db:
     image: postgres:16-alpine
+    mem_limit: 256m
+    memswap_limit: 256m
     environment:
       POSTGRES_DB: pokeshop_db
       POSTGRES_USER: postgres
@@ -17,7 +19,9 @@ services:
 
   redis:
     image: redis:7-alpine
-    command: ["redis-server", "--appendonly", "yes"]
+    mem_limit: 128m
+    memswap_limit: 128m
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "64mb", "--maxmemory-policy", "allkeys-lru"]
     volumes:
       - redis_data:/data
     healthcheck:
@@ -28,6 +32,8 @@ services:
 
   backend:
     build: ./backend
+    mem_limit: 512m
+    memswap_limit: 512m
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     environment:
       ENVIRONMENT: development
@@ -54,6 +60,8 @@ services:
 
   frontend:
     build: ./frontend
+    mem_limit: 1g
+    memswap_limit: 1g
     command: ["sh", "-c", "CI=true pnpm install --frozen-lockfile && pnpm dev --host 0.0.0.0 --port 5173 --strictPort"]
     environment:
       API_PROXY_TARGET: http://backend:8000
