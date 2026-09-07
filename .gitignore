@@ -3,6 +3,9 @@
 venv/
 env/
 .env/
+.env
+.env.*
+!.env.example
 
 # Python compiled files
 __pycache__/

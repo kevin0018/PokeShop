@@ -1,6 +1,10 @@
 # frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+Vue 3 frontend for PokeShop. Use Node.js 22.12+ and pnpm 10.10.0 (pinned in `package.json`).
+
+The complete development stack runs from the repository root with `docker compose up --build --wait`. Open http://localhost:5173. See the root README for Docker commands.
+
+For local development, install pnpm 10.10.0 before running the commands below. `/api` requests are proxied to http://localhost:8000; Docker sets `API_PROXY_TARGET=http://backend:8000`.
 
 ## Recommended IDE Setup
 
@@ -17,48 +21,48 @@ See [Vite Configuration Reference](https://vite.dev/config/).
 ## Project Setup
 
 ```sh
-npm install
+pnpm install --frozen-lockfile
 ```
 
 ### Compile and Hot-Reload for Development
 
 ```sh
-npm run dev
+pnpm dev
 ```
 
 ### Type-Check, Compile and Minify for Production
 
 ```sh
-npm run build
+pnpm build
 ```
 
 ### Run Unit Tests with [Vitest](https://vitest.dev/)
 
 ```sh
-npm run test:unit
+pnpm test:unit
 ```
 
 ### Run End-to-End Tests with [Playwright](https://playwright.dev)
 
 ```sh
 # Install browsers for the first run
-npx playwright install
+pnpm exec playwright install
 
 # When testing on CI, must build the project first
-npm run build
+pnpm build
 
 # Runs the end-to-end tests
-npm run test:e2e
+pnpm test:e2e
 # Runs the tests only on Chromium
-npm run test:e2e -- --project=chromium
+pnpm test:e2e --project=chromium
 # Runs the tests of a specific file
-npm run test:e2e -- tests/example.spec.ts
+pnpm test:e2e tests/example.spec.ts
 # Runs the tests in debug mode
-npm run test:e2e -- --debug
+pnpm test:e2e --debug
 ```
 
 ### Lint with [ESLint](https://eslint.org/)
 
 ```sh
-npm run lint
+pnpm lint
 ```
