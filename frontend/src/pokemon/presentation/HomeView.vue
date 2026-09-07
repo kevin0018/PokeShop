@@ -25,7 +25,10 @@ function pointer(event: PointerEvent) {
   scene.value!.style.setProperty('--dx', `${(event.clientX - r.x - r.width / 2) * 0.025}px`)
   scene.value!.style.setProperty('--dy', `${(event.clientY - r.y - r.height / 2) * 0.025}px`)
 }
-function toggle() { paused.value=!paused.value; reset() }
+function toggle() {
+  paused.value = !paused.value
+  reset()
+}
 function reset() {
   scene.value?.style.setProperty('--dx', '0px')
   scene.value?.style.setProperty('--dy', '0px')
@@ -171,6 +174,7 @@ onUnmounted(() => {
 .pikachu-scene {
   position: relative;
   isolation: isolate;
+  animation: scene-arrive 0.8s ease-out both;
   aspect-ratio: 1;
   --dx: 0px;
   --dy: 0px;
@@ -205,7 +209,7 @@ onUnmounted(() => {
 }
 .pikachu-float {
   position: absolute;
-  inset: 0;
+  inset: 5%;
   animation: pika-float 5s ease-in-out infinite;
   animation-play-state: paused;
 }
@@ -307,6 +311,16 @@ onUnmounted(() => {
   font-size: 0.65rem;
   color: var(--muted-strong);
 }
+@keyframes scene-arrive {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
 @keyframes pika-float {
   50% {
     transform: translateY(-12px) rotate(2deg);
@@ -361,6 +375,7 @@ onUnmounted(() => {
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .pikachu-scene,
   .pikachu-float,
   .electric-spark {
     animation: none;

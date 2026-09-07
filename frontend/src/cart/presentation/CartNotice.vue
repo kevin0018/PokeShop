@@ -26,6 +26,16 @@ watch(
   },
   { immediate: true },
 )
+watch(
+  () => props.message,
+  (value) => {
+    if (!value) {
+      clearTimeout(timer)
+      hovering.value = false
+      focused.value = false
+    }
+  },
+)
 watch(paused, (value) => {
   if (value) {
     clearTimeout(timer)

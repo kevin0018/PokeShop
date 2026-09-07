@@ -69,6 +69,7 @@ export const useThemeStore = defineStore('theme', () => {
     const y = origin ? origin.y + origin.height / 2 : 0
     const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))
     const active = doc.startViewTransition(async () => {
+      if (token !== revision) return
       preference.value = value
       await nextTick()
     })

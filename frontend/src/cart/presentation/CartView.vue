@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 import { ArrowLeft, Minus, Plus, Trash2 } from 'lucide-vue-next'
@@ -8,6 +9,9 @@ import { money, pokemonName, number } from '@/shared/presentation/format'
 import PokemonImage from '@/components/PokemonImage.vue'
 import RecommendationsPanel from '@/pokemon/presentation/RecommendationsPanel.vue'
 const cart = useCartStore()
+onMounted(() => {
+  if (!cart.loading) void cart.hydrate()
+})
 </script>
 <template>
   <RouterLink class="back-link" to="/catalogo"

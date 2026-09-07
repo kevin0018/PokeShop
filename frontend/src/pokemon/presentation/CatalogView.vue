@@ -124,6 +124,14 @@ request<typeof metadata.value>('/metadata')
 </template>
 
 <style>
+.catalog-section .catalog-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+.catalog-section .search-field {
+  flex: 1 1 260px;
+}
 .catalog-bento {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -150,6 +158,8 @@ request<typeof metadata.value>('/metadata')
   height: auto;
 }
 .catalog-bento .card-art img {
+  width: 80%;
+  padding: 18px;
   height: 100%;
   max-height: 100%;
   object-fit: contain;

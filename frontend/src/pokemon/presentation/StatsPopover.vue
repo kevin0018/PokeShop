@@ -7,7 +7,8 @@ defineProps<{ stats?: Record<string, number> }>()
 const { t } = useI18n(),
   open = ref(false),
   pinned = ref(false),
-  trigger = ref<HTMLButtonElement>()
+  trigger = ref<HTMLButtonElement>(),
+  closeButton = ref<HTMLButtonElement>()
 let timer: ReturnType<typeof setTimeout> | undefined,
   suppressed = false,
   hovering = false
@@ -17,7 +18,10 @@ function enter() {
   clearTimeout(timer)
   if (fine() && !suppressed) open.value = true
 }
-function blur() { suppressed=false; schedule() }
+function blur() {
+  suppressed = false
+  schedule()
+}
 function focus() {
   if (!suppressed && fine()) open.value = true
 }
@@ -46,6 +50,7 @@ function click() {
   suppressed = false
   pinned.value = true
   open.value = true
+  void nextTick(() => closeButton.value?.focus())
 }
 function close(restore = false) {
   clearTimeout(timer)
@@ -89,7 +94,12 @@ onUnmounted(() => clearTimeout(timer))
       >
         <div class="stats-popover-heading">
           <h2>{{ t('baseStats') }}</h2>
-          <button class="icon-button" :aria-label="t('close')" @click="close(true)">
+          <button
+            ref="closeButton"
+            class="icon-button"
+            :aria-label="t('close')"
+            @click="close(true)"
+          >
             <X :size="18" />
           </button>
         </div>
