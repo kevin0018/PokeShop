@@ -1,18 +1,13 @@
 """PostgreSQL catalog adapter. Offers never enter the upstream payload."""
-import os
 
+from src.database import database_url
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from src.pokemon.application.recommendations import recommend
 
-engine = create_async_engine(
-    os.getenv(
-        "DATABASE_URL", "postgresql+asyncpg://postgres:pokeshop_local@db/pokeshop_db"
-    ),
-    pool_size=4,
-    max_overflow=0,
-)
+engine = create_async_engine(database_url(), pool_size=4, max_overflow=0)
+
 FEATURED = [143, 448, 10100, 25, 133, 722]
 
 

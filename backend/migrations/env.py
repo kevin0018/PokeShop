@@ -1,6 +1,6 @@
 import asyncio
-import os
 
+from src.database import database_url
 from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
 
@@ -12,7 +12,7 @@ def migrate(connection):
 
 
 async def run():
-    engine = create_async_engine(os.environ["DATABASE_URL"])
+    engine = create_async_engine(database_url())
     async with engine.connect() as connection:
         await connection.run_sync(migrate)
     await engine.dispose()

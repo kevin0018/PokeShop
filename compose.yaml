@@ -8,7 +8,7 @@ services:
     environment:
       POSTGRES_DB: pokeshop_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: pokeshop_local
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in the root .env}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -37,7 +37,11 @@ services:
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     environment:
       ENVIRONMENT: development
-      DATABASE_URL: postgresql+asyncpg://postgres:pokeshop_local@db:5432/pokeshop_db
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: pokeshop_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in the root .env}
       REDIS_URL: redis://redis:6379/0
       ALLOWED_ORIGINS: '["http://localhost:${FRONTEND_PORT:-5173}", "http://127.0.0.1:${FRONTEND_PORT:-5173}"]'
       ALLOWED_HOSTS: '["localhost", "127.0.0.1", "backend"]'
