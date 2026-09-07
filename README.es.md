@@ -4,33 +4,39 @@
 
 ![Despliegue: demo local](https://img.shields.io/badge/despliegue-demo_local-71549a)
 
-Una tienda Pokémon de demostración con portada promocional basada en el peso, catálogo completo importado y carrito persistente. Creada con Vue 3, TypeScript y FastAPI. Precios y stock ficticios; las cuentas, pagos y pedidos reales quedan fuera de esta fase.
+Una tienda Pokémon de demostración con portada promocional con Pikachu animado en 2D, catálogo completo importado y carrito persistente. Creada con Vue 3, TypeScript y FastAPI. Precios y stock ficticios; las cuentas, pagos y pedidos reales quedan fuera de esta fase.
 
 [Demo local](http://localhost:5173) · [Documentación de la API](http://localhost:8000/docs)
 
 [![Interfaz real de PokeShop](docs/home.png)](docs/home.png)
 
+[Vista del catálogo](docs/catalog.png) · [Vista del carrito](docs/cart.png)
+
 ## Funcionalidades
 
-- `/`: seis destacados en un bento cuyo tamaño representa categorías de peso real: ligero ≤ 10 kg, medio ≤ 100 kg y pesado > 100 kg. Los accesos por generación abren el catálogo filtrado.
-- `/catalogo`: búsqueda en servidor, filtros por tipo/generación/forma, orden por número/nombre/precio/peso y páginas de 24. Filtros y página se guardan en la URL; las peticiones obsoletas se cancelan.
-- `/pokemon/:id`: número de especie, nombre diferenciador de forma, descripción localizada, kg/metros, habilidades y seis estadísticas base etiquetadas.
+- `/`: escena asimétrica de Pikachu, control de pausa y accesos por región. La animación se detiene fuera de pantalla, con la pestaña oculta y con movimiento reducido.
+- `/catalogo`: los 24 resultados usan un bento CSS Grid por altura (≤1 m: 2×1; ≤2 m: 3×1; >2 m: 3×2 sobre seis columnas en escritorio), sin reordenar. Dos columnas en tablet y una en móvil. El panel de filtros contiene tipo, región de origen, generación, forma y orden; Aplicar actualiza la URL y reinicia la página, Cancelar descarta los cambios.
+- `/pokemon/:id`: biología localizada, dimensiones, origen y habilidades. Las estadísticas se abren con hover, foco de teclado o toque; un clic fija el popover y Escape, pulsación fuera o Cerrar lo cierran.
 - `/carrito`: IDs y cantidades sobreviven a las recargas. Las entidades son independientes de las páginas del catálogo; los errores de red no borran la selección ni se interpretan como falta de stock.
 - Cuatro recomendaciones disponibles priorizan tipos compartidos, después generación y proximidad de precio. No repiten especie y excluyen las especies seleccionadas. El carrito vacío muestra destacados.
-- Español/inglés con Vue I18n, selectores accesibles de Reka UI, iconos Lucide, temas claro/oscuro/sistema y revelación circular de 350 ms para cambios manuales. El movimiento reducido y los cambios automáticos del sistema omiten la animación; los navegadores sin soporte usan un fundido breve.
+- Español/inglés con Vue I18n, selectores accesibles de Reka UI, iconos Lucide, temas claro/oscuro/sistema y revelación circular de 700 ms para cambios manuales. El movimiento reducido y los cambios automáticos del sistema omiten la animación; los navegadores sin soporte transicionan los colores durante 300 ms, sin atenuar la página.
+
+Chansey acompaña el resumen y el carrito vacío. Los avisos de acciones duran tres segundos, se pausan con hover/foco y se reinician con cada acción. Los errores de almacenamiento permanecen visibles. Espeon y Umbreon identifican los temas claro y oscuro.
 
 ## Ejecución local
 
 Requiere Docker Desktop con contenedores Linux y Compose v2.
 
 ```sh
+cp .env.example .env
+# Configura POSTGRES_PASSWORD en .env antes de arrancar
 docker compose up --build --wait
 docker compose exec backend alembic upgrade head
 docker compose exec backend python -m src.pokemon.infrastructure.sync
 ```
 
 Abre http://localhost:5173. Salud de la API: http://localhost:8000/health.
-Si un puerto está ocupado, copia `.env.example` a `.env` y cambia `FRONTEND_PORT` o `BACKEND_PORT`. Este entorno de desarrollo usa `FRONTEND_PORT=5174`; ese ajuste local no se incluye en Git. CORS sigue el puerto configurado.
+Si un puerto está ocupado, edita `.env` y cambia `FRONTEND_PORT` o `BACKEND_PORT`. Este entorno de desarrollo usa `FRONTEND_PORT=5174`; ese ajuste local no se incluye en Git. CORS sigue el puerto configurado.
 
 Los cambios de código se recargan automáticamente, también en Windows/WSL. Las dependencias del frontend viven en un volumen Linux y utilizan **solo pnpm**. La primera importación requiere internet; después la navegación consulta PostgreSQL. Las ilustraciones siguen siendo remotas.
 
@@ -51,20 +57,41 @@ docker compose exec backend python -m src.pokemon.infrastructure.sync --refresh
 
 Se ejecutan como máximo cuatro peticiones HTTP simultáneas, con tres intentos por recurso y espera limitada entre intentos. Cada producto completo se confirma independientemente. Los fallos se notifican y producen una salida no exitosa; las filas ya importadas permanecen. Repetir tras una interrupción reutiliza recursos en caché y actualiza los datos biológicos sin duplicarlos. El importador no borra entradas ausentes en origen.
 
-`pokemon` guarda datos biológicos; `offers`, valores comerciales. Se conservan los precios y stock de los 12 originales. Las ofertas nuevas empiezan en **29,90 € y 10 unidades ficticias**; una sincronización nunca sobrescribe ofertas existentes. `api_cache` conserva respuestas HTTP y fechas en el volumen de la base de datos. Ejecuta el importador dentro del contenedor backend existente, como indican los comandos anteriores.
+`pokemon` guarda biología; `offers`, base en céntimos, precio, stock, versión de política y desglose. Las 1.351 ofertas se recalcularon con `classic-v1`, conservando el stock. Los nuevos productos reciben la política vigente y 10 unidades ficticias; las sincronizaciones biológicas posteriores conservan ofertas existentes. `api_cache` persiste respuestas de origen en PostgreSQL.
+
+## Regiones y precios ficticios
+
+La región indica el origen de especie o forma, no todos los lugares donde se encuentra. Se usa la región principal de su generación, con excepciones para formas de Alola/Galar/Hisui/Paldea. Wyrdeer, Kleavor, Ursaluna, Basculegion, Sneasler, Overqwil y Enamorus proceden explícitamente de Hisui. La etapa evolutiva es la profundidad en la cadena de especies (raíz = 1); Mega/Gigamax heredan la etapa de su especie.
+
+```text
+precio = 30 € × (1 + 0,05 × peso_kg) × (1 + 0,10 × (etapa − 1)) × factor generación × factor región
+```
+
+Factores de generación 1–9: 1,80; 1,70; 1,60; 1,50; 1,40; 1,30; 1,20; 1,10; 1,00. Factores regionales: Kanto 1,45; Johto 1,40; Hoenn 1,35; Sinnoh 1,30; Teselia 1,25; Kalos 1,20; Alola 1,15; Galar 1,10; Hisui 1,05; Paldea 1,00. Peso limitado a 0–1.000 kg. Si faltan peso/etapa se usan 0/1 y los factores desconocidos son neutros, notificándolo en la previsualización. Aritmética decimal y redondeo al múltiplo de 0,10 € más cercano (mitades hacia arriba). El número de Pokédex no influye.
+
+Ejemplos verificados: Bulbasaur 105,30 €, Metapod 128,80 €, Charizard 519,10 €, Venusaur 563,80 €. Son precios ficticios de colección, no valoraciones de mercado.
+
+```sh
+# Solo previsualizar (opción predeterminada)
+docker compose exec backend python -m src.pokemon.infrastructure.reprice
+# Aplicar todos los precios en una transacción; conserva el stock
+docker compose exec backend python -m src.pokemon.infrastructure.reprice --apply
+```
+
+El `.env` raíz ignorado guarda `POSTGRES_PASSWORD`; ambos servicios lo referencian. API, Alembic e importador comparten `src/database.py`, construyendo la URL con SQLAlchemy para admitir caracteres especiales. `DATABASE_URL` codificada es una alternativa opcional exclusiva del backend. Ninguna credencial de base de datos llega al frontend; el navegador utiliza `/api`. Al trasladar la configuración se conservan contraseña y volumen existentes.
 
 ## API
 
 | Endpoint | Comportamiento |
 | --- | --- |
-| `GET /api/v1/pokemon` | `{ items, total }`; `q`, `type`, `generation`, `forms=all/default/alternative`, `sort`, `limit` (24 por defecto, máximo 100), `offset` |
+| `GET /api/v1/pokemon` | `{ items, total }`; `q`, `type`, `region`, `generation`, `forms=all/default/alternative`, `sort`, `limit` (24 por defecto, máximo 100), `offset` |
 | `/api/v1/pokemon/{id}` | Producto ampliado; 404 si no existe |
-| `/api/v1/pokemon/metadata` | Tipos y generaciones disponibles |
+| `/api/v1/pokemon/metadata` | Tipos, generaciones y regiones localizadas disponibles |
 | `/api/v1/pokemon/featured` | Selección editorial |
 | `/api/v1/pokemon/batch?ids=25,10100` | Hasta 100 IDs de entrada para recuperar el carrito |
 | `/api/v1/pokemon/recommendations?ids=25` | Cuatro sugerencias disponibles, sin repetir especie, con motivo |
 
-Órdenes: `number`, `name`, `price_asc`, `price_desc`, `weight_asc`, `weight_desc`. Las búsquedas numéricas encuentran especies y por tanto incluyen sus formas alternativas. Se conservan los campos anteriores; el contrato tipado completo está en `/docs`.
+Órdenes: `number`, `name`, `price_asc`, `price_desc`, `weight_asc`, `weight_desc`, `height_asc`, `height_desc`. Las búsquedas numéricas encuentran especies y por tanto incluyen sus formas alternativas. Se conservan los campos anteriores; el contrato tipado completo está en `/docs`.
 
 ## Arquitectura y decisiones
 
@@ -83,7 +110,7 @@ flowchart LR
   Sync --> DB
 ```
 
-Los filtros, totales y paginación se ejecutan en PostgreSQL. La ordenación de recomendaciones es una política de aplicación independiente del almacenamiento. Los metadatos biológicos multilingües viven en JSONB; las ofertas comerciales tienen restricciones propias y se guardan aparte. El adaptador de demostración permanece únicamente para pruebas aisladas y los valores comerciales originales; no sirve el catálogo en ejecución. Redis está preparado, pero este catálogo no lo utiliza.
+Los filtros, totales y paginación se ejecutan en PostgreSQL. La ordenación de recomendaciones es una política de aplicación independiente del almacenamiento. Los metadatos biológicos multilingües viven en JSONB; las ofertas comerciales tienen restricciones propias y se guardan aparte. El adaptador de demostración permanece únicamente para pruebas aisladas; no sirve el catálogo en ejecución. Redis está preparado, pero este catálogo no lo utiliza.
 
 ```text
 backend/migrations/                     # Versiones Alembic del esquema
@@ -103,12 +130,12 @@ Python 3.12, Poetry 2.1.3, FastAPI, SQLAlchemy/asyncpg, Alembic; Vue 3, TypeScri
 
 | Contenedor | Límite de memoria |
 | --- | --- |
-| Frontend | 1 GiB |
+| Frontend | 2 GiB |
 | Backend, incluido el importador | 512 MiB |
 | PostgreSQL 16 | 256 MiB |
 | Redis 7 | 128 MiB |
 
-Total: **1.920 MiB**, sin swap adicional para los contenedores. Redis limita los datos a 64 MiB con expulsión LRU. No se incluye Docker Desktop ni la construcción de imágenes. Solo se publican los puertos web, vinculados a localhost. Consulta los [detalles de recursos](docs/development.md).
+Total: **2.944 MiB**, sin swap adicional para los contenedores. Redis limita los datos a 64 MiB con expulsión LRU. No se incluye Docker Desktop ni la construcción de imágenes. Solo se publican los puertos web, vinculados a localhost. Consulta los [detalles de recursos](docs/development.md).
 
 ## Verificación y comandos
 
@@ -132,7 +159,7 @@ docker compose logs -f
 docker compose down
 ```
 
-Verificado el 07/09/2026: 12 pruebas de backend y 17 pruebas unitarias de frontend; tipos, ESLint, build de producción y Ruff. Chromium pasó tanto contra el servidor de desarrollo como contra el preview de producción. La cobertura de navegador contiene dos regresiones de interacción y 20 escenarios responsive, cada uno recorriendo las cuatro rutas a 320/375/414/768/1280 px en español/inglés y claro/oscuro (80 capturas). Se comprueban la carga correcta y los desbordamientos horizontales; las capturas se generan en `frontend/test-results/`, ignorado en Git, para revisión visual. Se cubren selección con teclado, Escape y recuperación del foco, carrito tras paginación/recarga/error de red y persistencia de preferencias. También se ejecutaron repetición, interrupción controlada y recuperación de la importación.
+Verificado el 07/09/2026: 21 pruebas de backend y 18 pruebas unitarias de frontend; tipos, ESLint, build de producción y Ruff. La suite completa de Chromium pasó contra el preview de producción; también se comprobaron las interacciones principales en desarrollo. La cobertura de navegador contiene cinco regresiones de interacción y 20 escenarios responsive, cada uno recorriendo las cuatro rutas a 320/375/414/768/1280 px en español/inglés y claro/oscuro (80 capturas). Se comprueban la carga correcta y los desbordamientos horizontales; las capturas se generan en `frontend/test-results/`, ignorado en Git, para revisión visual. Se cubren selección con teclado, Escape y recuperación del foco, carrito tras paginación/recarga/error de red y persistencia de preferencias. También se ejecutaron repetición, interrupción controlada y recuperación de la importación.
 
 Las pruebas de integración requieren la migración y sincronización inicial. Las de navegador utilizan Chromium y el servidor de desarrollo encendido; configura `PLAYWRIGHT_BASE_URL` para otro servidor. No se han verificado otros motores de navegador. `pnpm build` también ejecuta tipos y empaquetado secuencialmente.
 
