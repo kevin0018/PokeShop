@@ -1,15 +1,16 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useCatalogStore } from '@/pokemon/application/catalogStore'
-import { readCart, saveCart } from '../infrastructure/cartStorage'
+import { readCart, readRecentIds, saveCart } from '../infrastructure/cartStorage'
 import { i18n } from '@/i18n'
 import { pokemonName } from '@/shared/presentation/format'
 
 export const useCartStore = defineStore('cart', () => {
   const catalog = useCatalogStore()
   const entries = ref(readCart())
+  const recentIds = ref(readRecentIds())
   const noticeEvent = ref<{
-    key: 'adjusted' | 'maximum' | 'added' | 'removed'
+    key: 'adjusted' | 'maximum' | 'added' | 'removed' | 'cartCleared'
     name?: string
     id?: number
     count?: number
@@ -47,8 +48,20 @@ export const useCartStore = defineStore('cart', () => {
   const total = computed(() =>
     lines.value.reduce((sum, line) => sum + line.quantity * line.pokemon.price_cents, 0),
   )
+  const recentLines = computed(() => {
+    const ids = [
+      ...new Set([...recentIds.value, ...entries.value.map((entry) => entry.id).reverse()]),
+    ]
+    return ids
+      .flatMap((id) => {
+        const line = lines.value.find((line) => line.pokemon.id === id)
+        return line ? [line] : []
+      })
+      .slice(0, 3)
+  })
   function persist() {
-    storageFailed.value = !saveCart(entries.value)
+    recentIds.value = recentIds.value.filter((id) => entries.value.some((entry) => entry.id === id))
+    storageFailed.value = !saveCart(entries.value, recentIds.value)
   }
   const loading = ref(false)
   const error = ref(false)
@@ -86,6 +99,7 @@ export const useCartStore = defineStore('cart', () => {
     }
     if (entry) entry.quantity++
     else entries.value.push({ id, quantity: 1 })
+    recentIds.value = [id, ...recentIds.value.filter((recentId) => recentId !== id)]
     noticeEvent.value = { key: 'added', id, name: item.name, count: count.value }
     persist()
   }
@@ -102,7 +116,16 @@ export const useCartStore = defineStore('cart', () => {
     noticeEvent.value = { key: 'removed' }
     persist()
   }
+  function clear() {
+    entries.value = []
+    recentIds.value = []
+    error.value = false
+    noticeEvent.value = { key: 'cartCleared' }
+    persist()
+  }
   return {
+    recentLines,
+    clear,
     entries,
     loading,
     error,

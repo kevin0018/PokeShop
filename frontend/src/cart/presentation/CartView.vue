@@ -35,7 +35,12 @@ onMounted(() => {
       <p class="eyebrow">{{ t('selection') }}</p>
       <h1>{{ t('cart') }}</h1>
     </div>
-    <span>{{ t('units', cart.count) }}</span>
+    <div class="cart-heading-actions">
+      <span>{{ t('units', cart.count) }}</span>
+      <button v-if="cart.entries.length" class="button secondary" @click="cart.clear">
+        <Trash2 :size="16" />{{ t('clearCart') }}
+      </button>
+    </div>
   </div>
   <p v-if="cart.loading" role="status" class="state-box">{{ t('loadingCart') }}</p>
   <div v-else-if="cart.error" role="alert" class="state-box">
@@ -141,6 +146,12 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.cart-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
 .cart-layout {
   grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
   gap: 28px;

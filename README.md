@@ -159,7 +159,7 @@ docker compose logs -f
 docker compose down
 ```
 
-Verified on 2026-09-07: 21 backend tests and 18 frontend unit tests; type checks, ESLint, production build and Ruff. The full Chromium suite passed against the production preview; core interactions were also checked against the development server. Browser coverage comprises 13 interaction regressions and 20 responsive scenarios, each visiting all four routes at 320/375/414/768/1280 px in Spanish/English and light/dark (80 captures, including a populated seven-product cart). The suite checks successful loading and horizontal overflow; screenshots are generated under the ignored `frontend/test-results/` directory for visual review. Keyboard selection, Escape/focus restoration, cart paging/reload/network recovery and preference persistence are covered. Import repeat, controlled interruption and successful recovery were also exercised.
+Verified on 2026-09-07: 21 backend tests and 19 frontend unit tests; type checks, ESLint, production build and Ruff. The full Chromium suite passed against the production preview; core interactions were also checked against the development server. Browser coverage comprises 14 interaction regressions and 20 responsive scenarios, each visiting all four routes at 320/375/414/768/1280 px in Spanish/English and light/dark (80 captures, including a populated seven-product cart). The suite checks successful loading and horizontal overflow; screenshots are generated under the ignored `frontend/test-results/` directory for visual review. Keyboard selection, Escape/focus restoration, cart paging/reload/network recovery and preference persistence are covered. Import repeat, controlled interruption and successful recovery were also exercised.
 
 Integration tests require the migration and initial sync above. Browser tests use Chromium and the running dev server; set `PLAYWRIGHT_BASE_URL` for an external server. Other browser engines are not verified. `pnpm build` also runs type checking and bundling sequentially.
 
@@ -168,3 +168,5 @@ Integration tests require the migration and initial sync above. Browser tests us
 This Compose stack uses development servers. No production deployment, accounts, reservations, real checkout or payments are configured. The browser cart is not an authoritative order. `docker compose down -v` deletes local database, Redis and frontend dependency volumes.
 
 Data: [PokéAPI](https://pokeapi.co/docs/v2). Artwork: [PokéAPI sprites](https://github.com/PokeAPI/sprites). Pokémon and character artwork belong to their respective rights holders. This is an independent educational demo.
+
+The header previews the three most recently added distinct products and the complete cart total on hover, keyboard focus, click or tap. “View full cart” opens the list; “Empty cart” clears the saved selection. Recent order persists without rearranging cart pages.

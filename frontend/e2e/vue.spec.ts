@@ -304,3 +304,76 @@ test('cart removal clamps pages and quantity changes stay on the current page', 
     await page.evaluate(() => JSON.parse(localStorage.getItem('pokeshop.cart.v1')!).length),
   ).toBe(25)
 })
+
+test('cart preview shows latest three and global total, opens by hover and click, and clears all', async ({
+  page,
+  browser,
+}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      'pokeshop.cart.v1',
+      JSON.stringify([1, 2, 3, 4].map((id) => ({ id, quantity: 1 }))),
+    )
+    localStorage.setItem('pokeshop.cart.v1.recent', JSON.stringify([2, 4, 1, 3]))
+  })
+  await page.goto('/catalogo')
+  const trigger = page.locator('.cart-preview-trigger')
+  await trigger.hover()
+  const preview = page.getByRole('dialog', { name: 'Últimos añadidos' })
+  await expect(preview).toBeVisible()
+  await expect(preview.locator('.cart-preview-lines li')).toHaveCount(3)
+  expect(
+    await preview
+      .locator('.cart-preview-lines a')
+      .evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
+  ).toEqual(['/pokemon/2', '/pokemon/4', '/pokemon/1'])
+  await expect(preview.locator('.cart-preview-total')).toContainText('4 unidades')
+  const total = await preview.locator('.cart-preview-total strong').textContent()
+  await preview.hover()
+  await expect(preview).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(preview).toBeHidden()
+  await expect(trigger).toBeFocused()
+  await page.setViewportSize({ width: 320, height: 800 })
+  await trigger.click()
+  await expect(preview).toBeVisible()
+  const bounds = await preview.boundingBox()
+  expect(bounds!.x).toBeGreaterThanOrEqual(0)
+  expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(320)
+  await page.screenshot({ path: 'test-results/cart-preview-mobile.png' })
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await expect(page.getByRole('switch')).toHaveAttribute('aria-checked', 'true')
+  await page.screenshot({ path: 'test-results/cart-preview-desktop.png' })
+  await preview.getByRole('link', { name: 'Ver carrito completo' }).click()
+  await expect(page).toHaveURL(/carrito/)
+  await expect(page.locator('.summary-total strong')).toHaveText(total!)
+  await page.getByRole('button', { name: 'Vaciar carrito', exact: true }).click()
+  await expect(page.locator('.empty-cart')).toBeVisible()
+  await expect(page.locator('.cart-count')).toHaveText('0')
+  expect(await page.evaluate(() => localStorage.getItem('pokeshop.cart.v1'))).toBe('[]')
+  const touch = await browser.newContext({
+    hasTouch: true,
+    isMobile: true,
+    viewport: { width: 375, height: 812 },
+    baseURL,
+  })
+  try {
+    await touch.addInitScript(() => localStorage.setItem('pokeshop.locale', 'en'))
+    const mobile = await touch.newPage()
+    await mobile.goto('/catalogo')
+    await mobile.locator('.cart-preview-trigger').tap()
+    const panel = mobile.getByRole('dialog', { name: 'Recently added' })
+    await expect(panel).toBeVisible()
+    await mobile.locator('.cart-preview-trigger').tap()
+    await expect(panel).toBeHidden()
+    await mobile.locator('.cart-preview-trigger').tap()
+    await expect(panel).toBeVisible()
+    await expect(panel.locator('.cart-preview-total')).toContainText('€0.00')
+    await panel.getByRole('link', { name: 'View full cart' }).tap()
+    await expect(mobile).toHaveURL(/carrito/)
+    await expect(panel).toBeHidden()
+  } finally {
+    await touch.close()
+  }
+})
