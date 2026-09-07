@@ -66,6 +66,7 @@ const inCart = computed(
   </div>
   <section v-else-if="pokemon" class="detail-layout">
     <div class="detail-art">
+      <StatsPopover :key="pokemon.id" :stats="pokemon.stats" />
       <span class="dex-number">{{ number(pokemon.species_id ?? pokemon.id) }}</span
       ><PokemonImage :src="pokemon.image_url" :name="pokemonName(pokemon)" />
     </div>
@@ -106,14 +107,6 @@ const inCart = computed(
           <dd>{{ pokemon.region_names?.[locale] ?? pokemon.region ?? t('missingData') }}</dd>
         </div>
       </dl>
-      <div class="abilities">
-        <h2>{{ t('abilities') }}</h2>
-        <span v-for="ability in pokemon.abilities" :key="ability.name"
-          >{{ ability.names[locale] || ability.name }}
-          <small v-if="ability.hidden">· {{ t('hiddenAbility') }}</small></span
-        >
-      </div>
-      <StatsPopover :key="pokemon.id" :stats="pokemon.stats" />
       <p class="detail-price">{{ money(pokemon.price_cents) }}</p>
       <p class="stock-label">
         {{ pokemon.stock ? t('stock', pokemon.stock) : t('soldOutNow') }}
@@ -140,3 +133,32 @@ const inCart = computed(
     <RouterLink class="button primary" to="/catalogo">{{ t('exploreCatalog') }}</RouterLink>
   </div>
 </template>
+
+<style>
+.detail-art {
+  position: relative;
+}
+.detail-art .stats-trigger {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  margin: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 0.75rem;
+  background: var(--surface);
+  box-shadow: 0 3px 15px #0001;
+}
+.detail-art > .dex-number {
+  z-index: 1;
+}
+@media (max-width: 400px) {
+  .detail-art .stats-trigger {
+    top: 10px;
+    right: 10px;
+    font-size: 0.65rem;
+    padding: 8px;
+  }
+}
+</style>
