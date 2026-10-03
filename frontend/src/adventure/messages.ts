@@ -38,7 +38,7 @@ export const adventureEn = {
   buy: 'Buy {name}',
   owned: 'In your collection',
   insufficient: 'Not enough credits',
-  gymsTitle: 'The road to six badges.',
+  gymsTitle: 'Gyms',
   gymsHelp:
     'Win to unlock the next gym. Your first victory earns credits; rematches are free practice.',
   challenge: 'Challenge {name}',
@@ -157,7 +157,7 @@ export const adventureEs = {
   buy: 'Comprar a {name}',
   owned: 'En tu colección',
   insufficient: 'Créditos insuficientes',
-  gymsTitle: 'El camino a seis medallas.',
+  gymsTitle: 'Gimnasios',
   gymsHelp:
     'Gana para desbloquear el siguiente gimnasio. La primera victoria da créditos; las revanchas son prácticas gratuitas.',
   challenge: 'Retar a {name}',
