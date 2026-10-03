@@ -468,23 +468,25 @@
   margin: 26px 0 18px;
 }
 .pc-access {
-  position: relative;
+  position: absolute;
+  z-index: 3;
+  right: 5%;
+  bottom: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 28px;
-  width: min(440px, 100%);
-  margin: 32px auto 0;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  background: color-mix(in srgb, var(--center-mint) 12%, var(--surface));
+  width: 112px;
+  height: 148px;
+  padding: 10px 8px 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
   color: var(--ink);
   cursor: pointer;
 }
 .collection-pc-art {
-  width: 128px;
-  height: 160px;
+  width: 96px;
+  height: 120px;
   flex-shrink: 0;
   image-rendering: pixelated;
   filter: drop-shadow(0 8px 0 #0001);
@@ -497,18 +499,37 @@
   border-color: var(--center-mint);
 }
 .pc-access-label {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  text-align: left;
-}
-.pc-access-label strong {
+  position: absolute;
+  bottom: 8px;
+  right: calc(100% + 4px);
+  white-space: nowrap;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--purple);
   font-family: monospace;
-  font-size: 20px;
+  font-size: 11px;
+  opacity: 0;
+  pointer-events: none;
 }
-.pc-access-label > span {
-  color: var(--muted-strong);
-  font-size: 13px;
+.pc-access:hover .pc-access-label,
+.pc-access:focus-visible .pc-access-label {
+  opacity: 1;
+}
+.pc-interaction-hint {
+  position: absolute;
+  top: 0;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--center-red);
+  color: #fff;
+  font: bold 20px monospace;
+  box-shadow: 0 2px 0 #0002;
 }
 .sale-dialog.pc-dialog {
   --pc-accent: #72b8b2;
@@ -578,12 +599,17 @@
 }
 @media (max-width: 700px) {
   .pc-access {
-    gap: 16px;
-    padding: 12px;
+    width: 74px;
+    height: 120px;
+    right: 2%;
+    padding: 10px 4px 0;
+  }
+  .reception-window-right {
+    display: none;
   }
   .collection-pc-art {
-    width: 104px;
-    height: 130px;
+    width: 66px;
+    height: 83px;
   }
   .sale-dialog.pc-dialog {
     padding: 6px;

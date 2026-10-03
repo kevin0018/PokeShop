@@ -3,11 +3,11 @@ defineProps<{ selected: number }>()
 </script>
 
 <template>
-  <div class="center-reception" aria-hidden="true">
-    <div class="reception-window reception-window-left">
+  <div class="center-reception">
+    <div class="reception-window reception-window-left" aria-hidden="true">
       <span class="reception-heart">♥</span>
     </div>
-    <div class="reception-window reception-window-right">
+    <div class="reception-window reception-window-right" aria-hidden="true">
       <span
         v-for="i in 6"
         :key="i"
@@ -15,7 +15,13 @@ defineProps<{ selected: number }>()
         :class="{ active: i <= selected }"
       ></span>
     </div>
-    <svg class="center-nurse" viewBox="0 0 80 112" shape-rendering="crispEdges" focusable="false">
+    <svg
+      class="center-nurse"
+      viewBox="0 0 80 112"
+      shape-rendering="crispEdges"
+      focusable="false"
+      aria-hidden="true"
+    >
       <path fill="#aa4769" d="M18 30H62V66H18Z" />
       <path fill="#e78ba3" d="M14 28H26V52H14ZM54 28H66V52H54Z" />
       <path fill="#f0a1b6" d="M24 18H56V38H24Z" />
@@ -30,6 +36,9 @@ defineProps<{ selected: number }>()
       <path fill="#f0a1b6" d="M36 58H44V63H36Z" />
       <path fill="#8b5f78" d="M24 94H35V109H24ZM45 94H56V109H45Z" />
     </svg>
-    <div class="reception-counter"><span class="counter-emblem pokeball"></span></div>
+    <div class="reception-counter" aria-hidden="true">
+      <span class="counter-emblem pokeball"></span>
+    </div>
+    <slot />
   </div>
 </template>

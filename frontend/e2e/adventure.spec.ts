@@ -117,6 +117,7 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   await page.addStyleTag({ content: '#vue-devtools__anchor { display: none !important; }' })
   await page.screenshot({ path: testInfo.outputPath('catalog-trainer.png'), fullPage: true })
   await page.getByRole('link', { name: 'Mi equipo', exact: true }).click()
+  await expect(page.locator('.center-station .pc-interaction-hint')).toBeVisible()
   await page.getByRole('button', { name: 'Abrir PC', exact: true }).click()
   await expect(page.locator('.pc-box-grid > div')).toHaveCount(30)
   await page.getByRole('button', { name: 'Caja 2', exact: true }).click()

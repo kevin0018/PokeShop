@@ -566,7 +566,21 @@ function health(pokemon: Fighter) {
               <h2>{{ t('adventure.pokemonCenter') }}</h2>
             </header>
             <div class="center-body">
-              <CenterReception :selected="draft.length" />
+              <CenterReception :selected="draft.length">
+                <button
+                  class="pc-access"
+                  :aria-label="t('adventure.openPc')"
+                  :title="t('adventure.openPc')"
+                  aria-haspopup="dialog"
+                  @click="pcDialog?.showModal()"
+                >
+                  <span class="pc-interaction-hint" aria-hidden="true">!</span>
+                  <CollectionPc />
+                  <span class="pc-access-label" aria-hidden="true">{{
+                    t('adventure.openPc')
+                  }}</span>
+                </button>
+              </CenterReception>
               <p>{{ t('adventure.teamHelp') }}</p>
               <div class="team-slots">
                 <div
@@ -623,20 +637,6 @@ function health(pokemon: Fighter) {
               </div>
             </div>
           </div>
-          <button
-            class="pc-access"
-            :aria-label="t('adventure.openPc')"
-            aria-haspopup="dialog"
-            @click="pcDialog?.showModal()"
-          >
-            <CollectionPc />
-            <span class="pc-access-label"
-              ><strong>{{ t('adventure.openPc') }}</strong
-              ><span>{{
-                t('adventure.collectionCount', { count: game.trainer.collection.length })
-              }}</span></span
-            >
-          </button>
         </section>
 
         <section v-if="tab === 'gyms'" class="adventure-panel">
