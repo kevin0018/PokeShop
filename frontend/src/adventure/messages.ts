@@ -1,9 +1,6 @@
 export const adventureEn = {
   nav: 'Adventure',
-  eyebrow: 'The Kanto challenge',
-  title: 'Your team. Six badges.',
-  intro:
-    'Choose your companions, take on the gym leaders and build a team that grows with every victory.',
+  title: 'Your team',
   privateAccess: 'Trainer access',
   accessText:
     'Have an invitation? Create your trainer account and start with 1,000 credits. To request a code, contact me through my portfolio.',
@@ -124,10 +121,7 @@ export const adventureEn = {
 
 export const adventureEs = {
   nav: 'Aventura',
-  eyebrow: 'El reto de Kanto',
-  title: 'Tu equipo. Seis medallas.',
-  intro:
-    'Elige tus compañeros, reta a los líderes y construye un equipo que crece con cada victoria.',
+  title: 'Tu equipo',
   privateAccess: 'Acceso de entrenadores',
   accessText:
     '¿Tienes una invitación? Crea tu cuenta y empieza con 1.000 créditos. Para solicitar un código, contacta conmigo a través de mi portfolio.',

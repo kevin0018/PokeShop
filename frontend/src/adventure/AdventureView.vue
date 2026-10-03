@@ -217,9 +217,7 @@ function health(pokemon: Fighter) {
 <template>
   <section class="adventure" :class="{ 'is-battling': arenaOpen && displayed }">
     <header class="adventure-heading">
-      <p class="adventure-eyebrow">{{ t('adventure.eyebrow') }}</p>
       <h1>{{ t('adventure.title') }}</h1>
-      <p>{{ t('adventure.intro') }}</p>
     </header>
 
     <div v-if="game.error" class="adventure-error" role="alert">
