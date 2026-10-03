@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
 from src.pokemon.presentation.pokemon_routes import router as pokemon_router
+from src.adventure.routes import router as adventure_router
 
 
 def create_app() -> FastAPI:
@@ -56,6 +57,7 @@ def create_app() -> FastAPI:
         return {"status": "healthy", "service": "pokemon-ecommerce-api"}
 
     app.include_router(pokemon_router, prefix="/api/v1/pokemon", tags=["pokemon"])
+    app.include_router(adventure_router, prefix="/api/v1/adventure", tags=["adventure"])
 
     return app
 

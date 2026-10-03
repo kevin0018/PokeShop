@@ -1,0 +1,105 @@
+"""A deliberately small Kanto ruleset; no claims of full cartridge simulation."""
+
+# Real move names; the supported ruleset implements damage, accuracy and priority.
+# PP is reset per battle. Passive abilities and secondary effects are not enabled.
+MOVES = {
+    "tackle": ("normal", 40, 100, 35, "physical", 0, "Placaje", "Tackle"),
+    "quick-attack": ("normal", 40, 100, 30, "physical", 1, "Ataque rápido", "Quick attack"),
+    "bite": ("siniestro", 60, 100, 25, "physical", 0, "Mordisco", "Bite"),
+    "swift": ("normal", 60, 100, 20, "special", 0, "Rapidez", "Swift"),
+    "vine-whip": ("planta", 45, 100, 25, "physical", 0, "Látigo cepa", "Vine whip"),
+    "razor-leaf": ("planta", 55, 95, 25, "physical", 0, "Hoja afilada", "Razor leaf"),
+    "mega-drain": ("planta", 40, 100, 15, "special", 0, "Megaagotar", "Mega drain"),
+    "ember": ("fuego", 40, 100, 25, "special", 0, "Ascuas", "Ember"),
+    "flamethrower": ("fuego", 90, 100, 15, "special", 0, "Lanzallamas", "Flamethrower"),
+    "scratch": ("normal", 40, 100, 35, "physical", 0, "Arañazo", "Scratch"),
+    "water-gun": ("agua", 40, 100, 25, "special", 0, "Pistola agua", "Water gun"),
+    "bubble-beam": ("agua", 65, 100, 20, "special", 0, "Rayo burbuja", "Bubble beam"),
+    "thunder-shock": ("electrico", 40, 100, 30, "special", 0, "Impactrueno", "Thunder shock"),
+    "thunderbolt": ("electrico", 90, 100, 15, "special", 0, "Rayo", "Thunderbolt"),
+    "confusion": ("psiquico", 50, 100, 25, "special", 0, "Confusión", "Confusion"),
+    "psybeam": ("psiquico", 65, 100, 20, "special", 0, "Psicorrayo", "Psybeam"),
+    "karate-chop": ("lucha", 50, 100, 25, "physical", 0, "Golpe kárate", "Karate chop"),
+    "low-kick": ("lucha", 50, 100, 20, "physical", 0, "Patada baja", "Low kick"),
+    "rock-throw": ("roca", 50, 90, 15, "physical", 0, "Lanzarrocas", "Rock throw"),
+    "rock-slide": ("roca", 75, 90, 10, "physical", 0, "Avalancha", "Rock slide"),
+    "mud-slap": ("tierra", 20, 100, 10, "special", 0, "Bofetón lodo", "Mud slap"),
+    "sludge": ("veneno", 65, 100, 20, "special", 0, "Residuos", "Sludge"),
+    "acid": ("veneno", 40, 100, 30, "special", 0, "Ácido", "Acid"),
+    "lick": ("fantasma", 30, 100, 30, "physical", 0, "Lengüetazo", "Lick"),
+    "shadow-ball": ("fantasma", 80, 100, 15, "special", 0, "Bola sombra", "Shadow ball"),
+    "gust": ("volador", 40, 100, 35, "special", 0, "Tornado", "Gust"),
+    "wing-attack": ("volador", 60, 100, 35, "physical", 0, "Ataque ala", "Wing attack"),
+    "dragon-breath": ("dragon", 60, 100, 20, "special", 0, "Dragoaliento", "Dragon breath"),
+    "ice-beam": ("hielo", 90, 100, 10, "special", 0, "Rayo hielo", "Ice beam"),
+    "struggle": ("normal", 50, 100, 1, "physical", 0, "Forcejeo", "Struggle"),
+}
+
+FIRE = ["scratch", "ember", "bite", "flamethrower"]
+GRASS = ["tackle", "vine-whip", "razor-leaf", "sludge"]
+WATER = ["tackle", "water-gun", "bite", "bubble-beam"]
+ELECTRIC = ["quick-attack", "thunder-shock", "swift", "thunderbolt"]
+ROCK = ["tackle", "rock-throw", "mud-slap", "rock-slide"]
+GHOST = ["lick", "sludge", "shadow-ball", "thunderbolt"]
+PSYCHIC = ["confusion", "psybeam", "shadow-ball", "swift"]
+LOADOUTS = {
+    1: GRASS, 2: GRASS, 3: GRASS, 4: FIRE, 5: FIRE, 6: FIRE,
+    7: WATER, 8: WATER, 9: WATER,
+    16: ["tackle", "gust", "quick-attack", "wing-attack"],
+    25: ELECTRIC, 26: ELECTRIC,
+    37: ["quick-attack", "ember", "swift", "flamethrower"],
+    43: ["acid", "mega-drain", "razor-leaf", "sludge"],
+    54: ["scratch", "water-gun", "confusion", "bubble-beam"],
+    63: PSYCHIC, 65: PSYCHIC,
+    66: ["karate-chop", "low-kick", "rock-slide", "bite"],
+    74: ROCK, 95: ROCK, 92: GHOST, 94: GHOST,
+    100: ["tackle", "thunder-shock", "swift", "thunderbolt"],
+    110: ["tackle", "sludge", "shadow-ball", "flamethrower"],
+    114: ["vine-whip", "mega-drain", "sludge", "tackle"],
+    121: ["water-gun", "bubble-beam", "confusion", "ice-beam"],
+    133: ["tackle", "quick-attack", "bite", "swift"],
+    134: ["water-gun", "bubble-beam", "bite", "ice-beam"],
+    135: ELECTRIC,
+    136: ["quick-attack", "ember", "bite", "flamethrower"],
+    147: ["tackle", "dragon-breath", "swift", "thunderbolt"],
+    149: ["wing-attack", "dragon-breath", "ice-beam", "thunderbolt"],
+}
+SHOP_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 16, 25, 26, 37, 43, 54, 63, 66, 74, 92, 94, 133, 134, 135, 136, 147, 149]
+
+GYMS = [
+    {"id": 1, "leader": "Brock", "names": {"es": "Ciudad Plateada", "en": "Pewter City"}, "type": "roca", "pokemon": [74, 95], "level": 28, "reward": 150},
+    {"id": 2, "leader": "Misty", "names": {"es": "Ciudad Celeste", "en": "Cerulean City"}, "type": "agua", "pokemon": [54, 121], "level": 34, "reward": 200},
+    {"id": 3, "leader": "Lt. Surge", "names": {"es": "Ciudad Carmín", "en": "Vermilion City"}, "type": "electrico", "pokemon": [100, 25, 26], "level": 38, "reward": 250},
+    {"id": 4, "leader": "Erika", "names": {"es": "Ciudad Azulona", "en": "Celadon City"}, "type": "planta", "pokemon": [43, 114, 3], "level": 42, "reward": 300},
+    {"id": 5, "leader": "Koga", "names": {"es": "Ciudad Fucsia", "en": "Fuchsia City"}, "type": "veneno", "pokemon": [92, 110, 94], "level": 46, "reward": 350},
+    {"id": 6, "leader": "Sabrina", "names": {"es": "Ciudad Azafrán", "en": "Saffron City"}, "type": "psiquico", "pokemon": [63, 121, 65], "level": 50, "reward": 400},
+]
+
+# Modern type chart. Each tuple is (super effective, resisted, immune).
+CHART = {
+    "normal": ([], ["roca", "acero"], ["fantasma"]),
+    "fuego": (["planta", "hielo", "bicho", "acero"], ["fuego", "agua", "roca", "dragon"], []),
+    "agua": (["fuego", "tierra", "roca"], ["agua", "planta", "dragon"], []),
+    "planta": (["agua", "tierra", "roca"], ["fuego", "planta", "veneno", "volador", "bicho", "dragon", "acero"], []),
+    "electrico": (["agua", "volador"], ["electrico", "planta", "dragon"], ["tierra"]),
+    "hielo": (["planta", "tierra", "volador", "dragon"], ["fuego", "agua", "hielo", "acero"], []),
+    "lucha": (["normal", "hielo", "roca", "siniestro", "acero"], ["veneno", "volador", "psiquico", "bicho", "hada"], ["fantasma"]),
+    "veneno": (["planta", "hada"], ["veneno", "tierra", "roca", "fantasma"], ["acero"]),
+    "tierra": (["fuego", "electrico", "veneno", "roca", "acero"], ["planta", "bicho"], ["volador"]),
+    "volador": (["planta", "lucha", "bicho"], ["electrico", "roca", "acero"], []),
+    "psiquico": (["lucha", "veneno"], ["psiquico", "acero"], ["siniestro"]),
+    "roca": (["fuego", "hielo", "volador", "bicho"], ["lucha", "tierra", "acero"], []),
+    "fantasma": (["psiquico", "fantasma"], ["siniestro"], ["normal"]),
+    "dragon": (["dragon"], ["acero"], ["hada"]),
+    "siniestro": (["psiquico", "fantasma"], ["lucha", "siniestro", "hada"], []),
+}
+
+
+def move_data(key):
+    kind, power, accuracy, pp, category, priority, es, en = MOVES[key]
+    return {"id": key, "type": kind, "power": power, "accuracy": accuracy, "max_pp": pp, "pp": pp, "category": category, "priority": priority, "names": {"es": es, "en": en}}
+
+
+def credit_price(pokemon):
+    total = sum(pokemon["stats"].values())
+    return max(100, ((100 + max(0, total - 250) * 2 + 5) // 10) * 10)
