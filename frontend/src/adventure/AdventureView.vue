@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import { Award, LockKeyhole, Coins, Plus, X, ArrowRight, Flag } from 'lucide-vue-next'
 import BattleSprite from './BattleSprite.vue'
 import TrainerPortrait from './TrainerPortrait.vue'
@@ -56,6 +57,15 @@ const username = ref(''),
   password = ref(''),
   invitation = ref('')
 const tab = ref<'team' | 'gyms'>('team')
+const route = useRoute()
+watch(
+  () => route.query,
+  (query) => {
+    if (query.mode === 'login' || query.mode === 'register') setMode(query.mode)
+    if (query.tab === 'team' || query.tab === 'gyms') tab.value = query.tab
+  },
+  { immediate: true },
+)
 const draft = ref<number[]>([])
 const saved = ref(false)
 const arenaOpen = ref(false)
@@ -136,13 +146,6 @@ function toggle(id: number) {
 function setMode(value: 'login' | 'register') {
   mode.value = value
   game.error = ''
-}
-
-async function logout() {
-  if (await game.mutate('/logout', 'POST')) {
-    arenaOpen.value = false
-    mode.value = 'login'
-  }
 }
 
 function backToGyms() {
@@ -366,9 +369,6 @@ function health(pokemon: Fighter) {
             t('adventure.medals', { count: game.trainer.medals.length })
           }}</span
         >
-        <button class="text-button" :disabled="blocked" @click="logout">
-          {{ t('adventure.logout') }}
-        </button>
       </div>
 
       <template v-if="arenaOpen && displayed && player && opponent">
