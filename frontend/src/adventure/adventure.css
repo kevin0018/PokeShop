@@ -675,6 +675,32 @@
   width: 112px;
   height: 112px;
   image-rendering: pixelated;
+  animation: team-pokemon-float 3.6s ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+}
+.team-slot:nth-child(2) {
+  --float-delay: -0.6s;
+}
+.team-slot:nth-child(3) {
+  --float-delay: -1.2s;
+}
+.team-slot:nth-child(4) {
+  --float-delay: -1.8s;
+}
+.team-slot:nth-child(5) {
+  --float-delay: -2.4s;
+}
+.team-slot:nth-child(6) {
+  --float-delay: -3s;
+}
+@keyframes team-pokemon-float {
+  0%,
+  100% {
+    transform: translateY(3px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
 }
 .slot-artwork > svg {
   position: relative;
