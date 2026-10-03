@@ -62,7 +62,7 @@ onUnmounted(() => {
   >
     <div class="starter-haze" aria-hidden="true" />
     <div class="starter-heading">
-      <p>POKÉSHOP · {{ t('originalTrio') }}</p>
+      <p>POKÉSHOP</p>
       <h1>{{ t('starterHeadline') }}</h1>
     </div>
     <div class="starter-scene" :data-running="running">
@@ -123,13 +123,13 @@ onUnmounted(() => {
   min-height: calc(100svh - 88px);
   display: grid;
   grid-template-rows: auto 1fr auto;
-  background: #f0edf6;
-  color: #352644;
+  background: var(--paper);
+  color: var(--ink);
   padding: 42px 0 32px;
 }
 [data-theme='dark'] .starter-home {
-  background: #21182e;
-  color: #f4edf9;
+  background: var(--paper);
+  color: var(--ink);
 }
 .starter-haze {
   position: absolute;
@@ -364,5 +364,11 @@ onUnmounted(() => {
   .hero-starter:focus-visible img {
     transform: none;
   }
+}
+[data-theme='dark'] .starter-haze {
+  background:
+    radial-gradient(ellipse at 18% 66%, #777fa433, transparent 42%),
+    radial-gradient(ellipse at 53% 54%, #e59c7833, transparent 38%),
+    radial-gradient(ellipse at 88% 65%, #7395dd44, transparent 42%);
 }
 </style>

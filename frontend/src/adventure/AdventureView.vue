@@ -72,6 +72,8 @@ watch(
 const draft = ref<number[]>([])
 const saved = ref(false)
 const arenaOpen = ref(false)
+const entering = ref(false)
+const revealing = ref(false)
 const arenaHeading = ref<HTMLElement>()
 const displayed = ref<Battle | null>(null)
 const pcDialog = ref<HTMLDialogElement>()
@@ -122,7 +124,7 @@ const opponent = computed(() => displayed.value?.opponent[displayed.value.oppone
 const dirty = computed(
   () => JSON.stringify(draft.value) !== JSON.stringify(game.trainer?.team ?? []),
 )
-const blocked = computed(() => game.busy || playing.value)
+const blocked = computed(() => game.busy || playing.value || entering.value)
 const errorText = computed(() =>
   te(`adventure.errors.${game.error}`)
     ? t(`adventure.errors.${game.error}`)
@@ -201,7 +203,14 @@ async function saveTeam() {
 }
 
 async function challenge(gymId: number) {
-  const result = await game.mutate<Battle>('/battles', 'POST', { gym_id: gymId })
+  if (blocked.value) return
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  entering.value = !reduced
+  revealing.value = false
+  const resultPromise = game.mutate<Battle>('/battles', 'POST', { gym_id: gymId })
+  if (!reduced) await new Promise((resolve) => window.setTimeout(resolve, 600))
+  const result = await resultPromise
+  if (!mounted) return
   if (result) {
     displayed.value = game.battle ? structuredClone(toRaw(game.battle)) : result
     log.value = []
@@ -210,6 +219,9 @@ async function challenge(gymId: number) {
     await nextTick()
     arenaHeading.value?.scrollIntoView({ block: 'start' })
   }
+  revealing.value = true
+  if (!reduced) await new Promise((resolve) => window.setTimeout(resolve, 450))
+  entering.value = false
 }
 
 function eventText(event: BattleEvent) {
@@ -300,7 +312,25 @@ function health(pokemon: Fighter) {
 </script>
 
 <template>
-  <section class="adventure" :class="{ 'is-battling': arenaOpen && displayed }">
+  <Teleport to="body">
+    <div
+      v-if="arenaOpen && displayed"
+      class="gym-world pokemon-palette"
+      :data-type="gym?.type"
+      aria-hidden="true"
+    >
+      <GymBackdrop :type="gym?.type" />
+    </div>
+    <div v-if="entering" class="battle-entry" :class="{ revealing }" aria-hidden="true">
+      <div class="battle-entry-top" />
+      <div class="battle-entry-bottom" />
+    </div>
+  </Teleport>
+  <section
+    class="adventure pokemon-palette"
+    :data-type="arenaOpen && displayed ? gym?.type : undefined"
+    :class="{ 'is-battling': arenaOpen && displayed }"
+  >
     <header v-if="!arenaOpen || !displayed" class="adventure-heading">
       <h1>{{ t('adventure.title') }}</h1>
     </header>

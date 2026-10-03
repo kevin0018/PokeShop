@@ -194,7 +194,17 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   await expect(page.getByRole('button', { name: 'Retar a Brock', exact: true })).toBeEnabled()
   await page.keyboard.press('Escape')
   await page.getByRole('button', { name: 'Ver gimnasio de Brock', exact: true }).click()
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
   await page.getByRole('button', { name: 'Retar a Brock', exact: true }).click()
+  await expect(page.locator('.battle-entry')).toBeVisible()
+  await expect(page.locator('.battle-entry')).toBeHidden()
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect(page.locator('.gym-world')).toHaveAttribute('data-type', 'roca')
+  expect(await page.locator('.gym-world').boundingBox()).toMatchObject({
+    x: 0,
+    y: 0,
+    ...page.viewportSize(),
+  })
   await expect(page.locator('.battle-arena')).toBeVisible()
   await expect(page.locator('.adventure-heading')).toBeHidden()
   await expect(page.locator('.trainer-strip')).toBeHidden()

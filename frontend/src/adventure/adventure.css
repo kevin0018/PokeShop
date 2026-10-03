@@ -1508,3 +1508,84 @@
     transition: none !important;
   }
 }
+
+.gym-world {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--pokemon-tint) 30%, var(--paper));
+}
+.gym-world .gym-backdrop {
+  opacity: 0.65;
+}
+.gym-world::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    color-mix(in srgb, var(--paper) 50%, transparent),
+    transparent 60%,
+    color-mix(in srgb, var(--paper) 35%, transparent)
+  );
+}
+.adventure.is-battling {
+  --surface: color-mix(in srgb, var(--pokemon-tint) 12%, var(--paper));
+  --line: color-mix(in srgb, var(--pokemon-tint) 35%, var(--paper));
+}
+.is-battling .gym-intro {
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+}
+.battle-entry {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  pointer-events: auto;
+}
+.battle-entry > div {
+  position: absolute;
+  width: 100%;
+  height: 50%;
+  background: #07090e;
+}
+.battle-entry-top {
+  top: 0;
+  animation: encounter-close 0.3s ease-out both;
+}
+.battle-entry-bottom {
+  bottom: 0;
+  animation: encounter-close 0.3s 0.25s ease-out both;
+}
+.battle-entry.revealing .battle-entry-top {
+  animation: encounter-open 0.4s ease-in both;
+}
+.battle-entry.revealing .battle-entry-bottom {
+  animation: encounter-open 0.4s 0.05s ease-in both;
+}
+@keyframes encounter-close {
+  from {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  to {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+@keyframes encounter-open {
+  from {
+    transform: scaleX(1);
+    transform-origin: right;
+  }
+  to {
+    transform: scaleX(0);
+    transform-origin: right;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .battle-entry {
+    display: none;
+  }
+}

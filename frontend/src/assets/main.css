@@ -958,27 +958,27 @@ nav {
   --muted: #a6b6c5;
   --purple: #ff967c;
   --lavender: #b6a0d3;
-  --paper: #142330;
-  --line: #344957;
-  --surface: #1e3342;
+  --paper: #182238;
+  --line: #3c4d69;
+  --surface: #24324b;
   --on-accent: #302017;
   --badge: #503b36;
-  --feature: #263f50;
+  --feature: #2d4062;
   --heading: #fff3df;
   --muted-strong: #c0ced6;
   --button-hover: #ffb29b;
-  --surface-hover: #2a4353;
+  --surface-hover: #314563;
   --border-strong: #827063;
-  --orbit-inner: #496a7d;
+  --orbit-inner: #546f9b;
   --hero-mark: #674b40;
-  --art-surface: #243b48;
-  --control-border: #536e7f;
-  --control-surface: #263e4f;
-  --control-hover: #345569;
-  --empty-border: #547181;
-  --panel: #243c4b;
-  --panel-border: #3a5668;
-  --panel-divider: #496575;
+  --art-surface: #2a3b57;
+  --control-border: #62799a;
+  --control-surface: #2b3e5d;
+  --control-hover: #3c567e;
+  --empty-border: #607ba1;
+  --panel: #2b3c59;
+  --panel-border: #435c80;
+  --panel-divider: #536e93;
   color-scheme: dark;
 }
 :root[data-theme='dark'] .storage-warning {
@@ -1603,4 +1603,9 @@ html.theme-colors body * {
   cursor: pointer;
   min-height: 44px;
   min-width: 44px;
+}
+
+.app-shell {
+  position: relative;
+  z-index: 1;
 }

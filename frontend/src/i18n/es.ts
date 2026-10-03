@@ -16,7 +16,6 @@ export default {
   heightBento: 'Pequeños, medianos y altos: las tarjetas siguen su altura real.',
   removeFilter: 'Quitar filtro',
   starterHeadline: 'Aquí empieza tu historia.',
-  originalTrio: 'Los tres originales',
   adventure: 'Tu próxima aventura empieza con un compañero',
   heroCopy:
     'Una pequeña chispa. Todo un mundo por descubrir. Encuentra el Pokémon que hace tu colección tuya.',
