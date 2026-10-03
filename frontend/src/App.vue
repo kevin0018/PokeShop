@@ -20,14 +20,21 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="app-shell">
+  <div class="app-shell" :class="{ 'battle-focused': game.battleFocused }">
     <a class="skip-link" href="#contenido">{{ t('skip') }}</a>
-    <BaseHeader />
+    <BaseHeader v-if="!game.battleFocused" />
     <main id="contenido" class="main-content" :class="{ 'home-main': route.path === '/' }">
       <RouterView />
     </main>
-    <CartNotice :message="cart.notice" :event="cart.noticeEvent" @dismiss="cart.dismissNotice" />
-    <p v-if="cart.storageWarning" class="storage-warning" role="alert">{{ cart.storageWarning }}</p>
-    <BaseFooter />
+    <CartNotice
+      v-if="!game.battleFocused"
+      :message="cart.notice"
+      :event="cart.noticeEvent"
+      @dismiss="cart.dismissNotice"
+    />
+    <p v-if="cart.storageWarning && !game.battleFocused" class="storage-warning" role="alert">
+      {{ cart.storageWarning }}
+    </p>
+    <BaseFooter v-if="!game.battleFocused" />
   </div>
 </template>

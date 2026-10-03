@@ -87,6 +87,7 @@ export const useAdventureStore = defineStore('adventure', () => {
   const shop = ref<Companion[]>([])
   const gyms = ref<Gym[]>([])
   const battle = ref<Battle | null>(null)
+  const battleFocused = ref(false)
   const loading = ref(false)
   const busy = ref(false)
   const error = ref('')
@@ -177,5 +178,18 @@ export const useAdventureStore = defineStore('adventure', () => {
     }
   }
 
-  return { trainer, shop, gyms, battle, loading, busy, error, active, load, refresh, mutate }
+  return {
+    trainer,
+    shop,
+    gyms,
+    battle,
+    battleFocused,
+    loading,
+    busy,
+    error,
+    active,
+    load,
+    refresh,
+    mutate,
+  }
 })

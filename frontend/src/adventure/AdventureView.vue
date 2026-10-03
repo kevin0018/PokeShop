@@ -76,6 +76,13 @@ const entering = ref(false)
 const revealing = ref(false)
 const arenaHeading = ref<HTMLElement>()
 const displayed = ref<Battle | null>(null)
+watch(
+  () => Boolean(arenaOpen.value && displayed.value),
+  (focused) => {
+    game.battleFocused = focused
+  },
+  { immediate: true },
+)
 const pcDialog = ref<HTMLDialogElement>()
 const box = ref(0)
 const boxCount = computed(() => Math.max(2, Math.ceil((game.trainer?.collection.length ?? 0) / 30)))
@@ -161,6 +168,7 @@ onMounted(async () => {
 })
 onUnmounted(() => {
   mounted = false
+  game.battleFocused = false
 })
 
 async function authenticate() {
@@ -217,7 +225,8 @@ async function challenge(gymId: number) {
     arenaOpen.value = true
     leaving.value = false
     await nextTick()
-    arenaHeading.value?.scrollIntoView({ block: 'start' })
+    window.scrollTo({ top: 0 })
+    arenaHeading.value?.focus()
   }
   revealing.value = true
   if (!reduced) await new Promise((resolve) => window.setTimeout(resolve, 450))
@@ -436,7 +445,12 @@ function health(pokemon: Fighter) {
       </div>
 
       <template v-if="arenaOpen && displayed && player && opponent">
-        <div ref="arenaHeading" class="gym-intro pokemon-palette" :data-type="gym?.type">
+        <div
+          ref="arenaHeading"
+          tabindex="-1"
+          class="gym-intro pokemon-palette"
+          :data-type="gym?.type"
+        >
           <Award :size="28" />
           <div>
             <p>{{ gym?.names[locale] }}</p>
@@ -750,7 +764,7 @@ function health(pokemon: Fighter) {
         </section>
       </template>
     </template>
-    <details class="adventure-rules">
+    <details v-if="!arenaOpen || !displayed" class="adventure-rules">
       <summary>{{ t('adventure.rulesTitle') }}</summary>
       <p>{{ t('adventure.rules') }}</p>
     </details>

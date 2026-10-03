@@ -1599,3 +1599,26 @@
     display: none;
   }
 }
+
+.battle-focused .main-content {
+  width: min(1440px, calc(100% - 48px));
+  padding: 24px 0;
+}
+.battle-focused .adventure.is-battling {
+  min-height: calc(100dvh - 48px);
+}
+.battle-focused .battle-arena {
+  height: clamp(320px, 48dvh, 580px);
+}
+@media (max-width: 700px) {
+  .battle-focused .main-content {
+    width: calc(100% - 24px);
+    padding: 12px 0;
+  }
+  .battle-focused .adventure.is-battling {
+    min-height: calc(100dvh - 24px);
+  }
+  .battle-focused .battle-arena {
+    height: clamp(260px, 40dvh, 390px);
+  }
+}
