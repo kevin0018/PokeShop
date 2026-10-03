@@ -8,6 +8,8 @@ The adventure is a private, single-player Kanto challenge alongside the public c
 
 [Mobile interface](adventure-mobile.png) · [Catalog purchases](catalog-trainer.png). Captured from the local preview.
 
+[Gym leaders](gyms.png) · [Gyms on mobile](gyms-mobile.png). Each gym uses its type palette and a classic trainer PNG from [Pokémon Showdown's trainer sprites](https://play.pokemonshowdown.com/sprites/trainers/). Trainer artwork belongs to its respective rights holders. A portrait failure leaves the leader name and gym controls available.
+
 ## Access and deployment
 
 Apply the additive migration before opening the adventure:

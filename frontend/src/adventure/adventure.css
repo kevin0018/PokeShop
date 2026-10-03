@@ -289,23 +289,46 @@
   display: flex;
   gap: 22px;
   align-items: center;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--pokemon-tint) 45%, var(--line));
+  border-left: 5px solid var(--pokemon-tint);
   border-radius: 18px;
   padding: 22px;
-  background: var(--surface);
+  background: linear-gradient(
+    110deg,
+    color-mix(in srgb, var(--pokemon-tint) 24%, var(--surface)),
+    color-mix(in srgb, var(--pokemon-tint) 8%, var(--surface))
+  );
 }
 .gym-medal {
+  position: relative;
   flex-shrink: 0;
   display: grid;
   justify-items: center;
   align-content: center;
   gap: 5px;
-  width: 82px;
-  height: 88px;
-  background: color-mix(in srgb, var(--pokemon-tint) 20%, var(--surface));
+  width: 128px;
+  height: 128px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--pokemon-tint) 38%, var(--surface)) 0 53%,
+    transparent 54%
+  );
   border-radius: 16px;
   color: var(--pokemon-ink);
   font-size: 12px;
+}
+.gym-status {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border: 1px solid color-mix(in srgb, var(--pokemon-tint) 45%, var(--line));
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
 }
 .gym-info {
   flex: 1;
@@ -327,7 +350,7 @@
   font-weight: 600;
 }
 .gym-locked {
-  background: var(--control-surface);
+  border-left-style: dashed;
 }
 .gym-stop .button {
   font-size: 12px;
@@ -755,8 +778,16 @@
     gap: 14px;
   }
   .gym-medal {
-    width: 60px;
-    height: 75px;
+    width: 88px;
+    height: 96px;
+  }
+  .gym-medal .trainer-portrait {
+    width: 88px;
+    height: 88px;
+  }
+  .gym-status {
+    padding: 3px 6px;
+    font-size: 10px;
   }
   .gym-info {
     min-width: 0;

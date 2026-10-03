@@ -8,6 +8,8 @@ La aventura es un reto privado de Kanto para un jugador, junto al catálogo púb
 
 [Interfaz móvil](adventure-mobile.png) · [Compras desde el catálogo](catalog-trainer.png). Capturas de la vista local.
 
+[Líderes de gimnasio](gyms.png) · [Gimnasios en móvil](gyms-mobile.png). Cada gimnasio utiliza la paleta de su tipo y un PNG clásico de [los sprites de entrenadores de Pokémon Showdown](https://play.pokemonshowdown.com/sprites/trainers/). Las ilustraciones pertenecen a sus respectivos titulares. Si falla el retrato, el nombre del líder y los controles siguen disponibles.
+
 ## Acceso y despliegue
 
 Antes de abrir la aventura, aplica la migración y crea una invitación:

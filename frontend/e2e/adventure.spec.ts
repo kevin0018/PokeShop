@@ -114,6 +114,33 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   await page.reload()
   await expect(page.locator('.team-slot.occupied')).toHaveCount(3)
   await page.getByRole('button', { name: 'Gimnasios', exact: true }).click()
+  await expect(page.locator('.gym-stop img.trainer-portrait')).toHaveCount(6)
+  await expect
+    .poll(() =>
+      page
+        .locator('.gym-stop img.trainer-portrait')
+        .evaluateAll((images) =>
+          images.every(
+            (image) =>
+              (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0,
+          ),
+        ),
+    )
+    .toBe(true)
+  const gymColors = await page
+    .locator('.gym-stop')
+    .evaluateAll((cards) => cards.map((card) => getComputedStyle(card).backgroundImage))
+  expect(new Set(gymColors).size).toBe(6)
+  for (const width of [320, 375, 414, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 })
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  }
+  await page.screenshot({ path: testInfo.outputPath('gyms-desktop.png'), fullPage: true })
+  await page.setViewportSize({ width: 375, height: 900 })
+  await page.screenshot({ path: testInfo.outputPath('gyms-mobile.png'), fullPage: true })
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await page.screenshot({ path: testInfo.outputPath('gyms-dark.png'), fullPage: true })
+  await page.emulateMedia({ colorScheme: 'light' })
   await expect(page.getByRole('button', { name: 'Retar a Brock', exact: true })).toBeEnabled()
   await expect(page.locator('.gym-stop').nth(1).getByRole('button')).toBeDisabled()
   await page.getByRole('button', { name: 'Retar a Brock', exact: true }).click()

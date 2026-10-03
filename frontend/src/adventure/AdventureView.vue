@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from 'v
 import { useI18n } from 'vue-i18n'
 import { Award, LockKeyhole, Coins, Plus, X, ArrowRight, Flag } from 'lucide-vue-next'
 import BattleSprite from './BattleSprite.vue'
+import TrainerPortrait from './TrainerPortrait.vue'
 import {
   type Battle,
   type BattleEvent,
@@ -602,10 +603,13 @@ function health(pokemon: Fighter) {
               :class="{ 'gym-locked': g.id > game.trainer.medals.length + 1 }"
             >
               <div class="gym-medal">
-                <Award v-if="g.id <= game.trainer.medals.length + 1" :size="36" /><LockKeyhole
-                  v-else
-                  :size="28"
-                /><span>{{ g.id }}</span>
+                <TrainerPortrait :gym-id="g.id" :leader="g.leader" />
+                <span class="gym-status"
+                  ><Award v-if="game.trainer.medals.includes(g.id)" :size="14" /><LockKeyhole
+                    v-else-if="g.id > game.trainer.medals.length + 1"
+                    :size="14"
+                  />{{ g.id }}</span
+                >
               </div>
               <div class="gym-info">
                 <small>{{ g.names[locale] }} &middot; {{ t(`types.${g.type}`, g.type) }}</small>
