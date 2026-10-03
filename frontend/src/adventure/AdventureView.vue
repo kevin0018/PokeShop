@@ -2,7 +2,17 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-import { Award, LockKeyhole, Plus, X, ArrowRight, Flag, History } from 'lucide-vue-next'
+import {
+  Award,
+  LockKeyhole,
+  Plus,
+  X,
+  ArrowRight,
+  Flag,
+  History,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-vue-next'
 import BattleSprite from './BattleSprite.vue'
 import TrainerPortrait from './TrainerPortrait.vue'
 import GymBackdrop from './GymBackdrop.vue'
@@ -201,9 +211,34 @@ function backToGyms() {
   tab.value = 'gyms'
 }
 
-function makeLead(id: number) {
-  draft.value = [id, ...draft.value.filter((value) => value !== id)]
+const draggedSlot = ref<number | null>(null)
+const teamSlots = ref<HTMLElement>()
+async function moveSlot(from: number, to: number, focus = false) {
+  if (game.active || blocked.value || from < 0 || from >= draft.value.length) return
+  to = Math.max(0, Math.min(to, draft.value.length - 1))
+  if (from === to) return
+  const reordered = [...draft.value]
+  const member = reordered.splice(from, 1)[0]!
+  reordered.splice(to, 0, member)
+  draft.value = reordered
   saved.value = false
+  if (focus) {
+    await nextTick()
+    teamSlots.value?.querySelectorAll<HTMLElement>('.team-slot')[to]?.focus()
+  }
+}
+function startDrag(event: DragEvent, index: number) {
+  if (game.active || blocked.value || !slots.value[index]) {
+    event.preventDefault()
+    return
+  }
+  draggedSlot.value = index
+  event.dataTransfer?.setData('text/plain', String(index))
+  if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move'
+}
+function dropSlot(index: number) {
+  if (draggedSlot.value !== null) void moveSlot(draggedSlot.value, index)
+  draggedSlot.value = null
 }
 
 async function saveTeam() {
@@ -625,12 +660,26 @@ function health(pokemon: Fighter) {
                 </button>
               </CenterReception>
               <p>{{ t('adventure.teamHelp') }}</p>
-              <div class="team-slots">
+              <p class="team-order-help">{{ t('adventure.reorderHelp') }}</p>
+              <div ref="teamSlots" class="team-slots">
                 <div
                   v-for="(member, i) in slots"
                   :key="i"
                   class="team-slot"
-                  :class="{ occupied: member }"
+                  :class="{ occupied: member, dragging: draggedSlot === i }"
+                  :draggable="Boolean(member) && !game.active && !blocked"
+                  :tabindex="member ? 0 : undefined"
+                  :aria-label="
+                    member
+                      ? `${name(member)} · ${t('adventure.slot', { number: i + 1 })}`
+                      : undefined
+                  "
+                  @dragstart="startDrag($event, i)"
+                  @dragend="draggedSlot = null"
+                  @dragover.prevent
+                  @drop.prevent="dropSlot(i)"
+                  @keydown.alt.left.prevent="moveSlot(i, i - 1, true)"
+                  @keydown.alt.right.prevent="moveSlot(i, i + 1, true)"
                 >
                   <div class="slot-header">
                     <small>{{ t('adventure.slot', { number: i + 1 }) }}</small>
@@ -656,15 +705,22 @@ function health(pokemon: Fighter) {
                   <template v-if="member">
                     <strong>{{ name(member) }}</strong>
                     <span v-if="i === 0" class="slot-lead">{{ t('adventure.lead') }}</span>
-                    <button
-                      v-if="i > 0"
-                      class="lead-button"
-                      :disabled="game.active || blocked"
-                      :aria-label="t('adventure.leadAction', { name: name(member) })"
-                      @click="makeLead(member.id)"
-                    >
-                      {{ t('adventure.lead') }}
-                    </button>
+                    <div class="slot-order-controls">
+                      <button
+                        :disabled="i === 0 || game.active || blocked"
+                        :aria-label="t('adventure.moveEarlier', { name: name(member) })"
+                        @click="moveSlot(i, i - 1, true)"
+                      >
+                        <ChevronLeft :size="18" />
+                      </button>
+                      <button
+                        :disabled="i === draft.length - 1 || game.active || blocked"
+                        :aria-label="t('adventure.moveLater', { name: name(member) })"
+                        @click="moveSlot(i, i + 1, true)"
+                      >
+                        <ChevronRight :size="18" />
+                      </button>
+                    </div>
                   </template>
                   <span v-else class="slot-empty-label">{{ t('adventure.emptySlot') }}</span>
                 </div>

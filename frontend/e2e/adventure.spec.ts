@@ -140,6 +140,35 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   await expect(page.getByText('Equipo guardado', { exact: true })).toBeVisible()
   await page.reload()
   await expect(page.locator('.team-slot.occupied')).toHaveCount(3)
+  await page.getByRole('button', { name: 'Mover a Squirtle antes', exact: true }).click()
+  await expect(page.locator('.team-slot > strong')).toHaveText([
+    'Squirtle',
+    'Bulbasaur',
+    'Charmander',
+  ])
+  await page.getByRole('button', { name: 'Guardar equipo', exact: true }).click()
+  await page.reload()
+  await expect(page.locator('.team-slot > strong')).toHaveText([
+    'Squirtle',
+    'Bulbasaur',
+    'Charmander',
+  ])
+  await page.locator('.team-slot').nth(1).dragTo(page.locator('.team-slot').first())
+  await expect(page.locator('.team-slot > strong')).toHaveText([
+    'Bulbasaur',
+    'Squirtle',
+    'Charmander',
+  ])
+  await page.locator('.team-slot').first().focus()
+  await page.keyboard.press('Alt+ArrowRight')
+  await expect(page.locator('.team-slot > strong')).toHaveText([
+    'Squirtle',
+    'Bulbasaur',
+    'Charmander',
+  ])
+  await expect(page.locator('.team-slot').nth(1)).toBeFocused()
+  await page.keyboard.press('Alt+ArrowLeft')
+  await page.getByRole('button', { name: 'Guardar equipo', exact: true }).click()
   for (const width of [320, 375, 414, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 })
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)

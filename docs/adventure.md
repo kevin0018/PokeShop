@@ -42,6 +42,8 @@ Selling from the collection requires confirmation and returns half the original 
 
 Battle entry uses two consecutive black wipes and skips them with reduced motion. During battle the header, footer, cart notices and rules are hidden, leaving the gym, fighters, turn history and battle controls in focus. Gym-specific scenery covers the viewport as well as the arena. Reloads retain this focused view; returning to the gyms restores navigation.
 
+The Center team can be reordered by dragging, with 44 px arrow controls for touch, or Alt + left/right arrows on a focused slot. The first slot leads the battle. Reordering changes the draft until Save team; reload restores the saved order. Team edits are disabled during active battles.
+
 ## Authority and recovery
 
 The Pokémon Center contains a clickable pixel-art PC. It opens the collection in a modal with 30-slot boxes, team selection and confirmed sales. Boxes display the collection in groups of 30; closing the PC keeps the draft team, which is persisted with Save team.

@@ -23,7 +23,10 @@ export const adventureEn = {
     'Choose up to six Pokémon. The first slot leads the battle. Your team fights at level 50.',
   slot: 'Slot {number}',
   lead: 'Lead',
-  leadAction: 'Make {name} the lead',
+  reorderHelp:
+    'Drag Pokémon or use the arrows to change their order. Keyboard: Alt + left/right arrow.',
+  moveEarlier: 'Move {name} earlier',
+  moveLater: 'Move {name} later',
   select: 'Select {name}',
   removeFromTeam: 'Remove {name} from the team',
   saveTeam: 'Save team',
@@ -172,7 +175,10 @@ export const adventureEs = {
     'Elige hasta seis Pokémon. La primera plaza inicia el combate. Tu equipo lucha a nivel 50.',
   slot: 'Plaza {number}',
   lead: 'Inicial',
-  leadAction: 'Poner a {name} primero',
+  reorderHelp:
+    'Arrastra los Pokémon o usa las flechas para cambiar el orden. Teclado: Alt + flecha izquierda/derecha.',
+  moveEarlier: 'Mover a {name} antes',
+  moveLater: 'Mover a {name} después',
   select: 'Seleccionar a {name}',
   removeFromTeam: 'Quitar a {name} del equipo',
   saveTeam: 'Guardar equipo',

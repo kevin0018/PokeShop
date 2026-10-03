@@ -42,6 +42,8 @@ La venta desde la colección requiere confirmación y devuelve la mitad del prec
 
 La entrada al combate utiliza dos franjas negras consecutivas y las omite con movimiento reducido. Durante la batalla se ocultan cabecera, footer, avisos del carrito y reglas: quedan el gimnasio, los Pokémon, el historial y los controles. El escenario de cada gimnasio ocupa el fondo de la ventana además de la arena. Al recargar se mantiene esta vista; volver a los gimnasios recupera la navegación.
 
+El equipo del Centro se puede reordenar arrastrando, con flechas de 44 px para controles táctiles o con Alt + flecha izquierda/derecha sobre una plaza con foco. La primera plaza inicia el combate. Se modifica el borrador hasta pulsar «Guardar equipo»; al recargar vuelve el orden guardado. Durante un combate activo no se puede editar el equipo.
+
 ## Autoridad y recuperación
 
 El Centro Pokémon incluye un PC en pixel art que se puede pulsar. Abre la colección en un modal con cajas de 30 plazas, selección del equipo y ventas con confirmación. Las cajas muestran la colección en grupos de 30; cerrar el PC conserva el borrador del equipo, que se guarda con «Guardar equipo».
