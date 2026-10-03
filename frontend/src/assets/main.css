@@ -1018,7 +1018,7 @@ nav {
 }
 @media (max-width: 850px) {
   .header-inner nav {
-    gap: 14px;
+    gap: 8px;
   }
   .header-inner {
     gap: 14px;
@@ -1297,7 +1297,7 @@ nav {
     max-width: 240px;
   }
   .site-header nav {
-    gap: 16px;
+    gap: 8px;
   }
 }
 @media (max-width: 540px) {
@@ -1511,6 +1511,7 @@ nav {
     grid-row: 2;
     display: flex;
     width: 100%;
+    gap: 4px;
     justify-content: space-between;
     margin: 0;
   }
@@ -1547,6 +1548,11 @@ nav {
   }
   .site-header nav .cart-link {
     padding: 8px 0;
+  }
+}
+@media (max-width: 400px) {
+  .site-header .cart-label {
+    display: none;
   }
 }
 @media (max-width: 350px) {

@@ -91,6 +91,7 @@ onUnmounted(() => clearTimeout(timer))
         ref="trigger"
         type="button"
         class="cart-link cart-preview-trigger"
+        :aria-label="t('cart')"
         :aria-expanded="open"
         aria-haspopup="dialog"
         @mouseenter="enter"
@@ -99,7 +100,7 @@ onUnmounted(() => clearTimeout(timer))
         @blur="blur"
         @click="click"
       >
-        <ShoppingBag :size="19" aria-hidden="true" /><span>{{ t('cart') }}</span>
+        <ShoppingBag :size="19" aria-hidden="true" /><span class="cart-label">{{ t('cart') }}</span>
         <span class="cart-count">{{ cart.count }}</span>
       </button>
     </PopoverAnchor>
