@@ -223,6 +223,12 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   await page.getByRole('button', { name: 'Mi equipo', exact: true }).click()
   await page.getByRole('button', { name: /Vender a Charmander/ }).click()
   await expect(page.getByRole('dialog')).toContainText('110 créditos')
+  for (const width of [320, 375, 1280]) {
+    await page.setViewportSize({ width, height: 900 })
+    const box = await page.getByRole('dialog').boundingBox()
+    expect(Math.abs(box!.x + box!.width / 2 - width / 2)).toBeLessThan(2)
+    expect(Math.abs(box!.y + box!.height / 2 - 450)).toBeLessThan(2)
+  }
   await page.getByRole('button', { name: 'Cancelar', exact: true }).click()
   await expect(page.locator('.team-slot.occupied')).toHaveCount(3)
   await page.getByRole('button', { name: /Vender a Charmander/ }).click()
