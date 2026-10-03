@@ -2,16 +2,19 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { Search, ArrowLeft, ArrowRight } from 'lucide-vue-next'
+import { Search, ArrowLeft, ArrowRight, Coins, ShoppingBag, UsersRound } from 'lucide-vue-next'
 import CatalogFilters from './CatalogFilters.vue'
 import PokemonCard from './PokemonCard.vue'
 import { request } from '../infrastructure/httpPokemonRepository'
 import { useCatalogStore } from '../application/catalogStore'
 import { useAdventureStore } from '@/adventure/store'
+import { useCartStore } from '@/cart/application/cartStore'
+import ShopCounter from './ShopCounter.vue'
 
 import type { Pokemon } from '../domain/pokemon'
 const { t } = useI18n()
 const game = useAdventureStore()
+const cart = useCartStore()
 const route = useRoute(),
   router = useRouter(),
   catalog = useCatalogStore()
@@ -72,17 +75,36 @@ request<typeof metadata.value>('/metadata')
 </script>
 <template>
   <section class="catalog-section">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">{{ t('allGenerations') }}</p>
-        <h1>{{ t('catalog') }}</h1>
+    <header class="shop-front">
+      <div class="shop-awning" aria-hidden="true"></div>
+      <div class="section-heading shop-heading">
+        <div>
+          <p class="eyebrow">{{ t('shopLabel') }}</p>
+          <h1>{{ t('catalog') }}</h1>
+        </div>
+        <ShopCounter />
       </div>
-      <span>{{ t('catalogIntro') }}</span>
-    </div>
-    <div v-if="game.trainer" class="catalog-trainer">
-      <span>{{ t('adventure.credits', { amount: game.trainer.credits }) }}</span>
-      <RouterLink to="/aventura">{{ t('adventure.teamTab') }}</RouterLink>
-      <p>{{ t('adventure.catalogHelp') }}</p>
+      <p class="shop-intro">{{ game.trainer ? t('adventure.catalogHelp') : t('catalogIntro') }}</p>
+      <div class="shop-checkout-bar">
+        <div v-if="game.trainer" class="catalog-trainer">
+          <Coins :size="22" aria-hidden="true" />
+          <div>
+            <small>{{ t('shopBalance') }}</small
+            ><strong>{{ t('adventure.credits', { amount: game.trainer.credits }) }}</strong>
+          </div>
+        </div>
+        <div class="shop-links">
+          <RouterLink v-if="game.trainer" to="/aventura"
+            ><UsersRound :size="17" aria-hidden="true" />{{ t('adventure.teamTab') }}</RouterLink
+          >
+          <RouterLink to="/carrito" class="shop-cart"
+            ><ShoppingBag :size="18" aria-hidden="true" />{{ t('cart')
+            }}<span>{{ cart.count }}</span></RouterLink
+          >
+        </div>
+      </div>
+    </header>
+    <div v-if="game.trainer" class="shop-playable">
       <label
         ><input
           type="checkbox"
@@ -152,133 +174,314 @@ request<typeof metadata.value>('/metadata')
 </template>
 
 <style>
+.catalog-section {
+  --shop-blue: #719acb;
+}
+.shop-front {
+  overflow: hidden;
+  margin-bottom: 24px;
+  border: 1px solid color-mix(in srgb, var(--shop-blue) 45%, var(--line));
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: 0 5px 0 color-mix(in srgb, var(--shop-blue) 16%, var(--surface));
+}
+.shop-awning {
+  height: 22px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--shop-blue) 0 42px,
+    color-mix(in srgb, var(--shop-blue) 22%, var(--surface)) 42px 84px
+  );
+  border-bottom: 4px solid color-mix(in srgb, var(--shop-blue) 45%, var(--surface));
+}
+.shop-front .shop-heading {
+  padding: 24px 28px 0;
+  margin: 0;
+  align-items: center;
+}
+.shop-heading .eyebrow {
+  color: var(--purple);
+}
+.shop-heading h1 {
+  font-size: clamp(28px, 4vw, 40px);
+}
+.shop-counter-art {
+  width: 180px;
+  height: 112px;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+}
+.shop-intro {
+  padding: 0 28px 24px;
+  max-width: 820px;
+  color: var(--muted-strong);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.shop-checkout-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px 28px;
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--shop-blue) 9%, var(--surface));
+}
 .catalog-trainer {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px 24px;
-  margin-bottom: 24px;
+  align-items: center;
+  gap: 12px;
+  color: var(--purple);
 }
-.catalog-trainer p {
-  flex-basis: 100%;
+.catalog-trainer > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.catalog-trainer small {
+  font-size: 11px;
   color: var(--muted-strong);
+}
+.catalog-trainer strong {
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.shop-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+.shop-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 13px;
+}
+.shop-cart {
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.shop-cart > span {
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--badge);
+  color: var(--purple);
+  font-size: 12px;
+}
+.shop-playable {
+  margin: 0 0 18px;
+  font-size: 13px;
+  color: var(--muted-strong);
+}
+.shop-playable label {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  cursor: pointer;
+}
+.shop-playable input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--purple);
 }
 .catalog-section .catalog-tools {
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
 }
 .catalog-section .search-field {
   flex: 1 1 260px;
 }
 .catalog-bento {
   display: grid;
-  gap: 16px;
+  gap: 20px;
 }
-.bento-block {
+.catalog-section .bento-block {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 16px;
-  grid-auto-rows: 200px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
 }
-.bento-block > .pokemon-card {
-  grid-column: span 2;
+.catalog-section .bento-block > .pokemon-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-radius: 16px;
+  background: var(--surface);
 }
-.bento-block[data-count='6'] > .pokemon-card:first-child {
-  grid-column: span 3;
-  grid-row: span 2;
+.catalog-section .bento-block .illustrated-card .card-art {
+  position: relative;
+  inset: auto;
+  display: block;
+  height: 220px;
+  flex-shrink: 0;
+  background: radial-gradient(
+    ellipse at 50% 60%,
+    color-mix(in srgb, var(--pokemon-tint) 30%, var(--surface)),
+    color-mix(in srgb, var(--pokemon-tint) 8%, var(--surface))
+  );
+  border-bottom: 1px solid var(--line);
 }
-.bento-block[data-count='6'] > .pokemon-card:nth-child(2),
-.bento-block[data-count='6'] > .pokemon-card:nth-child(3) {
-  grid-column: span 3;
+.catalog-section .bento-block .illustrated-card .card-art::before {
+  width: 150px;
+  height: 150px;
+  left: calc(50% - 75px);
+  right: auto;
+  top: 40px;
+  border-color: color-mix(in srgb, var(--pokemon-tint) 40%, transparent);
 }
-.bento-block[data-count='1'] > .pokemon-card {
-  grid-column: span 6;
+.catalog-section .bento-block .illustrated-card .card-art img {
+  width: 78%;
+  height: 84%;
+  left: 11%;
+  right: auto;
+  top: 24px;
 }
-.bento-block[data-count='2'] > .pokemon-card,
-.bento-block[data-count='4'] > .pokemon-card,
-.bento-block[data-count='5'] > .pokemon-card:nth-child(-n + 2) {
-  grid-column: span 3;
+.catalog-section .bento-block .illustrated-card > .type-list {
+  top: 14px;
+  left: 14px;
+  bottom: auto;
+  max-width: calc(100% - 74px);
 }
-@media (min-width: 901px) {
-  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-body,
-  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-body,
-  .bento-block[data-count='1'] .card-body {
-    width: 100%;
-    top: 0;
-    bottom: 0;
-    transform: none;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-  }
-  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-body > h3,
-  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-body > h3,
-  .bento-block[data-count='1'] .card-body > h3,
-  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-measures,
-  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-measures,
-  .bento-block[data-count='1'] .card-measures {
-    max-width: 42%;
-  }
-  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-bottom,
-  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-bottom,
-  .bento-block[data-count='1'] .card-bottom {
-    min-height: 44px;
-  }
-  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .add-button,
-  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .add-button,
-  .bento-block[data-count='1'] .add-button {
-    position: absolute;
-    right: 18px;
-    bottom: 14px;
-  }
-  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-art img,
-  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-art img,
-  .bento-block[data-count='1'] .card-art img {
-    width: 54%;
-    height: 95%;
-    left: auto;
-    right: 0;
-    top: 2%;
-  }
-  .bento-block[data-count='6'] > .pokemon-card:first-child .card-art img {
-    height: 76%;
-    width: 88%;
-    left: 6%;
-    top: 0;
-  }
-  .bento-block[data-count='6'] > .pokemon-card:first-child h3 {
-    font-size: 1.6rem;
-  }
-  .bento-block[data-count='6'] > .pokemon-card:first-child .card-body {
-    padding: 24px;
-  }
+.catalog-section .bento-block .illustrated-card .card-body {
+  position: relative;
+  inset: auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  padding: 16px;
+  background: var(--surface);
 }
-@media (min-width: 541px) and (max-width: 900px) {
-  .bento-block {
+.catalog-section .illustrated-card h3 {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+.catalog-section .illustrated-card .card-measures {
+  margin: 0;
+  font-size: 11px;
+}
+.catalog-section .illustrated-card .card-bottom {
+  margin-top: auto;
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+.catalog-section .illustrated-card .catalog-purchase.compact {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+.catalog-section .illustrated-card .card-bottom strong {
+  font-size: 18px;
+}
+.catalog-section .illustrated-card .add-button {
+  position: static;
+  width: 100%;
+  min-height: 44px;
+  border-radius: 10px;
+  gap: 8px;
+  font-size: 13px;
+}
+.catalog-section .illustrated-card .add-label {
+  display: inline;
+}
+@media (max-width: 900px) {
+  .catalog-section .bento-block {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-auto-rows: 250px;
-  }
-  .catalog-bento .bento-block > .pokemon-card:nth-child(n) {
-    grid-column: span 1;
-    grid-row: span 1;
-  }
-  .bento-block[data-count='6'] > .pokemon-card:first-child,
-  .bento-block[data-count='6'] > .pokemon-card:last-child,
-  .bento-block[data-count='1'] > .pokemon-card,
-  .bento-block[data-count='3'] > .pokemon-card:last-child,
-  .bento-block[data-count='5'] > .pokemon-card:last-child {
-    grid-column: span 2;
+    gap: 14px;
   }
 }
-@media (max-width: 540px) {
-  .bento-block {
-    grid-template-columns: minmax(0, 1fr);
-    grid-auto-rows: 260px;
+@media (max-width: 700px) {
+  .shop-front .shop-heading {
+    padding: 18px 16px 8px;
+    flex-wrap: nowrap;
+    gap: 10px;
   }
-  .catalog-bento .bento-block > .pokemon-card:nth-child(n) {
-    grid-column: span 1;
-    grid-row: span 1;
+  .shop-counter-art {
+    width: 120px;
+    height: 75px;
+  }
+  .shop-intro {
+    padding: 0 16px 18px;
+    font-size: 13px;
+  }
+  .shop-checkout-bar {
+    padding: 12px 16px;
+    gap: 8px;
+  }
+  .shop-links {
+    gap: 12px;
+  }
+  .shop-links a {
+    font-size: 12px;
+  }
+  .catalog-section .search-field {
+    flex-basis: 180px;
+    min-width: 0;
+  }
+  .catalog-section .bento-block {
+    gap: 12px;
+  }
+  .catalog-bento {
+    gap: 12px;
+  }
+  .catalog-section .bento-block .illustrated-card .card-art {
+    height: 160px;
+  }
+  .catalog-section .bento-block .illustrated-card .card-art::before {
+    width: 110px;
+    height: 110px;
+    left: calc(50% - 55px);
+    top: 35px;
+  }
+  .catalog-section .bento-block .illustrated-card .card-art img {
+    width: 92%;
+    height: 78%;
+    left: 4%;
+    top: 30px;
+  }
+  .catalog-section .bento-block .illustrated-card .card-body {
+    padding: 12px;
+  }
+  .catalog-section .illustrated-card h3 {
+    font-size: 15px;
+  }
+  .catalog-section .illustrated-card .card-bottom strong {
+    font-size: 14px;
+  }
+  .catalog-section .illustrated-card .add-button {
+    font-size: 11px;
+    padding-inline: 5px;
+  }
+  .catalog-section .illustrated-card .card-measures {
+    font-size: 9px;
+  }
+}
+@media (max-width: 350px) {
+  .catalog-section .bento-block {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .shop-counter-art {
+    width: 96px;
+    height: 60px;
   }
 }
 </style>

@@ -1,5 +1,7 @@
 export default {
   cartPage: 'Cart products',
+  shopLabel: 'Pokémon shop',
+  shopBalance: 'Available balance',
   ticketLabel: 'COMPANION PASS',
 
   filters: 'Filters',

@@ -35,7 +35,9 @@ const label = computed(() => {
       @click="cart.add(pokemon.id)"
     >
       <Check v-if="owned || inCart" :size="18" /><Plus v-else :size="18" />
-      <span :class="{ 'add-label': compact }">{{ label }}</span>
+      <span :class="{ 'add-label': compact }">{{
+        compact ? (owned ? t('adventure.owned') : inCart ? t('adventure.inCart') : t('add')) : label
+      }}</span>
     </button>
   </div>
 </template>

@@ -1,6 +1,8 @@
 import type en from './en'
 export default {
   cartPage: 'Productos del carrito',
+  shopLabel: 'Tienda Pokémon',
+  shopBalance: 'Saldo disponible',
   ticketLabel: 'PASE DE COMPAÑEROS',
 
   filters: 'Filtros',
