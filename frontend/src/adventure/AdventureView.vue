@@ -5,6 +5,7 @@ import { useRoute } from 'vue-router'
 import { Award, LockKeyhole, Coins, Plus, X, ArrowRight, Flag } from 'lucide-vue-next'
 import BattleSprite from './BattleSprite.vue'
 import TrainerPortrait from './TrainerPortrait.vue'
+import GymBackdrop from './GymBackdrop.vue'
 import {
   type Battle,
   type BattleEvent,
@@ -262,7 +263,7 @@ function health(pokemon: Fighter) {
 
 <template>
   <section class="adventure" :class="{ 'is-battling': arenaOpen && displayed }">
-    <header class="adventure-heading">
+    <header v-if="!arenaOpen || !displayed" class="adventure-heading">
       <h1>{{ t('adventure.title') }}</h1>
     </header>
 
@@ -357,7 +358,7 @@ function health(pokemon: Fighter) {
     </div>
 
     <template v-else>
-      <div class="trainer-strip">
+      <div v-if="!arenaOpen || !displayed" class="trainer-strip">
         <strong>{{ game.trainer.username }}</strong>
         <span
           ><Coins :size="18" />{{
@@ -376,11 +377,17 @@ function health(pokemon: Fighter) {
           <Award :size="28" />
           <div>
             <p>{{ gym?.names[locale] }}</p>
-            <h2>{{ gym?.leader }}</h2>
+            <h1>{{ gym?.leader }}</h1>
           </div>
           <span>{{ t('adventure.turn', { turn: displayed.turn }) }}</span>
         </div>
-        <div class="battle-arena" :class="motion" :aria-busy="blocked">
+        <div
+          class="battle-arena pokemon-palette"
+          :class="motion"
+          :data-type="gym?.type"
+          :aria-busy="blocked"
+        >
+          <GymBackdrop :type="gym?.type" />
           <div class="fighter-hud enemy-hud">
             <strong>{{ name(opponent) }}</strong
             ><span>{{ t('adventure.level', { level: opponent.level }) }}</span>
