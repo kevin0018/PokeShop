@@ -3,6 +3,7 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
+from src.adventure.content import SHOP_IDS
 from src.pokemon.infrastructure.postgres_repository import PostgresCatalog
 
 from .schemas import CatalogResponse, PokemonItems, PokemonResponse
@@ -33,10 +34,23 @@ async def list_pokemon(
     generation: int = Query(0, ge=0, le=20),
     forms: Literal["all", "default", "alternative"] = "all",
     region: str = Query("", max_length=30),
+    currency: Literal["eur", "credits"] = "eur",
+    playable: bool = False,
     catalog=Depends(get_catalog),
 ):
+    if currency == "credits" and sort in ("price_asc", "price_desc"):
+        sort = sort.replace("price", "credit")
+    selection = {"ids": SHOP_IDS} if playable else {}
     items, total = await catalog.search(
-        q, pokemon_type, sort, limit, offset, generation, forms, region=region
+        q,
+        pokemon_type,
+        sort,
+        limit,
+        offset,
+        generation,
+        forms,
+        region=region,
+        **selection,
     )
     return {"items": items, "total": total}
 

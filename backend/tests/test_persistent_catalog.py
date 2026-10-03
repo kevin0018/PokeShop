@@ -6,6 +6,7 @@ import unittest
 import httpx
 from sqlalchemy import text
 
+from src.adventure.content import SHOP_IDS, credit_price
 from src.pokemon.application.recommendations import recommend
 from src.pokemon.infrastructure.postgres_repository import (
     PostgresCatalog,
@@ -16,6 +17,23 @@ from src.pokemon.infrastructure.sync import Importer
 
 
 class PersistentCatalogTests(unittest.TestCase):
+    def test_adventure_credit_sort_matches_purchase_prices(self):
+        async def check():
+            repo = PostgresCatalog()
+            for direction in ("asc", "desc"):
+                items, total = await repo.search(
+                    ids=SHOP_IDS, sort="credit_" + direction, limit=100
+                )
+                self.assertEqual(total, len(SHOP_IDS))
+                self.assertEqual({p["id"] for p in items}, set(SHOP_IDS))
+                prices = [credit_price(p) for p in items]
+                self.assertEqual(prices, sorted(prices, reverse=direction == "desc"))
+            items, total = await repo.search(ids=SHOP_IDS, q="bulba")
+            self.assertEqual(total, 1)
+            self.assertEqual(items[0]["id"], 1)
+
+        self.run_async(check)
+
     def run_async(self, fn):
         async def run():
             try:

@@ -18,9 +18,12 @@ import PokemonImage from '@/components/PokemonImage.vue'
 import StatsPopover from './StatsPopover.vue'
 import RecommendationsPanel from './RecommendationsPanel.vue'
 import type { Pokemon } from '../domain/pokemon'
+import CatalogPurchase from '@/adventure/CatalogPurchase.vue'
+import { useAdventureStore } from '@/adventure/store'
 const route = useRoute()
 const catalog = useCatalogStore()
 const cart = useCartStore()
+const game = useAdventureStore()
 const pokemon = ref<Pokemon>()
 const loading = ref(true),
   error = ref(false)
@@ -107,23 +110,29 @@ const inCart = computed(
           <dd>{{ pokemon.region_names?.[locale] ?? pokemon.region ?? t('missingData') }}</dd>
         </div>
       </dl>
-      <p class="detail-price">{{ money(pokemon.price_cents) }}</p>
-      <p class="stock-label">
-        {{ pokemon.stock ? t('stock', pokemon.stock) : t('soldOutNow') }}
-      </p>
-      <button
-        class="button primary"
-        :disabled="inCart >= pokemon.stock"
-        @click="cart.add(pokemon.id)"
-      >
-        <Plus :size="19" />
-        {{
-          !pokemon.stock ? t('soldOut') : inCart >= pokemon.stock ? t('stockMax') : t('addCart')
-        }}</button
-      ><RouterLink v-if="inCart" class="back-link" to="/carrito"
-        >{{ t('viewCart', { count: inCart }) }} <ArrowRight :size="16"
-      /></RouterLink>
-      <p class="demo-note">{{ t('demoCatalog') }}</p>
+      <template v-if="game.trainer">
+        <CatalogPurchase :pokemon="pokemon" />
+        <p v-if="game.error" role="alert">{{ t(`adventure.errors.${game.error}`) }}</p>
+      </template>
+      <template v-else>
+        <p class="detail-price">{{ money(pokemon.price_cents) }}</p>
+        <p class="stock-label">
+          {{ pokemon.stock ? t('stock', pokemon.stock) : t('soldOutNow') }}
+        </p>
+        <button
+          class="button primary"
+          :disabled="inCart >= pokemon.stock"
+          @click="cart.add(pokemon.id)"
+        >
+          <Plus :size="19" />
+          {{
+            !pokemon.stock ? t('soldOut') : inCart >= pokemon.stock ? t('stockMax') : t('addCart')
+          }}</button
+        ><RouterLink v-if="inCart" class="back-link" to="/carrito"
+          >{{ t('viewCart', { count: inCart }) }} <ArrowRight :size="16"
+        /></RouterLink>
+        <p class="demo-note">{{ t('demoCatalog') }}</p>
+      </template>
     </div>
   </section>
   <RecommendationsPanel v-if="pokemon && !error" :ids="[pokemon.id]" />

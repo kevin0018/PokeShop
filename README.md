@@ -10,11 +10,11 @@ A Pokémon shop demo with a full-width Kanto starter collage, a complete importe
 
 [![Actual PokeShop interface](docs/home.png)](docs/home.png)
 
-[Catalog preview](docs/catalog.png) · [Cart preview](docs/cart.png) · [Adventure battle](docs/adventure.png) · [Mobile battle](docs/adventure-mobile.png)
+[Catalog preview](docs/catalog.png) · [Trainer catalog](docs/catalog-trainer.png) · [Cart preview](docs/cart.png) · [Adventure battle](docs/adventure.png) · [Mobile battle](docs/adventure-mobile.png)
 
 ## Highlights
 
-- `/aventura`: single-use owner-issued invitations, trainer accounts, 1,000 starting credits, a curated Kanto market, saved teams of up to six and six sequential gyms. First victories award badges and credits; battles resume after reload. Classic front/back sprites render server events. [Rules, access, deployment and test setup](docs/adventure.md). This addition must be migrated/deployed before it is available on the public demo.
+- `/aventura`: single-use owner-issued invitations, trainer accounts, 1,000 starting credits, purchases through the existing catalog, saved teams of up to six and six sequential gyms. First victories award badges and credits; battles resume after reload. Classic front/back sprites render server events. [Rules, access, deployment and test setup](docs/adventure.md). This addition must be migrated/deployed before it is available on the public demo.
 - `/`: a full-width collage of Bulbasaur, Charmander and Squirtle, without a card frame. Shared type colors shape the background; catalog and Kanto links remain. The homepage opens directly. Reduced motion disables decorative animation; the background stops offscreen and in hidden tabs.
 - `/catalogo`: 24 ordered results in compact blocks of six: one 3×2 card, two 3×1 cards and three 2×1 cards, on six desktop columns with 200 px rows and 16 px gaps. Partial blocks fill balanced rows. Tablet uses two columns and mobile one. Size is editorial, independent of height; dimensions remain visible. Draft filters retain URL state and explicit Apply/Cancel.
 - `/pokemon/:id`: localized biology, dimensions and origin. Statistics open from the top-right corner of the illustration on hover, keyboard focus or tap; click pins the popover and Escape/outside/close dismiss it. Abilities remain in the API but are omitted from the view.

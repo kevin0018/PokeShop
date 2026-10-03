@@ -106,7 +106,8 @@
   flex-wrap: wrap;
   font-size: 13px;
 }
-.adventure-tabs button {
+.adventure-tabs button,
+.adventure-tabs a {
   min-height: 44px;
   padding: 10px 16px;
   border: 1px solid var(--line);
@@ -251,62 +252,6 @@
 .team-note {
   padding: 14px 0;
   font-size: 13px;
-}
-.trainer-market {
-  margin-top: 26px;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-}
-.recruit-card {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 18px;
-  background:
-    radial-gradient(
-      ellipse at 80% 0%,
-      color-mix(in srgb, var(--pokemon-tint) 23%, transparent),
-      transparent 65%
-    ),
-    var(--surface);
-  min-width: 0;
-}
-.recruit-types {
-  display: flex;
-  gap: 6px;
-  font-size: 10px;
-  color: var(--pokemon-ink);
-}
-.recruit-card > img {
-  width: 100%;
-  height: 145px;
-  object-fit: contain;
-}
-.recruit-card > h3 {
-  font-size: 18px;
-  margin: 8px 0 6px;
-}
-.recruit-card > small {
-  color: var(--muted-strong);
-  font-size: 10px;
-}
-.recruit-price {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin: 16px 0;
-  font-size: 14px;
-  font-variant-numeric: tabular-nums;
-}
-.recruit-card .button {
-  margin-top: auto;
-  justify-content: center;
-  font-size: 12px;
-  min-height: 44px;
-  white-space: normal;
-  text-align: center;
 }
 .gym-route {
   padding: 0;
@@ -678,9 +623,6 @@
   }
 }
 @media (max-width: 900px) {
-  .trainer-market {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
   .team-slots {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -757,7 +699,8 @@
   .adventure-tabs {
     gap: 6px;
   }
-  .adventure-tabs button {
+  .adventure-tabs button,
+  .adventure-tabs a {
     padding: 10px;
     font-size: 12px;
   }
@@ -780,26 +723,6 @@
   }
   .team-slot > span {
     font-size: 10px;
-  }
-  .trainer-market {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-  .recruit-card {
-    padding: 12px;
-  }
-  .recruit-card > img {
-    height: 120px;
-  }
-  .recruit-card > h3 {
-    font-size: 16px;
-  }
-  .recruit-price {
-    font-size: 12px;
-  }
-  .recruit-card .button {
-    padding: 10px 6px;
-    font-size: 11px;
   }
   .gym-stop {
     flex-wrap: wrap;

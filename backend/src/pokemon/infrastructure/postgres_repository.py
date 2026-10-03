@@ -49,11 +49,17 @@ class PostgresCatalog:
             clauses.append("p.id = ANY(:ids)")
             params["ids"] = ids
         where = " WHERE " + " AND ".join(clauses) if clauses else ""
+        # Same rounding and lower bound as adventure.content.credit_price.
+        credit_price_sql = """GREATEST(100, ((100 + 2 * GREATEST(0,
+            (SELECT COALESCE(SUM(value::int),0) FROM jsonb_each_text(p.data->'stats'))
+            - 250) + 5) / 10) * 10)"""
         order = {
             "number": "p.id",
             "name": "p.data->>'name'",
             "price_asc": "o.price_cents",
             "price_desc": "o.price_cents DESC",
+            "credit_asc": credit_price_sql,
+            "credit_desc": credit_price_sql + " DESC",
             "height_asc": "(p.data->>'height_m')::float",
             "height_desc": "(p.data->>'height_m')::float DESC",
             "weight_asc": "(p.data->>'weight_kg')::float",

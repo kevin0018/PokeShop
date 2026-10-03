@@ -9,10 +9,13 @@ import BaseFooter from './components/BaseFooter.vue'
 import { onMounted } from 'vue'
 
 import { useCartStore } from './cart/application/cartStore'
+import { useAdventureStore } from './adventure/store'
 
 const cart = useCartStore()
+const game = useAdventureStore()
 onMounted(() => {
   void cart.hydrate()
+  void game.load()
 })
 </script>
 

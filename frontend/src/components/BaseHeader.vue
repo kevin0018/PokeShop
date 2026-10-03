@@ -3,6 +3,8 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 import CartPreview from '@/cart/presentation/CartPreview.vue'
 import PreferencesControls from './PreferencesControls.vue'
+import { useAdventureStore } from '@/adventure/store'
+const game = useAdventureStore()
 </script>
 <template>
   <header class="site-header">
@@ -15,7 +17,10 @@ import PreferencesControls from './PreferencesControls.vue'
         <RouterLink to="/" class="catalog-link">{{ t('homeNav') }}</RouterLink
         ><RouterLink to="/catalogo" class="catalog-link">{{ t('catalog') }}</RouterLink
         ><RouterLink to="/aventura" class="catalog-link">{{ t('adventure.nav') }}</RouterLink
-        ><CartPreview />
+        ><RouterLink v-if="game.trainer" to="/aventura" class="catalog-link">{{
+          t('adventure.credits', { amount: game.trainer.credits })
+        }}</RouterLink
+        ><CartPreview v-else />
       </nav>
       <PreferencesControls />
     </div>

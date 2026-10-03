@@ -15,7 +15,6 @@ export const adventureEn = {
   credits: '{amount} credits',
   medals: '{count} / 6 badges',
   teamTab: 'My team',
-  shopTab: 'Trainer market',
   gymsTab: 'Gyms',
   teamTitle: 'Who is coming with you?',
   teamHelp:
@@ -29,17 +28,16 @@ export const adventureEn = {
   teamSaved: 'Team saved',
   unsavedTeam: 'Save your team before challenging a gym.',
   collectionTitle: 'Your collection',
-  emptyCollection: 'Your first companion is waiting in the trainer market.',
+  emptyCollection: 'Buy Pokémon in the catalog to add them to your team.',
   emptySlot: 'Open slot',
   teamFull: 'Your six slots are full. Remove a companion to choose another.',
-  shopTitle: 'Make your credits count.',
-  shopHelp:
-    'A permanent companion for your collection. Prices in credits belong to this adventure; the catalog cart is a separate demonstration.',
-  buy: 'Recruit {name}',
+  catalogHelp:
+    'Buy Pokémon with your credits. 26 Kanto Pokémon are currently available for battles.',
+  notPlayable: 'Not available for battles yet',
+  onlyPlayable: 'Only Pokémon available for battles',
+  buy: 'Buy {name}',
   owned: 'In your collection',
   insufficient: 'Not enough credits',
-  emptyMarket: 'The trainer market is not ready yet. Try again later.',
-  totalStats: 'Base stat total: {amount}',
   gymsTitle: 'The road to six badges.',
   gymsHelp:
     'Win to unlock the next gym. Your first victory earns credits; rematches are free practice.',
@@ -136,7 +134,6 @@ export const adventureEs = {
   credits: '{amount} créditos',
   medals: '{count} / 6 medallas',
   teamTab: 'Mi equipo',
-  shopTab: 'Mercado de entrenadores',
   gymsTab: 'Gimnasios',
   teamTitle: '¿Quién viene contigo?',
   teamHelp:
@@ -150,17 +147,16 @@ export const adventureEs = {
   teamSaved: 'Equipo guardado',
   unsavedTeam: 'Guarda el equipo antes de retar a un gimnasio.',
   collectionTitle: 'Tu colección',
-  emptyCollection: 'Tu primer compañero te espera en el mercado de entrenadores.',
+  emptyCollection: 'Compra Pokémon en el catálogo para añadirlos a tu equipo.',
   emptySlot: 'Plaza libre',
   teamFull: 'Las seis plazas están completas. Quita un compañero para elegir otro.',
-  shopTitle: 'Que cada crédito cuente.',
-  shopHelp:
-    'Un compañero permanente para tu colección. Los precios en créditos son de esta aventura; el carrito del catálogo es una demostración aparte.',
-  buy: 'Reclutar a {name}',
+  catalogHelp:
+    'Compra Pokémon con tus créditos. Por ahora hay 26 Pokémon de Kanto disponibles para combatir.',
+  notPlayable: 'Todavía no disponible para combatir',
+  onlyPlayable: 'Solo Pokémon disponibles para combatir',
+  buy: 'Comprar a {name}',
   owned: 'En tu colección',
   insufficient: 'Créditos insuficientes',
-  emptyMarket: 'El mercado de entrenadores aún no está listo. Vuelve a intentarlo más tarde.',
-  totalStats: 'Estadísticas base totales: {amount}',
   gymsTitle: 'El camino a seis medallas.',
   gymsHelp:
     'Gana para desbloquear el siguiente gimnasio. La primera victoria da créditos; las revanchas son prácticas gratuitas.',

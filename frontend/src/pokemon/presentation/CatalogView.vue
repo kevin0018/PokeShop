@@ -7,9 +7,11 @@ import CatalogFilters from './CatalogFilters.vue'
 import PokemonCard from './PokemonCard.vue'
 import { request } from '../infrastructure/httpPokemonRepository'
 import { useCatalogStore } from '../application/catalogStore'
+import { useAdventureStore } from '@/adventure/store'
 
 import type { Pokemon } from '../domain/pokemon'
 const { t } = useI18n()
+const game = useAdventureStore()
 const route = useRoute(),
   router = useRouter(),
   catalog = useCatalogStore()
@@ -42,6 +44,10 @@ async function load() {
   const params = new URLSearchParams({ limit: '24', offset: String((page.value - 1) * 24) })
   for (const key of ['q', 'type', 'region', 'generation', 'forms', 'sort'])
     if (value(key)) params.set(key, value(key))
+  if (game.trainer) {
+    params.set('currency', 'credits')
+    if (value('playable') !== 'false') params.set('playable', 'true')
+  }
   try {
     const result = await request<{ items: Pokemon[]; total: number }>(`?${params}`, current.signal)
     if (current.signal.aborted) return
@@ -57,7 +63,7 @@ async function load() {
   }
 }
 let controller: AbortController | undefined
-watch(() => route.query, load, { immediate: true })
+watch([() => route.query, () => Boolean(game.trainer)], load, { immediate: true })
 import { onUnmounted } from 'vue'
 onUnmounted(() => controller?.abort())
 request<typeof metadata.value>('/metadata')
@@ -72,6 +78,22 @@ request<typeof metadata.value>('/metadata')
         <h1>{{ t('catalog') }}</h1>
       </div>
       <span>{{ t('catalogIntro') }}</span>
+    </div>
+    <div v-if="game.trainer" class="catalog-trainer">
+      <span>{{ t('adventure.credits', { amount: game.trainer.credits }) }}</span>
+      <RouterLink to="/aventura">{{ t('adventure.teamTab') }}</RouterLink>
+      <p>{{ t('adventure.catalogHelp') }}</p>
+      <label
+        ><input
+          type="checkbox"
+          :checked="value('playable') !== 'false'"
+          @change="change('playable', ($event.target as HTMLInputElement).checked ? '' : 'false')"
+        />
+        {{ t('adventure.onlyPlayable') }}</label
+      >
+    </div>
+    <div v-if="game.trainer && game.error" class="state-box" role="alert">
+      {{ t(`adventure.errors.${game.error}`) }}
     </div>
     <div class="catalog-tools">
       <label class="search-field"
@@ -130,6 +152,16 @@ request<typeof metadata.value>('/metadata')
 </template>
 
 <style>
+.catalog-trainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin-bottom: 24px;
+}
+.catalog-trainer p {
+  flex-basis: 100%;
+  color: var(--muted-strong);
+}
 .catalog-section .catalog-tools {
   display: flex;
   flex-wrap: wrap;

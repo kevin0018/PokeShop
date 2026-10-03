@@ -2,7 +2,6 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Award, LockKeyhole, Coins, Plus, X, ArrowRight, Flag } from 'lucide-vue-next'
-import PokemonImage from '@/components/PokemonImage.vue'
 import BattleSprite from './BattleSprite.vue'
 import { type Battle, type BattleEvent, type Fighter, useAdventureStore } from './store'
 
@@ -12,7 +11,7 @@ const mode = ref<'login' | 'register'>('login')
 const username = ref(''),
   password = ref(''),
   invitation = ref('')
-const tab = ref<'team' | 'shop' | 'gyms'>('team')
+const tab = ref<'team' | 'gyms'>('team')
 const draft = ref<number[]>([])
 const saved = ref(false)
 const arenaOpen = ref(false)
@@ -79,7 +78,7 @@ async function authenticate() {
   if (result) {
     password.value = ''
     invitation.value = ''
-    tab.value = game.trainer?.collection.length ? 'team' : 'shop'
+    tab.value = 'team'
     arenaOpen.value = game.active
   }
 }
@@ -456,13 +455,14 @@ function health(pokemon: Fighter) {
         </button>
         <nav class="adventure-tabs" :aria-label="t('adventure.nav')">
           <button
-            v-for="item in ['team', 'shop', 'gyms'] as const"
+            v-for="item in ['team', 'gyms'] as const"
             :key="item"
             :aria-pressed="tab === item"
             @click="tab = item"
           >
             {{ t(`adventure.${item}Tab`) }}
           </button>
+          <RouterLink to="/catalogo">{{ t('catalog') }}</RouterLink>
         </nav>
 
         <section v-if="tab === 'team'" class="adventure-panel">
@@ -520,9 +520,9 @@ function health(pokemon: Fighter) {
           <h3>{{ t('adventure.collectionTitle') }}</h3>
           <div v-if="!game.trainer.collection.length" class="adventure-empty">
             <p>{{ t('adventure.emptyCollection') }}</p>
-            <button class="button secondary" @click="tab = 'shop'">
-              {{ t('adventure.shopTab') }}
-            </button>
+            <RouterLink class="button secondary" to="/catalogo">
+              {{ t('catalog') }}
+            </RouterLink>
           </div>
           <div v-else class="collection-picker">
             <button
@@ -542,53 +542,6 @@ function health(pokemon: Fighter) {
             </button>
           </div>
           <p v-if="draft.length === 6" class="team-note">{{ t('adventure.teamFull') }}</p>
-        </section>
-
-        <section v-if="tab === 'shop'" class="adventure-panel">
-          <h2>{{ t('adventure.shopTitle') }}</h2>
-          <p>{{ t('adventure.shopHelp') }}</p>
-          <p v-if="!game.shop.length" class="state-box">{{ t('adventure.emptyMarket') }}</p>
-          <div class="trainer-market">
-            <article
-              v-for="member in game.shop"
-              :key="member.id"
-              class="recruit-card pokemon-palette"
-              :data-type="member.types[0]"
-            >
-              <div class="recruit-types">
-                <span v-for="type in member.types" :key="type">{{ t(`types.${type}`, type) }}</span>
-              </div>
-              <PokemonImage :src="member.image_url" :name="name(member)" />
-              <h3>{{ name(member) }}</h3>
-              <small>{{
-                t('adventure.totalStats', {
-                  amount: Object.values(member.stats).reduce((sum, value) => sum + value, 0),
-                })
-              }}</small>
-              <strong class="recruit-price"
-                ><Coins :size="16" />{{
-                  t('adventure.credits', { amount: n(member.price) })
-                }}</strong
-              >
-              <button
-                class="button secondary"
-                :disabled="
-                  blocked ||
-                  game.trainer.collection.some((p) => p.id === member.id) ||
-                  game.trainer.credits < member.price
-                "
-                @click="game.mutate('/purchases', 'POST', { pokemon_id: member.id })"
-              >
-                {{
-                  game.trainer.collection.some((p) => p.id === member.id)
-                    ? t('adventure.owned')
-                    : game.trainer.credits < member.price
-                      ? t('adventure.insufficient')
-                      : t('adventure.buy', { name: name(member) })
-                }}
-              </button>
-            </article>
-          </div>
         </section>
 
         <section v-if="tab === 'gyms'" class="adventure-panel">

@@ -6,7 +6,7 @@ La aventura es un reto privado de Kanto para un jugador, junto al catálogo púb
 
 [![Interfaz real del combate local](adventure.png)](adventure.png)
 
-[Interfaz móvil](adventure-mobile.png). Capturas de la vista local con los controles de desarrollo ocultos.
+[Interfaz móvil](adventure-mobile.png) · [Compras desde el catálogo](catalog-trainer.png). Capturas de la vista local.
 
 ## Acceso y despliegue
 
@@ -24,7 +24,7 @@ Configura `ALLOWED_ORIGINS` con los orígenes exactos del frontend, incluido HTT
 
 ## Reglas y economía
 
-- Mercado jugable de 26 Pokémon de Kanto; el catálogo público conserva todas las especies y formas. Un ejemplar por especie y entrenador, sin intercambios, venta, evolución ni pagos reales.
+- Las compras reutilizan `/catalogo`, sus tarjetas, búsqueda, filtros, paginación y fichas. Con sesión de entrenador se muestran los precios en créditos del servidor y se compra directamente para la colección. El catálogo filtra inicialmente los 26 Pokémon de Kanto que pueden combatir; desmarcar el filtro muestra todas las especies y señala las no disponibles. El orden por precio utiliza créditos. La demostración sin sesión mantiene su carrito en euros. Un ejemplar por especie y entrenador, sin intercambios, venta, evolución ni pagos reales.
 - Precio en créditos: `100 + 2 × máximo(0, suma de estadísticas base − 250)`, redondeado a decenas y con mínimo 100. Es independiente de los precios de demostración en euros y de su stock compartido. Es una política inicial que necesita pruebas de equilibrio.
 - Tus Pokémon tienen nivel 50; los gimnasios, niveles 28, 34, 38, 42, 46 y 50. Los equipos y cuatro movimientos están definidos en `backend/src/adventure/content.py`.
 - Incluye daño físico/especial, bonificación por tipo propio, efectividad moderna con tipos dobles e inmunidades, velocidad, prioridad, precisión, PP, cambios y Forcejeo con retroceso. Los empates de velocidad/prioridad se resuelven al azar en el servidor. El rival elige el mayor daño estimado ajustado por precisión.

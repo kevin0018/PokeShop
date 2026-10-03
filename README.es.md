@@ -10,11 +10,11 @@ Una tienda Pokémon de demostración con portada a todo el ancho con los tres in
 
 [![Interfaz real de PokeShop](docs/home.png)](docs/home.png)
 
-[Vista del catálogo](docs/catalog.png) · [Vista del carrito](docs/cart.png) · [Combate de aventura](docs/adventure.png) · [Combate en móvil](docs/adventure-mobile.png)
+[Vista del catálogo](docs/catalog.png) · [Catálogo con entrenador](docs/catalog-trainer.png) · [Vista del carrito](docs/cart.png) · [Combate de aventura](docs/adventure.png) · [Combate en móvil](docs/adventure-mobile.png)
 
 ## Funcionalidades
 
-- `/aventura`: invitaciones de un solo uso emitidas por el propietario, cuentas de entrenador, 1.000 créditos iniciales, mercado de Kanto, equipos guardados de hasta seis y seis gimnasios consecutivos. Las primeras victorias conceden medallas y créditos; recargar conserva el combate. Los sprites clásicos de frente y espalda representan eventos del servidor. [Reglas, acceso, despliegue y pruebas](docs/adventure.es.md). La demo pública necesita migración y despliegue para ofrecer esta ampliación.
+- `/aventura`: invitaciones de un solo uso emitidas por el propietario, cuentas de entrenador, 1.000 créditos iniciales, compras desde el catálogo existente, equipos guardados de hasta seis y seis gimnasios consecutivos. Las primeras victorias conceden medallas y créditos; recargar conserva el combate. Los sprites clásicos de frente y espalda representan eventos del servidor. [Reglas, acceso, despliegue y pruebas](docs/adventure.es.md). La demo pública necesita migración y despliegue para ofrecer esta ampliación.
 - `/`: collage a todo el ancho de Bulbasaur, Charmander y Squirtle, sin marco de tarjeta. Los colores por tipo forman el fondo; se mantienen los accesos al catálogo y Kanto. La portada se muestra directamente. El movimiento reducido desactiva las animaciones decorativas; el fondo se detiene fuera de pantalla y con la pestaña oculta.
 - `/catalogo`: 24 resultados ordenados en bloques compactos de seis: una tarjeta 3×2, dos 3×1 y tres 2×1, sobre seis columnas de escritorio con filas de 200 px y separación de 16 px. Los bloques incompletos forman filas equilibradas. Dos columnas en tablet y una en móvil. El tamaño es editorial, independiente de la altura; las dimensiones siguen visibles. Los filtros provisionales conservan estado en URL y Aplicar/Cancelar.
 - `/pokemon/:id`: biología localizada, dimensiones y origen. Las estadísticas se abren desde la esquina superior derecha de la ilustración con hover, foco o toque; un clic fija el popover y Escape, pulsación fuera o Cerrar lo cierran. Las habilidades permanecen en la API, pero se omiten en la vista.

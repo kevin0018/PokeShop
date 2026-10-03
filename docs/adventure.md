@@ -6,7 +6,7 @@ The adventure is a private, single-player Kanto challenge alongside the public c
 
 [![Actual local battle interface](adventure.png)](adventure.png)
 
-[Mobile interface](adventure-mobile.png). Captured from the local preview with development controls hidden.
+[Mobile interface](adventure-mobile.png) · [Catalog purchases](catalog-trainer.png). Captured from the local preview.
 
 ## Access and deployment
 
@@ -24,7 +24,7 @@ Set `ALLOWED_ORIGINS` to the exact public frontend origin(s), including the HTTP
 
 ## Rules and economy
 
-- The playable market is a curated set of 26 Kanto Pokémon; the public catalog remains complete. There is one copy of each species per trainer, no trading, selling, evolution or real payments.
+- Purchases reuse `/catalogo`, its existing cards, search, filters, pagination and detail views. Signed-in trainers see server-priced credits and buy directly into their collection. The catalog initially filters to the 26 Kanto Pokémon currently supported in battle; turning off the playable filter shows the full catalog and marks unsupported Pokémon. Price ordering uses credit prices. The anonymous demonstration keeps its euro cart. There is one copy of each species per trainer, no trading, selling, evolution or real payments.
 - Credit price is `100 + 2 × max(0, sum(base stats) − 250)`, rounded to the nearest ten, with a minimum of 100. This is independent of the catalog's euro demonstration prices and shared fictional stock. It is an initial balancing policy, not a competitive valuation.
 - Trainer Pokémon use level 50. Gym levels are 28, 34, 38, 42, 46 and 50. Teams and four-move loadouts are defined in `backend/src/adventure/content.py`.
 - Implemented: physical/special damage, STAB, modern type effectiveness (including dual types/immunity), speed, move priority, accuracy, PP, switching and Struggle with recoil. Equal speed/priority uses a server-side random tie-break. Opponents choose the move with the greatest estimated damage adjusted for accuracy.

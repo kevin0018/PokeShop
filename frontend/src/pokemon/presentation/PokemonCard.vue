@@ -6,8 +6,11 @@ import type { Pokemon } from '../domain/pokemon'
 import { useCartStore } from '@/cart/application/cartStore'
 import { money, pokemonName, number, typeName, decimal } from '@/shared/presentation/format'
 import PokemonImage from '@/components/PokemonImage.vue'
+import CatalogPurchase from '@/adventure/CatalogPurchase.vue'
+import { useAdventureStore } from '@/adventure/store'
 defineProps<{ pokemon: Pokemon; bento?: boolean }>()
 const cart = useCartStore()
+const game = useAdventureStore()
 </script>
 <template>
   <article
@@ -22,7 +25,7 @@ const cart = useCartStore()
     >
       <span class="dex-number">{{ number(pokemon.species_id ?? pokemon.id) }}</span
       ><PokemonImage :src="pokemon.image_url" :name="pokemonName(pokemon)" />
-      <span v-if="!pokemon.stock" class="sold-out">{{ t('soldOut') }}</span>
+      <span v-if="!game.trainer && !pokemon.stock" class="sold-out">{{ t('soldOut') }}</span>
     </RouterLink>
     <div class="type-list">
       <span v-for="type in pokemon.types" :key="type" class="type-tag" :data-type="type">{{
@@ -47,19 +50,22 @@ const cart = useCartStore()
         >
       </p>
       <div class="card-bottom">
-        <strong>{{ money(pokemon.price_cents) }}</strong
-        ><button
-          class="add-button"
-          :disabled="
-            !pokemon.stock ||
-            (cart.lines.find((line) => line.pokemon.id === pokemon.id)?.quantity ?? 0) >=
-              pokemon.stock
-          "
-          :aria-label="t('addPokemon', { name: pokemonName(pokemon) })"
-          @click="cart.add(pokemon.id)"
-        >
-          <Plus :size="18" /><span class="add-label">{{ t('add') }}</span>
-        </button>
+        <CatalogPurchase v-if="game.trainer" :pokemon="pokemon" compact />
+        <template v-else>
+          <strong>{{ money(pokemon.price_cents) }}</strong
+          ><button
+            class="add-button"
+            :disabled="
+              !pokemon.stock ||
+              (cart.lines.find((line) => line.pokemon.id === pokemon.id)?.quantity ?? 0) >=
+                pokemon.stock
+            "
+            :aria-label="t('addPokemon', { name: pokemonName(pokemon) })"
+            @click="cart.add(pokemon.id)"
+          >
+            <Plus :size="18" /><span class="add-label">{{ t('add') }}</span>
+          </button>
+        </template>
       </div>
     </div>
   </article>
