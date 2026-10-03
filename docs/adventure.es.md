@@ -40,6 +40,8 @@ La venta desde la colección requiere confirmación y devuelve la mitad del prec
 
 ## Autoridad y recuperación
 
+El Centro Pokémon incluye un PC en pixel art que se puede pulsar. Abre la colección en un modal con cajas de 30 plazas, selección del equipo y ventas con confirmación. Las cajas muestran la colección en grupos de 30; cerrar el PC conserva el borrador del equipo, que se guarda con «Guardar equipo».
+
 El servidor calcula precios, saldo, propiedad, turnos y decisiones del rival. Las transacciones bloquean primero al entrenador para serializar operaciones. Cada batalla guarda su estado y revisión; un turno repetido o antiguo devuelve 409. Solo puede existir una batalla activa por entrenador. Se comprueba la propiedad al leer y modificar cada combate. Recargar o cerrar sesión conserva el progreso y la batalla.
 
 El navegador representa los eventos del servidor y su estado final. Si se pierde una respuesta, recupera el estado antes de reintentar. El carrito de demostración no concede Pokémon para la aventura.

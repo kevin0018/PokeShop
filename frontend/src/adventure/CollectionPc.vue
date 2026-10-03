@@ -1,0 +1,35 @@
+<template>
+  <svg
+    class="collection-pc-art"
+    viewBox="0 0 128 160"
+    shape-rendering="crispEdges"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      fill="#334351"
+      d="M20 4H108V8H116V88H112V94H80V108H120V116H124V148H116V156H12V148H4V116H8V108H48V94H16V88H12V12H20Z"
+    />
+    <path fill="#b7c9ca" d="M20 12H108V84H20Z" />
+    <path fill="#e2e9df" d="M20 12H108V20H20ZM20 20H28V76H20Z" />
+    <path fill="#6c8792" d="M28 24H100V72H28Z" />
+    <path fill="#254d53" d="M32 28H96V68H32Z" />
+    <path fill="#86c6a7" d="M36 32H92V64H36Z" />
+    <path
+      fill="#b5e4bb"
+      d="M40 36H88V40H40ZM40 44H48V48H40ZM52 44H60V48H52ZM64 44H72V48H64ZM76 44H84V48H76ZM40 52H48V56H40ZM52 52H60V56H52ZM64 52H72V56H64ZM76 52H84V56H76Z"
+    />
+    <path fill="#d76b80" d="M32 76H44V80H32Z" />
+    <path fill="#52a985" d="M92 76H100V80H92Z" />
+    <path fill="#6c8792" d="M52 94H76V108H52Z" />
+    <path fill="#b7c9ca" d="M12 112H116V144H12Z" />
+    <path fill="#e2e9df" d="M12 112H116V118H12Z" />
+    <path fill="#6c8792" d="M24 124H84V136H24Z" />
+    <path
+      fill="#d6e2d8"
+      d="M28 124H32V128H28ZM36 124H40V128H36ZM44 124H48V128H44ZM52 124H56V128H52ZM60 124H64V128H60ZM68 124H72V128H68ZM76 124H80V128H76ZM28 132H40V136H28ZM44 132H68V136H44ZM72 132H80V136H72Z"
+    />
+    <path fill="#334351" d="M92 124H108V128H92ZM92 132H108V136H92Z" />
+    <path fill="#6c8792" d="M20 144H108V148H20Z" />
+  </svg>
+</template>

@@ -40,6 +40,8 @@ Selling from the collection requires confirmation and returns half the original 
 
 ## Authority and recovery
 
+The Pokémon Center contains a clickable pixel-art PC. It opens the collection in a modal with 30-slot boxes, team selection and confirmed sales. Boxes display the collection in groups of 30; closing the PC keeps the draft team, which is persisted with Save team.
+
 The API accepts only intents. It loads prices, balances, ownership, moves and opponent decisions itself. Trainer row locks serialize purchases, team updates and battles. Each battle holds a server-side snapshot and revision; stale/replayed turns return 409. One active battle per trainer is enforced by a partial unique index. Ownership is checked on every battle read/write. Battles persist across reloads and login; animation does not control outcomes or rewards.
 
 The browser renders ordered server events and the final authoritative state. If a response is lost, refresh the trainer/battle before retrying. The old demonstration cart does not grant ownership and is never submitted as an adventure purchase.

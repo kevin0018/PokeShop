@@ -7,6 +7,7 @@ import BattleSprite from './BattleSprite.vue'
 import TrainerPortrait from './TrainerPortrait.vue'
 import GymBackdrop from './GymBackdrop.vue'
 import CenterReception from './CenterReception.vue'
+import CollectionPc from './CollectionPc.vue'
 import {
   type Battle,
   type BattleEvent,
@@ -73,6 +74,26 @@ const saved = ref(false)
 const arenaOpen = ref(false)
 const arenaHeading = ref<HTMLElement>()
 const displayed = ref<Battle | null>(null)
+const pcDialog = ref<HTMLDialogElement>()
+const box = ref(0)
+const boxCount = computed(() => Math.max(2, Math.ceil((game.trainer?.collection.length ?? 0) / 30)))
+const boxSlots = computed(() =>
+  Array.from({ length: 30 }, (_, i) => game.trainer?.collection[box.value * 30 + i] ?? null),
+)
+watch(boxCount, (count) => {
+  box.value = Math.min(box.value, count - 1)
+})
+watch(
+  () => route.fullPath,
+  () => pcDialog.value?.close(),
+)
+watch(
+  () => game.trainer?.username,
+  () => {
+    pcDialog.value?.close()
+    box.value = 0
+  },
+)
 const historyDialog = ref<HTMLDialogElement>()
 const history = computed(() => (game.battle ?? displayed.value)?.history ?? [])
 watch(
@@ -607,59 +628,20 @@ function health(pokemon: Fighter) {
               </div>
             </div>
           </div>
-          <div class="center-collection pc-terminal">
-            <div class="pc-hardware" aria-hidden="true">
-              <span class="pc-power"></span><strong>PC</strong><span class="pc-vents"></span>
-            </div>
-            <div class="pc-screen">
-              <header class="pc-screen-header">
-                <h3>{{ t('adventure.collectionTitle') }}</h3>
-                <span>{{
-                  t('adventure.collectionCount', { count: game.trainer.collection.length })
-                }}</span>
-              </header>
-              <div v-if="!game.trainer.collection.length" class="adventure-empty">
-                <p>{{ t('adventure.emptyCollection') }}</p>
-                <RouterLink class="button secondary" to="/catalogo">
-                  {{ t('catalog') }}
-                </RouterLink>
-              </div>
-              <div v-else class="collection-picker">
-                <div
-                  v-for="member in game.trainer.collection"
-                  :key="member.id"
-                  class="collection-member"
-                >
-                  <button
-                    :aria-pressed="draft.includes(member.id)"
-                    :aria-label="t('adventure.select', { name: name(member) })"
-                    :disabled="
-                      game.active || blocked || (!draft.includes(member.id) && draft.length === 6)
-                    "
-                    @click="toggle(member.id)"
-                  >
-                    <img
-                      :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
-                      alt=""
-                    /><strong>{{ name(member) }}</strong>
-                  </button>
-                  <button
-                    class="collection-sell"
-                    :aria-label="t('adventure.sell', { name: name(member) })"
-                    :disabled="game.active || blocked"
-                    @click="askSale(member)"
-                  >
-                    {{ t('adventure.sellButton') }}
-                  </button>
-                </div>
-              </div>
-              <p v-if="game.trainer.collection.length" class="team-note">
-                {{ t('adventure.salePolicy') }}
-              </p>
-              <p v-if="draft.length === 6" class="team-note">{{ t('adventure.teamFull') }}</p>
-            </div>
-            <div class="pc-base" aria-hidden="true"><span></span><span></span><span></span></div>
-          </div>
+          <button
+            class="pc-access"
+            :aria-label="t('adventure.openPc')"
+            aria-haspopup="dialog"
+            @click="pcDialog?.showModal()"
+          >
+            <CollectionPc />
+            <span class="pc-access-label"
+              ><strong>{{ t('adventure.openPc') }}</strong
+              ><span>{{
+                t('adventure.collectionCount', { count: game.trainer.collection.length })
+              }}</span></span
+            >
+          </button>
         </section>
 
         <section v-if="tab === 'gyms'" class="adventure-panel">
@@ -773,6 +755,72 @@ function health(pokemon: Fighter) {
         </ol>
       </li>
     </ol>
+  </dialog>
+  <dialog ref="pcDialog" class="sale-dialog pc-dialog" aria-labelledby="pc-title">
+    <template v-if="game.trainer">
+      <div class="pc-screen">
+        <header class="pc-screen-header">
+          <h2 id="pc-title">{{ t('adventure.collectionTitle') }}</h2>
+          <span>{{
+            t('adventure.collectionCount', { count: game.trainer.collection.length })
+          }}</span>
+          <button
+            class="history-close"
+            :aria-label="t('adventure.closePc')"
+            @click="pcDialog?.close()"
+          >
+            <X :size="20" aria-hidden="true" />
+          </button>
+        </header>
+        <div class="pc-box-tabs" :aria-label="t('adventure.boxes')" role="group">
+          <button v-for="i in boxCount" :key="i" :aria-pressed="box === i - 1" @click="box = i - 1">
+            {{ t('adventure.box', { number: i }) }}
+          </button>
+        </div>
+        <p v-if="!game.trainer.collection.length" class="team-note">
+          {{ t('adventure.emptyCollection') }}
+          <RouterLink to="/catalogo">{{ t('catalog') }}</RouterLink>
+        </p>
+        <div class="collection-picker pc-box-grid">
+          <div
+            v-for="(member, i) in boxSlots"
+            :key="member?.id ?? `empty-${i}`"
+            :class="member ? 'collection-member' : 'pc-empty-slot'"
+          >
+            <template v-if="member">
+              <button
+                :aria-pressed="draft.includes(member.id)"
+                :aria-label="t('adventure.select', { name: name(member) })"
+                :disabled="
+                  game.active || blocked || (!draft.includes(member.id) && draft.length === 6)
+                "
+                @click="toggle(member.id)"
+              >
+                <img
+                  :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
+                  alt=""
+                /><strong>{{ name(member) }}</strong>
+              </button>
+              <button
+                class="collection-sell"
+                :aria-label="t('adventure.sell', { name: name(member) })"
+                :disabled="game.active || blocked"
+                @click="askSale(member)"
+              >
+                {{ t('adventure.sellButton') }}
+              </button>
+            </template>
+            <span v-else aria-hidden="true">{{ i + 1 }}</span>
+          </div>
+        </div>
+        <p class="pc-selection-count">{{ t('adventure.selectedTeam', { count: draft.length }) }}</p>
+        <p v-if="draft.length === 6" class="team-note">{{ t('adventure.teamFull') }}</p>
+        <p class="team-note">{{ t('adventure.salePolicy') }}</p>
+        <button class="button primary" @click="pcDialog?.close()">
+          {{ t('adventure.backToTeam') }}
+        </button>
+      </div>
+    </template>
   </dialog>
   <dialog
     ref="saleDialog"

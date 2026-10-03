@@ -243,13 +243,6 @@
   justify-content: center;
   flex-wrap: wrap;
 }
-.center-collection {
-  margin-top: 38px;
-  padding: 22px;
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  background: var(--surface);
-}
 @media (max-width: 700px) {
   .center-canopy {
     min-height: 70px;
@@ -264,9 +257,6 @@
   .center-body .team-slots {
     padding: 8px;
     gap: 6px;
-  }
-  .center-collection {
-    padding: 16px 12px;
   }
 }
 @media (max-width: 540px) {
@@ -378,42 +368,6 @@
   background: var(--center-mint);
   box-shadow: 0 0 8px #72b8b260;
 }
-.pc-terminal {
-  --pc-accent: #72b8b2;
-  padding: 16px 18px 0;
-  border: 2px solid color-mix(in srgb, var(--pc-accent) 45%, var(--line));
-  border-radius: 24px 24px 16px 16px;
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--pc-accent) 12%, var(--surface)),
-    color-mix(in srgb, var(--pc-accent) 26%, var(--surface))
-  );
-  box-shadow: 0 8px 0 color-mix(in srgb, var(--pc-accent) 35%, var(--surface));
-}
-.pc-hardware {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 4px 14px;
-  font-family: monospace;
-  font-size: 13px;
-  letter-spacing: 2px;
-  color: var(--muted-strong);
-}
-.pc-power {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #489980;
-  box-shadow: 0 0 8px #72b8b280;
-}
-.pc-vents {
-  margin-left: auto;
-  width: 70px;
-  height: 12px;
-  background: repeating-linear-gradient(90deg, var(--muted-strong) 0 3px, transparent 3px 8px);
-  opacity: 0.3;
-}
 .pc-screen {
   padding: 22px;
   border: 7px solid color-mix(in srgb, var(--pc-accent) 38%, var(--surface));
@@ -433,12 +387,6 @@
   padding-bottom: 16px;
   margin-bottom: 18px;
   border-bottom: 1px solid color-mix(in srgb, var(--pc-accent) 40%, var(--line));
-}
-.pc-screen-header h3 {
-  margin: 0;
-  font-family: monospace;
-  font-size: 18px;
-  letter-spacing: -0.5px;
 }
 .pc-screen-header > span {
   font-size: 12px;
@@ -472,20 +420,6 @@
   border-radius: 8px;
   background: var(--surface);
 }
-.pc-base {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  height: 38px;
-}
-.pc-base span {
-  width: 36px;
-  height: 5px;
-  border-radius: 3px;
-  background: var(--muted-strong);
-  opacity: 0.25;
-}
 @media (max-width: 700px) {
   .center-canopy::before,
   .center-canopy::after {
@@ -518,9 +452,6 @@
     height: 126px;
     width: 90px;
   }
-  .pc-terminal {
-    padding: 12px 8px 0;
-  }
   .pc-screen {
     padding: 14px 8px;
     border-width: 5px;
@@ -535,6 +466,152 @@
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 10px;
   margin: 26px 0 18px;
+}
+.pc-access {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  width: min(440px, 100%);
+  margin: 32px auto 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--center-mint) 12%, var(--surface));
+  color: var(--ink);
+  cursor: pointer;
+}
+.collection-pc-art {
+  width: 128px;
+  height: 160px;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 8px 0 #0001);
+  transition: transform 0.2s;
+}
+.pc-access:hover .collection-pc-art {
+  transform: translateY(-4px);
+}
+.pc-access:hover {
+  border-color: var(--center-mint);
+}
+.pc-access-label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+.pc-access-label strong {
+  font-family: monospace;
+  font-size: 20px;
+}
+.pc-access-label > span {
+  color: var(--muted-strong);
+  font-size: 13px;
+}
+.sale-dialog.pc-dialog {
+  --pc-accent: #72b8b2;
+  width: min(920px, calc(100vw - 32px));
+  padding: 12px;
+  background: color-mix(in srgb, var(--pc-accent) 24%, var(--surface));
+}
+.pc-dialog .pc-screen-header {
+  flex-wrap: nowrap;
+}
+.pc-dialog .pc-screen-header h2 {
+  font-family: monospace;
+  font-size: 20px;
+}
+.pc-dialog .pc-screen-header .history-close {
+  margin-left: auto;
+}
+.pc-box-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.pc-box-tabs button {
+  min-height: 44px;
+  padding: 8px 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: monospace;
+  cursor: pointer;
+}
+.pc-box-tabs button[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--pc-accent) 30%, var(--surface));
+  border-color: var(--pc-accent);
+}
+.pc-screen .pc-box-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+.pc-box-grid .collection-member img {
+  width: 64px;
+  height: 64px;
+}
+.pc-box-grid .collection-member strong {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.pc-empty-slot {
+  display: grid;
+  place-items: center;
+  min-height: 96px;
+  border: 1px dashed color-mix(in srgb, var(--pc-accent) 35%, var(--line));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--pc-accent) 4%, var(--surface));
+  color: var(--muted-strong);
+  font: 11px monospace;
+}
+.pc-selection-count {
+  font: 13px monospace;
+  color: var(--purple);
+}
+.pc-dialog .team-note {
+  font-size: 12px;
+  line-height: 1.5;
+}
+@media (max-width: 700px) {
+  .pc-access {
+    gap: 16px;
+    padding: 12px;
+  }
+  .collection-pc-art {
+    width: 104px;
+    height: 130px;
+  }
+  .sale-dialog.pc-dialog {
+    padding: 6px;
+  }
+  .pc-dialog .pc-screen-header {
+    flex-wrap: wrap;
+  }
+  .pc-dialog .pc-screen-header h2 {
+    font-size: 17px;
+  }
+  .pc-dialog .pc-screen-header > span {
+    order: 3;
+    width: 100%;
+  }
+  .pc-screen .pc-box-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .pc-box-grid .collection-member > button:first-child {
+    padding-inline: 4px;
+  }
+  .pc-box-grid .collection-member img {
+    width: 48px;
+    height: 48px;
+  }
+  .pc-empty-slot {
+    min-height: 64px;
+  }
 }
 .team-slot {
   position: relative;
