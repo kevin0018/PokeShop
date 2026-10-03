@@ -646,12 +646,11 @@ function health(pokemon: Fighter) {
                   </div>
                   <div class="slot-artwork">
                     <span class="slot-pokeball" aria-hidden="true"></span>
-                    <span v-if="member" class="slot-projection">
-                      <img
-                        :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
-                        :alt="name(member)"
-                      />
-                    </span>
+                    <img
+                      v-if="member"
+                      :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
+                      :alt="name(member)"
+                    />
                     <Plus v-else :size="26" aria-hidden="true" />
                   </div>
                   <template v-if="member">

@@ -357,27 +357,8 @@
   background: var(--line);
 }
 .center-body .occupied .slot-artwork::after {
-  width: 52px;
-  height: 8px;
-  border: 1px solid #b9fff2;
-  border-radius: 50%;
-  background: #72e5d9;
-  box-shadow:
-    0 0 10px #72e5d999,
-    0 0 22px #72e5d955;
-}
-.center-body .occupied .slot-artwork::before {
-  content: '';
-  position: absolute;
-  bottom: 8px;
-  width: min(100%, 100px);
-  height: 85%;
-  pointer-events: none;
-  clip-path: polygon(8% 0, 92% 0, 72% 100%, 28% 100%);
-  background: linear-gradient(to top, #72e5d94d, #72e5d912 65%, transparent);
-}
-.center-body .occupied .slot-pokeball {
-  opacity: 0.1;
+  background: var(--center-mint);
+  box-shadow: 0 0 8px #72b8b260;
 }
 .pc-screen {
   padding: 22px;
@@ -694,66 +675,6 @@
   width: 112px;
   height: 112px;
   image-rendering: pixelated;
-}
-.slot-projection {
-  position: relative;
-  display: grid;
-  place-items: center;
-  max-width: 100%;
-  pointer-events: none;
-  animation: team-projection-pulse 4s ease-in-out infinite;
-  animation-delay: var(--projection-delay, 0s);
-}
-.slot-projection img {
-  opacity: 0.88;
-  filter: drop-shadow(0 0 3px #72e5d9b3) drop-shadow(0 0 8px #72e5d94d);
-}
-.slot-projection::after {
-  content: '';
-  position: absolute;
-  inset: 18% 14%;
-  border-radius: 50%;
-  background:
-    linear-gradient(transparent 40%, #b9fff24d 50%, transparent 60%) 0 0 / 100% 200%,
-    repeating-linear-gradient(transparent 0 3px, #72e5d91a 3px 4px);
-  animation: team-projection-scan 3s linear infinite;
-  animation-delay: var(--projection-delay, 0s);
-}
-.team-slot:nth-child(2) {
-  --projection-delay: -0.6s;
-}
-.team-slot:nth-child(3) {
-  --projection-delay: -1.2s;
-}
-.team-slot:nth-child(4) {
-  --projection-delay: -1.8s;
-}
-.team-slot:nth-child(5) {
-  --projection-delay: -2.4s;
-}
-.team-slot:nth-child(6) {
-  --projection-delay: -3s;
-}
-@keyframes team-projection-pulse {
-  0%,
-  100% {
-    opacity: 0.85;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-@keyframes team-projection-scan {
-  from {
-    background-position:
-      0 100%,
-      0 0;
-  }
-  to {
-    background-position:
-      0 -100%,
-      0 0;
-  }
 }
 .slot-artwork > svg {
   position: relative;
