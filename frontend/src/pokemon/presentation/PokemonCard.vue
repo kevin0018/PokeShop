@@ -173,6 +173,16 @@ const cart = useCartStore()
 .illustrated-card .add-label {
   display: none;
 }
+@media (max-width: 700px) {
+  .illustrated-card .add-button {
+    border-radius: 12px;
+    gap: 6px;
+    font-size: 12px;
+  }
+  .illustrated-card .add-label {
+    display: inline;
+  }
+}
 .illustrated-card .card-measures {
   font-size: 0.65rem;
   color: var(--muted-strong);
