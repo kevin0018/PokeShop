@@ -2,9 +2,11 @@
 import hashlib
 import hmac
 import secrets
+from threading import BoundedSemaphore
 
 COOKIE = "pokeshop_session"
 SESSION_SECONDS = 7 * 24 * 60 * 60
+_password_slots = BoundedSemaphore(2)
 
 
 def digest(value):
@@ -17,7 +19,16 @@ def csrf_token(token):
 
 def hash_password(password, salt=None):
     salt = salt or secrets.token_hex(16)
-    value = hashlib.scrypt(password.encode(), salt=bytes.fromhex(salt), n=32768, r=8, p=1, maxmem=64 * 1024 * 1024).hex()
+    # Bound memory even when the allowed authentication attempts arrive together.
+    with _password_slots:
+        value = hashlib.scrypt(
+            password.encode(),
+            salt=bytes.fromhex(salt),
+            n=32768,
+            r=8,
+            p=1,
+            maxmem=64 * 1024 * 1024,
+        ).hex()
     return f"scrypt${salt}${value}"
 
 
