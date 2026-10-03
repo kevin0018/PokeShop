@@ -2,7 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-import { Award, LockKeyhole, Coins, Plus, X, ArrowRight, Flag, History } from 'lucide-vue-next'
+import { Award, LockKeyhole, Plus, X, ArrowRight, Flag, History } from 'lucide-vue-next'
 import BattleSprite from './BattleSprite.vue'
 import TrainerPortrait from './TrainerPortrait.vue'
 import GymBackdrop from './GymBackdrop.vue'
@@ -16,7 +16,7 @@ import {
   useAdventureStore,
 } from './store'
 
-const { t, te, locale, n } = useI18n()
+const { t, te, locale } = useI18n()
 const game = useAdventureStore()
 const openedGym = ref<number | null>(null)
 function dismissGym(event: PointerEvent) {
@@ -398,11 +398,6 @@ function health(pokemon: Fighter) {
     <template v-else>
       <div v-if="!arenaOpen || !displayed" class="trainer-strip">
         <strong>{{ game.trainer.username }}</strong>
-        <span
-          ><Coins :size="18" />{{
-            t('adventure.credits', { amount: n(game.trainer.credits) })
-          }}</span
-        >
         <span
           ><Award :size="18" />{{
             t('adventure.medals', { count: game.trainer.medals.length })
