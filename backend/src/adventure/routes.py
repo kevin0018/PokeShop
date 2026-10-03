@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
 
 from src.pokemon.infrastructure.postgres_repository import engine
+
 from . import service
 from .content import GYMS, SHOP_IDS
 from .security import COOKIE, SESSION_SECONDS, digest
@@ -55,7 +56,11 @@ class Turn(BaseModel):
 
 def check_origin(request):
     origin = request.headers.get("origin")
-    allowed = json.loads(os.getenv("ALLOWED_ORIGINS", '["http://localhost:5173", "http://127.0.0.1:5173"]'))
+    allowed = json.loads(
+        os.getenv(
+            "ALLOWED_ORIGINS", '["http://localhost:5173", "http://127.0.0.1:5173"]'
+        )
+    )
     if origin and origin not in allowed:
         service.fail("invalidOrigin", 403)
 
@@ -70,12 +75,22 @@ def mutation(request):
 
 
 def set_session(response, token):
-    response.set_cookie(COOKIE, token, max_age=SESSION_SECONDS, httponly=True, secure=os.getenv("ENVIRONMENT") == "production", samesite="strict", path="/api/v1/adventure")
+    response.set_cookie(
+        COOKIE,
+        token,
+        max_age=SESSION_SECONDS,
+        httponly=True,
+        secure=os.getenv("ENVIRONMENT") == "production",
+        samesite="strict",
+        path="/api/v1/adventure",
+    )
     response.headers["Cache-Control"] = "no-store"
 
 
 @router.post("/register", status_code=201)
-async def register(body: Registration, request: Request, response: Response, db=Depends(get_engine)):
+async def register(
+    body: Registration, request: Request, response: Response, db=Depends(get_engine)
+):
     check_origin(request)
     await service.throttle(db, f"auth:{request.client.host}")
     await service.throttle(db, f"username:{body.username}")
@@ -85,7 +100,9 @@ async def register(body: Registration, request: Request, response: Response, db=
 
 
 @router.post("/login")
-async def login(body: Credentials, request: Request, response: Response, db=Depends(get_engine)):
+async def login(
+    body: Credentials, request: Request, response: Response, db=Depends(get_engine)
+):
     check_origin(request)
     await service.throttle(db, f"auth:{request.client.host}")
     await service.throttle(db, f"username:{body.username}")
@@ -106,15 +123,28 @@ async def me(request: Request, response: Response, db=Depends(get_engine)):
 async def logout(request: Request, response: Response, db=Depends(get_engine)):
     mutation(request)
     async with db.begin() as conn:
-        await conn.execute(text("DELETE FROM trainer_sessions WHERE token_hash=:token"), {"token": digest(token_from(request))})
-    response.delete_cookie(COOKIE, path="/api/v1/adventure", httponly=True, secure=os.getenv("ENVIRONMENT") == "production", samesite="strict")
+        await conn.execute(
+            text("DELETE FROM trainer_sessions WHERE token_hash=:token"),
+            {"token": digest(token_from(request))},
+        )
+    response.delete_cookie(
+        COOKIE,
+        path="/api/v1/adventure",
+        httponly=True,
+        secure=os.getenv("ENVIRONMENT") == "production",
+        samesite="strict",
+    )
     return {"ok": True}
 
 
 @router.get("/shop")
 async def shop(db=Depends(get_engine)):
     async with db.connect() as conn:
-        return {"items": [service.shop_item(p) for p in await service.pokemon_data(conn, SHOP_IDS)]}
+        return {
+            "items": [
+                service.shop_item(p) for p in await service.pokemon_data(conn, SHOP_IDS)
+            ]
+        }
 
 
 @router.get("/gyms")
@@ -149,16 +179,24 @@ async def challenge(body: Challenge, request: Request, db=Depends(get_engine)):
 
 
 @router.get("/battles/{battle_id}")
-async def battle(battle_id: uuid.UUID, request: Request, response: Response, db=Depends(get_engine)):
+async def battle(
+    battle_id: uuid.UUID, request: Request, response: Response, db=Depends(get_engine)
+):
     response.headers["Cache-Control"] = "no-store"
     async with db.connect() as conn:
         trainer = await service.session(conn, token_from(request))
-        return service.battle_response(await service.battle_row(conn, trainer["id"], battle_id))
+        return service.battle_response(
+            await service.battle_row(conn, trainer["id"], battle_id)
+        )
 
 
 @router.post("/battles/{battle_id}/turns")
-async def turn(battle_id: uuid.UUID, body: Turn, request: Request, db=Depends(get_engine)):
+async def turn(
+    battle_id: uuid.UUID, body: Turn, request: Request, db=Depends(get_engine)
+):
     mutation(request)
     async with db.begin() as conn:
         trainer = await service.session(conn, token_from(request), lock=True)
-        return await service.turn(conn, trainer, battle_id, body.revision, body.model_dump())
+        return await service.turn(
+            conn, trainer, battle_id, body.revision, body.model_dump()
+        )
