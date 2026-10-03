@@ -955,30 +955,30 @@ nav {
 
 :root[data-theme='dark'] {
   --ink: #f3f1ee;
-  --muted: #aaa7a4;
+  --muted: #b2acbb;
   --purple: #c4a5ed;
   --lavender: #b6a0d3;
-  --paper: #101010;
-  --line: #353535;
-  --surface: #1b1b1b;
+  --paper: #1c1b22;
+  --line: #45414f;
+  --surface: #282630;
   --on-accent: #24172e;
   --badge: #3a2c48;
-  --feature: #252525;
+  --feature: #302d39;
   --heading: #faf7f2;
-  --muted-strong: #c8c5c0;
+  --muted-strong: #cec7d5;
   --button-hover: #d4b9f6;
-  --surface-hover: #2b2b2b;
-  --border-strong: #66615d;
-  --orbit-inner: #454545;
+  --surface-hover: #36323f;
+  --border-strong: #716779;
+  --orbit-inner: #514957;
   --hero-mark: #443153;
-  --art-surface: #222222;
-  --control-border: #535353;
-  --control-surface: #232323;
-  --control-hover: #333333;
-  --empty-border: #555555;
-  --panel: #222222;
-  --panel-border: #3c3c3c;
-  --panel-divider: #4a4a4a;
+  --art-surface: #2e2b35;
+  --control-border: #61576d;
+  --control-surface: #302c39;
+  --control-hover: #40394b;
+  --empty-border: #655b70;
+  --panel: #302c39;
+  --panel-border: #4b4358;
+  --panel-divider: #5d536a;
   color-scheme: dark;
 }
 :root[data-theme='dark'] .storage-warning {
