@@ -282,79 +282,141 @@
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 840px;
   margin-top: 26px;
 }
 .gym-stop {
-  display: flex;
-  gap: 22px;
-  align-items: center;
+  position: relative;
+  min-width: 0;
   border: 1px solid color-mix(in srgb, var(--pokemon-tint) 45%, var(--line));
-  border-left: 5px solid var(--pokemon-tint);
+  border-top: 4px solid var(--pokemon-tint);
   border-radius: 18px;
-  padding: 22px;
   background: linear-gradient(
-    110deg,
+    135deg,
     color-mix(in srgb, var(--pokemon-tint) 24%, var(--surface)),
     color-mix(in srgb, var(--pokemon-tint) 8%, var(--surface))
   );
 }
+.gym-stop:has(.gym-actions) {
+  z-index: 3;
+}
+.gym-card-trigger {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 10px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
 .gym-medal {
-  position: relative;
-  flex-shrink: 0;
+  width: clamp(70px, 10vw, 128px);
+  height: clamp(70px, 10vw, 128px);
   display: grid;
-  justify-items: center;
-  align-content: center;
-  gap: 5px;
-  width: 128px;
-  height: 128px;
+  place-items: center;
   background: radial-gradient(
     circle,
     color-mix(in srgb, var(--pokemon-tint) 38%, var(--surface)) 0 53%,
     transparent 54%
   );
-  border-radius: 16px;
-  color: var(--pokemon-ink);
-  font-size: 12px;
+}
+.gym-medal .trainer-portrait {
+  width: 100%;
+  height: 100%;
 }
 .gym-status {
   position: absolute;
-  left: 0;
-  top: 0;
+  left: 8px;
+  top: 8px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 5px 8px;
+  padding: 4px 6px;
   border: 1px solid color-mix(in srgb, var(--pokemon-tint) 45%, var(--line));
   border-radius: 8px;
   background: var(--surface);
   color: var(--ink);
+  font-size: 11px;
 }
 .gym-info {
-  flex: 1;
+  display: grid;
+  gap: 4px;
+  text-align: center;
 }
-.gym-info h3 {
-  margin: 5px 0 8px;
+.gym-info strong {
   font-size: 22px;
+  line-height: 1.15;
 }
-.gym-info small,
-.gym-info p {
+.gym-info small {
+  color: var(--muted-strong);
+  font-size: 12px;
+}
+.gym-actions {
+  position: absolute;
+  top: calc(100% - 8px);
+  left: -1px;
+  right: -1px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--pokemon-tint) 45%, var(--line));
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px #0002;
+}
+.gym-actions small,
+.gym-actions p {
   font-size: 12px;
   color: var(--muted-strong);
+  line-height: 1.5;
+}
+.gym-actions p {
+  margin: 6px 0 12px;
+}
+.gym-actions .button {
+  width: 100%;
+  min-height: 44px;
+  white-space: normal;
+  justify-content: center;
+  font-size: 12px;
 }
 .earned-badge {
-  display: inline-block;
-  margin-top: 8px;
+  display: block;
+  margin-bottom: 10px;
   color: var(--purple);
   font-size: 12px;
-  font-weight: 600;
 }
 .gym-locked {
-  border-left-style: dashed;
+  border-top-style: dashed;
 }
-.gym-stop .button {
-  font-size: 12px;
-  min-height: 44px;
+@media (max-width: 700px) {
+  .gym-route {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .gym-card-trigger {
+    gap: 4px;
+    padding: 8px 4px;
+  }
+  .gym-medal {
+    width: clamp(64px, 20vw, 88px);
+    height: clamp(64px, 20vw, 88px);
+  }
+  .gym-info strong {
+    font-size: 18px;
+  }
+  .gym-info small {
+    font-size: 11px;
+  }
+  .gym-actions {
+    padding: 10px;
+  }
 }
 .gym-intro {
   display: flex;
@@ -681,9 +743,6 @@
   .trainer-form {
     padding: 24px;
   }
-  .gym-stop {
-    gap: 16px;
-  }
 }
 @media (max-width: 700px) {
   .is-battling .adventure-heading {
@@ -771,38 +830,6 @@
   }
   .team-slot > span {
     font-size: 10px;
-  }
-  .gym-stop {
-    flex-wrap: wrap;
-    padding: 16px;
-    gap: 14px;
-  }
-  .gym-medal {
-    width: 88px;
-    height: 96px;
-  }
-  .gym-medal .trainer-portrait {
-    width: 88px;
-    height: 88px;
-  }
-  .gym-status {
-    padding: 3px 6px;
-    font-size: 10px;
-  }
-  .gym-info {
-    min-width: 0;
-  }
-  .gym-info h3 {
-    font-size: 20px;
-  }
-  .gym-info p {
-    line-height: 1.6;
-  }
-  .gym-stop .button {
-    width: 100%;
-    justify-content: center;
-    white-space: normal;
-    text-align: center;
   }
   .battle-arena {
     height: 330px;

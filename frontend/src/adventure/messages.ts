@@ -41,6 +41,8 @@ export const adventureEn = {
   confirmPurchase: 'Confirm purchase',
   purchaseCompleted: 'Purchase completed.',
   sell: 'Sell {name}',
+  sellButton: 'Sell',
+  gymDetails: 'View {name} gym',
   saleTitle: 'Sell Pokémon',
   saleHelp: 'Sell {name} for {amount} credits? It will also be removed from your team.',
   salePolicy:
@@ -173,6 +175,8 @@ export const adventureEs = {
   confirmPurchase: 'Confirmar compra',
   purchaseCompleted: 'Compra completada.',
   sell: 'Vender a {name}',
+  sellButton: 'Vender',
+  gymDetails: 'Ver gimnasio de {name}',
   saleTitle: 'Vender Pokémon',
   saleHelp: '¿Vender a {name} por {amount} créditos? También se quitará de tu equipo.',
   salePolicy:

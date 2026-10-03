@@ -26,6 +26,8 @@ Configura `ALLOWED_ORIGINS` con los orígenes exactos del frontend, incluido HTT
 
 ## Reglas y economía
 
+Los gimnasios usan tarjetas cuadradas en tres columnas de escritorio o dos de móvil. Pasar el ratón, enfocar con teclado o tocar una tarjeta abre sus detalles y la acción de retar; Escape o pulsar fuera cierra el panel. Los botones de la colección solo muestran «Vender»; el importe exacto aparece en la confirmación.
+
 - Las compras reutilizan `/catalogo`, sus tarjetas, búsqueda, filtros, paginación y fichas. Con sesión de entrenador se muestran los precios en créditos del servidor y se añaden Pokémon al carrito existente y se confirma toda la compra desde allí. El catálogo filtra inicialmente los 26 Pokémon de Kanto que pueden combatir; desmarcar el filtro muestra todas las especies y señala las no disponibles. El orden por precio utiliza créditos. La demostración sin sesión mantiene su carrito en euros. Un ejemplar por especie y entrenador, sin intercambios, evolución ni pagos reales.
 - Precio en créditos: `100 + 2 × máximo(0, suma de estadísticas base − 250)`, redondeado a decenas y con mínimo 100. Es independiente de los precios de demostración en euros y de su stock compartido. Es una política inicial que necesita pruebas de equilibrio.
 - Tus Pokémon tienen nivel 50; los gimnasios, niveles 28, 34, 38, 42, 46 y 50. Los equipos y cuatro movimientos están definidos en `backend/src/adventure/content.py`.

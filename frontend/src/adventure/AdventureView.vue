@@ -14,6 +14,20 @@ import {
 
 const { t, te, locale, n } = useI18n()
 const game = useAdventureStore()
+const openedGym = ref<number | null>(null)
+function dismissGym(event: PointerEvent) {
+  if (!(event.target instanceof Element) || !event.target.closest('.gym-stop'))
+    openedGym.value = null
+}
+onMounted(() => document.addEventListener('pointerdown', dismissGym))
+onUnmounted(() => document.removeEventListener('pointerdown', dismissGym))
+function leaveGym(event: MouseEvent) {
+  if (!(event.currentTarget as HTMLElement).contains(document.activeElement)) openedGym.value = null
+}
+function blurGym(event: FocusEvent) {
+  if (!(event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null))
+    openedGym.value = null
+}
 const saleDialog = ref<HTMLDialogElement>()
 const pendingSale = ref<Companion | null>(null)
 function cancelSale() {
@@ -575,11 +589,11 @@ function health(pokemon: Fighter) {
               </button>
               <button
                 class="collection-sell"
+                :aria-label="t('adventure.sell', { name: name(member) })"
                 :disabled="game.active || blocked"
                 @click="askSale(member)"
               >
-                {{ t('adventure.sell', { name: name(member) }) }} ·
-                {{ t('adventure.credits', { amount: member.sale_price ?? 0 }) }}
+                {{ t('adventure.sellButton') }}
               </button>
             </div>
           </div>
@@ -601,19 +615,41 @@ function health(pokemon: Fighter) {
               class="gym-stop pokemon-palette"
               :data-type="g.type"
               :class="{ 'gym-locked': g.id > game.trainer.medals.length + 1 }"
+              @mouseenter="openedGym = g.id"
+              @mouseleave="leaveGym"
+              @focusin="openedGym = g.id"
+              @focusout="blurGym"
+              @keydown.esc.stop.prevent="openedGym = null"
             >
-              <div class="gym-medal">
-                <TrainerPortrait :gym-id="g.id" :leader="g.leader" />
-                <span class="gym-status"
-                  ><Award v-if="game.trainer.medals.includes(g.id)" :size="14" /><LockKeyhole
-                    v-else-if="g.id > game.trainer.medals.length + 1"
-                    :size="14"
-                  />{{ g.id }}</span
-                >
-              </div>
-              <div class="gym-info">
-                <small>{{ g.names[locale] }} &middot; {{ t(`types.${g.type}`, g.type) }}</small>
-                <h3>{{ g.leader }}</h3>
+              <button
+                class="gym-card-trigger"
+                :aria-label="t('adventure.gymDetails', { name: g.leader })"
+                :aria-expanded="openedGym === g.id"
+                :aria-controls="`gym-actions-${g.id}`"
+                @click="openedGym = g.id"
+              >
+                <div class="gym-medal">
+                  <TrainerPortrait :gym-id="g.id" :leader="g.leader" />
+                  <span class="gym-status"
+                    ><Award v-if="game.trainer.medals.includes(g.id)" :size="14" /><LockKeyhole
+                      v-else-if="g.id > game.trainer.medals.length + 1"
+                      :size="14"
+                    />{{ g.id }}</span
+                  >
+                </div>
+                <span class="gym-info">
+                  <strong>{{ g.leader }}</strong>
+                  <small>{{ t(`types.${g.type}`, g.type) }}</small>
+                </span>
+              </button>
+              <div
+                v-if="openedGym === g.id"
+                :id="`gym-actions-${g.id}`"
+                class="gym-actions"
+                role="group"
+                :aria-label="g.leader"
+              >
+                <small>{{ g.names[locale] }}</small>
                 <p>
                   {{ t('adventure.level', { level: g.level }) }} &middot;
                   {{ t('adventure.firstReward', { amount: g.reward }) }}
@@ -621,29 +657,29 @@ function health(pokemon: Fighter) {
                 <span v-if="game.trainer.medals.includes(g.id)" class="earned-badge">{{
                   t('adventure.earned')
                 }}</span>
+                <button
+                  class="button secondary"
+                  :disabled="
+                    blocked ||
+                    game.active ||
+                    dirty ||
+                    !game.trainer.team.length ||
+                    g.id > game.trainer.medals.length + 1
+                  "
+                  @click="challenge(g.id)"
+                >
+                  {{
+                    g.id > game.trainer.medals.length + 1
+                      ? t('adventure.locked')
+                      : t(
+                          game.trainer.medals.includes(g.id)
+                            ? 'adventure.practice'
+                            : 'adventure.challenge',
+                          { name: g.leader },
+                        )
+                  }}
+                </button>
               </div>
-              <button
-                class="button secondary"
-                :disabled="
-                  blocked ||
-                  game.active ||
-                  dirty ||
-                  !game.trainer.team.length ||
-                  g.id > game.trainer.medals.length + 1
-                "
-                @click="challenge(g.id)"
-              >
-                {{
-                  g.id > game.trainer.medals.length + 1
-                    ? t('adventure.locked')
-                    : t(
-                        game.trainer.medals.includes(g.id)
-                          ? 'adventure.practice'
-                          : 'adventure.challenge',
-                        { name: g.leader },
-                      )
-                }}
-              </button>
             </li>
           </ol>
         </section>

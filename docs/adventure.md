@@ -26,6 +26,8 @@ Set `ALLOWED_ORIGINS` to the exact public frontend origin(s), including the HTTP
 
 ## Rules and economy
 
+Gyms use square cards in three desktop columns or two mobile columns. Hover, keyboard focus or tapping a card opens its details and challenge action; Escape or clicking outside closes the panel. Collection sale buttons show only “Sell”; the exact refund appears in the confirmation dialog.
+
 - Purchases reuse `/catalogo`, its existing cards, search, filters, pagination and detail views. Signed-in trainers see server-priced credits and add Pokémon to the existing cart and confirm the whole purchase there. The catalog initially filters to the 26 Kanto Pokémon currently supported in battle; turning off the playable filter shows the full catalog and marks unsupported Pokémon. Price ordering uses credit prices. The anonymous demonstration keeps its euro cart. There is one copy of each species per trainer, no trading, evolution or real payments.
 - Credit price is `100 + 2 × max(0, sum(base stats) − 250)`, rounded to the nearest ten, with a minimum of 100. This is independent of the catalog's euro demonstration prices and shared fictional stock. It is an initial balancing policy, not a competitive valuation.
 - Trainer Pokémon use level 50. Gym levels are 28, 34, 38, 42, 46 and 50. Teams and four-move loadouts are defined in `backend/src/adventure/content.py`.
