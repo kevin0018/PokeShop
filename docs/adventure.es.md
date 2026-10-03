@@ -46,7 +46,9 @@ El navegador representa los eventos del servidor y su estado final. Si se pierde
 
 ## Verificación
 
-Verificado localmente el 03/10/2026: pasan 24 pruebas de aventura, 21 regresiones anteriores del backend, 19 pruebas unitarias del frontend y las 34 pruebas de Chrome. También pasan tipos, ESLint, compilación de producción y Ruff. El navegador cubre registro, compras, persistencia del equipo, recarga del combate, cambios de idioma, anchos 320/375/414/768/1280, primera victoria y desbloqueo, salida/entrada y un ataque confirmado cuya respuesta se pierde y recupera sin repetirlo. Una prueba reproducible con estadísticas reales de Kanto verifica una ruta asequible por los seis gimnasios; demuestra viabilidad, no un equilibrio exhaustivo del juego.
+El indicador de turno abre el historial del combate, agrupado por turno resuelto y con el jugador o líder identificado en cada acción. El servidor guarda el historial dentro del estado de la batalla: se conserva al recargar y los turnos duplicados rechazados no añaden entradas. Los estados anteriores pueden recuperar su último turno guardado; los eventos sobrescritos no se pueden reconstruir.
+
+Verificado localmente el 03/10/2026: pasan 25 pruebas de aventura, 21 regresiones anteriores del backend, 19 pruebas unitarias del frontend y las 34 pruebas de Chrome. También pasan tipos, ESLint, compilación de producción y Ruff. El navegador cubre registro, compras, persistencia del equipo, recarga del combate, cambios de idioma, anchos 320/375/414/768/1280, primera victoria y desbloqueo, salida/entrada y un ataque confirmado cuya respuesta se pierde y recupera sin repetirlo. Una prueba reproducible con estadísticas reales de Kanto verifica una ruta asequible por los seis gimnasios; demuestra viabilidad, no un equilibrio exhaustivo del juego.
 
 Las pruebas deben ejecutarse únicamente en una base separada y migrada cuyo nombre comience por `adventure_test`. Vacían las tablas de aventura y escriben fixtures biológicos allí.
 

@@ -371,11 +371,18 @@ async def sell(conn, trainer, pokemon_id, request_id):
 
 
 def battle_response(row):
+    state = row["state"]
     return {
         "id": str(row["id"]),
         "gym_id": row["gym_id"],
         "revision": row["revision"],
-        **row["state"],
+        **state,
+        "history": state.get(
+            "history",
+            [{"turn": max(1, state["turn"] - 1), "events": state["events"]}]
+            if state.get("events")
+            else [],
+        ),
     }
 
 
@@ -408,6 +415,7 @@ async def start_battle(conn, trainer, gym_id):
         "player_active": 0,
         "opponent_active": 0,
         "events": [],
+        "history": [],
         "reward": 0,
     }
     battle_id = uuid.uuid4()

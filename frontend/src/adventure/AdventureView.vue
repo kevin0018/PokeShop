@@ -2,7 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-import { Award, LockKeyhole, Coins, Plus, X, ArrowRight, Flag } from 'lucide-vue-next'
+import { Award, LockKeyhole, Coins, Plus, X, ArrowRight, Flag, History } from 'lucide-vue-next'
 import BattleSprite from './BattleSprite.vue'
 import TrainerPortrait from './TrainerPortrait.vue'
 import GymBackdrop from './GymBackdrop.vue'
@@ -72,6 +72,21 @@ const saved = ref(false)
 const arenaOpen = ref(false)
 const arenaHeading = ref<HTMLElement>()
 const displayed = ref<Battle | null>(null)
+const historyDialog = ref<HTMLDialogElement>()
+const history = computed(() => (game.battle ?? displayed.value)?.history ?? [])
+watch(
+  () => game.battle?.id,
+  () => historyDialog.value?.close(),
+)
+function eventActor(event: BattleEvent) {
+  const side =
+    event.kind === 'damage'
+      ? event.side === 'player'
+        ? 'opponent'
+        : 'player'
+      : (event.side ?? 'player')
+  return side === 'player' ? t('adventure.you') : gym.value?.leader
+}
 const playing = ref(false)
 const motion = ref('')
 const leaving = ref(false)
@@ -176,9 +191,10 @@ async function challenge(gymId: number) {
 }
 
 function eventText(event: BattleEvent) {
-  const pokemon = [...(displayed.value?.player ?? []), ...(displayed.value?.opponent ?? [])].find(
-    (p) => p.id === event.pokemon,
-  )
+  const fighters = event.side
+    ? (displayed.value?.[event.side] ?? [])
+    : [...(displayed.value?.player ?? []), ...(displayed.value?.opponent ?? [])]
+  const pokemon = fighters.find((p) => p.id === event.pokemon)
   const move = pokemon?.moves.find((m) => m.id === event.move)
   const pokemonName = pokemon ? name(pokemon) : ''
   if (event.kind === 'attack')
@@ -379,7 +395,17 @@ function health(pokemon: Fighter) {
             <p>{{ gym?.names[locale] }}</p>
             <h1>{{ gym?.leader }}</h1>
           </div>
-          <span>{{ t('adventure.turn', { turn: displayed.turn }) }}</span>
+          <button
+            class="turn-history-button"
+            :disabled="blocked"
+            :aria-label="t('adventure.viewHistory', { turn: displayed.turn })"
+            aria-haspopup="dialog"
+            @click="historyDialog?.showModal()"
+          >
+            <History :size="16" aria-hidden="true" />{{
+              t('adventure.turn', { turn: displayed.turn })
+            }}
+          </button>
         </div>
         <div
           class="battle-arena pokemon-palette"
@@ -701,6 +727,31 @@ function health(pokemon: Fighter) {
       <p>{{ t('adventure.rules') }}</p>
     </details>
   </section>
+  <dialog ref="historyDialog" class="sale-dialog history-dialog" aria-labelledby="history-title">
+    <div class="history-heading">
+      <h2 id="history-title">{{ t('adventure.historyTitle') }}</h2>
+      <button
+        class="history-close"
+        :aria-label="t('adventure.closeHistory')"
+        @click="historyDialog?.close()"
+      >
+        <X :size="20" aria-hidden="true" />
+      </button>
+    </div>
+    <p v-if="!history.length">{{ t('adventure.emptyHistory') }}</p>
+    <p v-else-if="history[0]!.turn > 1">{{ t('adventure.partialHistory') }}</p>
+    <ol class="battle-history">
+      <li v-for="turn in history" :key="turn.turn" class="history-turn">
+        <h3>{{ t('adventure.turn', { turn: turn.turn }) }}</h3>
+        <ol>
+          <li v-for="(event, i) in turn.events" :key="i">
+            <strong>{{ eventActor(event) }}</strong
+            ><span>{{ eventText(event) }}</span>
+          </li>
+        </ol>
+      </li>
+    </ol>
+  </dialog>
   <dialog
     ref="saleDialog"
     class="sale-dialog"

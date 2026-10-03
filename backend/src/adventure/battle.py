@@ -75,11 +75,25 @@ def resolve_turn(previous, action, rng=None):
     state = copy.deepcopy(previous)
     if state["status"] != "active":
         raise ValueError("battleFinished")
+    if "history" not in state:
+        state["history"] = (
+            [
+                {
+                    "turn": max(1, state["turn"] - 1),
+                    "events": copy.deepcopy(state["events"]),
+                }
+            ]
+            if state.get("events")
+            else []
+        )
     state["events"] = []
     events = state["events"]
     if action["kind"] == "surrender":
         state["status"] = "surrendered"
-        events.append({"kind": "surrender"})
+        events.append({"kind": "surrender", "side": "player"})
+        state["history"].append(
+            {"turn": state["turn"], "events": copy.deepcopy(events)}
+        )
         return state
     player = state["player"][state["player_active"]]
     opponent = state["opponent"][state["opponent_active"]]
@@ -177,5 +191,6 @@ def resolve_turn(previous, action, rng=None):
         state["status"] = "lost"
     elif not any(p["hp"] > 0 for p in state["opponent"]):
         state["status"] = "won"
+    state["history"].append({"turn": state["turn"], "events": copy.deepcopy(events)})
     state["turn"] += 1
     return state

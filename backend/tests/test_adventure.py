@@ -137,6 +137,24 @@ class RulesTests(unittest.TestCase):
         self.assertEqual(result["opponent_active"], 1)
         self.assertEqual(result["player"][0]["hp"], state["player"][0]["hp"])
 
+    def test_history_preserves_turns_and_upgrades_existing_snapshot(self):
+        state = self.state()
+        first = resolve_turn(
+            state, {"kind": "move", "move": "tackle"}, random.Random(3)
+        )
+        self.assertEqual(first["history"], [{"turn": 1, "events": first["events"]}])
+        self.assertNotIn("history", state)
+        second = resolve_turn(first, {"kind": "surrender"})
+        self.assertEqual([entry["turn"] for entry in second["history"]], [1, 2])
+        self.assertEqual(second["history"][0], first["history"][0])
+        self.assertEqual(len(first["history"]), 1)
+        self.assertEqual(second["history"][1]["events"][0]["side"], "player")
+        legacy = copy.deepcopy(first)
+        del legacy["history"]
+        self.assertEqual(
+            resolve_turn(legacy, {"kind": "surrender"})["history"], second["history"]
+        )
+
     def test_priority_precedes_speed(self):
         state = self.state()
         state["player"][0] = fighter(sample(25, ["electrico"]))
@@ -430,6 +448,7 @@ class AdventureAPITests(unittest.TestCase):
     def test_battle_snapshot_revision_and_resume(self):
         self.setup_team()
         battle = self.post("battles", {"gym_id": 1}).json()
+        self.assertEqual(battle["history"], [])
         self.assertEqual(self.post("battles", {"gym_id": 1}).status_code, 409)
         self.assertEqual(
             self.client.put(
@@ -448,6 +467,9 @@ class AdventureAPITests(unittest.TestCase):
         result = self.post(path, action)
         self.assertEqual(result.status_code, 200)
         self.assertEqual(result.json()["revision"], 1)
+        self.assertEqual(
+            result.json()["history"], [{"turn": 1, "events": result.json()["events"]}]
+        )
         self.assertEqual(self.post(path, action).status_code, 409)
         self.assertEqual(
             self.client.get(f'/api/v1/adventure/battles/{battle["id"]}').json(),

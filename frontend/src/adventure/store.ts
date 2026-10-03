@@ -52,6 +52,7 @@ export interface Battle {
   player_active: number
   opponent_active: number
   events: BattleEvent[]
+  history?: { turn: number; events: BattleEvent[] }[]
   reward: number
 }
 export interface Gym {

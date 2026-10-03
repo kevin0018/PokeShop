@@ -46,7 +46,9 @@ The browser renders ordered server events and the final authoritative state. If 
 
 ## Verification
 
-Verified locally on 2026-10-03: 24 adventure tests, 21 existing backend regression tests, 19 frontend unit tests and all 34 Chrome browser tests passed. Type checking, ESLint, production build and Ruff passed. Browser coverage includes registration, purchases, team persistence, battle reload, language changes, 320/375/414/768/1280 px layouts, first victory and unlocking, logout/login, and a committed attack whose response is deliberately lost and recovered without replay. A seeded test using imported Kanto base stats verifies an affordable route through all six gyms; this demonstrates feasibility, not comprehensive game balance.
+The turn indicator opens a battle history grouped by resolved turn, with the player or gym leader identified for each action. The server stores this history in the battle snapshot, so reloads preserve it and rejected duplicate turns do not add entries. Existing snapshots can recover their last stored turn; earlier overwritten events cannot be reconstructed.
+
+Verified locally on 2026-10-03: 25 adventure tests, 21 existing backend regression tests, 19 frontend unit tests and all 34 Chrome browser tests passed. Type checking, ESLint, production build and Ruff passed. Browser coverage includes registration, purchases, team persistence, battle reload, language changes, 320/375/414/768/1280 px layouts, first victory and unlocking, logout/login, and a committed attack whose response is deliberately lost and recovered without replay. A seeded test using imported Kanto base stats verifies an affordable route through all six gyms; this demonstrates feasibility, not comprehensive game balance.
 
 Run API tests against a separately created, migrated database whose name starts with `adventure_test`. The suite truncates adventure tables and writes biological fixtures there; never point it at a real catalog database.
 
