@@ -477,7 +477,7 @@ function health(pokemon: Fighter) {
             >
               <small
                 >{{ t('adventure.slot', { number: i + 1 })
-                }}<span v-if="i === 0 && member"> · {{ t('adventure.lead') }}</span></small
+                }}<span v-if="i === 0 && member"> &middot; {{ t('adventure.lead') }}</span></small
               >
               <template v-if="member">
                 <img
@@ -564,10 +564,10 @@ function health(pokemon: Fighter) {
                 /><span>{{ g.id }}</span>
               </div>
               <div class="gym-info">
-                <small>{{ g.names[locale] }} · {{ t(`types.${g.type}`, g.type) }}</small>
+                <small>{{ g.names[locale] }} &middot; {{ t(`types.${g.type}`, g.type) }}</small>
                 <h3>{{ g.leader }}</h3>
                 <p>
-                  {{ t('adventure.level', { level: g.level }) }} ·
+                  {{ t('adventure.level', { level: g.level }) }} &middot;
                   {{ t('adventure.firstReward', { amount: g.reward }) }}
                 </p>
                 <span v-if="game.trainer.medals.includes(g.id)" class="earned-badge">{{
