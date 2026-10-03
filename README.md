@@ -184,7 +184,7 @@ The public VPS was last fully verified on 2026-09-07 with 33 browser tests. That
 
 ## Deployment
 
-**Live on the Contabo VPS: [https://pokeshop-app.duckdns.org](https://pokeshop-app.duckdns.org). HTTPS is enabled with automatic certificate renewal.**
+[Live demo](https://pokeshop-app.duckdns.org)
 
 HTTP requests to the domain or server IP redirect to the HTTPS domain. Certificate renewal was verified with a successful Certbot dry run; three targeted Chromium regressions also passed over HTTPS (catalog/cart recovery, language/theme persistence and cart preview). Browser carts are stored per origin, so a cart saved on localhost or the IP does not transfer to the domain.
 

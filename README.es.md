@@ -184,7 +184,7 @@ La última verificación completa de la VPS pública fue el 07/09/2026, con 33 p
 
 ## Despliegue
 
-**Publicado en la VPS de Contabo: [https://pokeshop-app.duckdns.org](https://pokeshop-app.duckdns.org). HTTPS activo con renovación automática del certificado.**
+[Demo](https://pokeshop-app.duckdns.org)
 
 Las peticiones HTTP al dominio o a la IP redirigen al dominio HTTPS. Se verificó la renovación con una simulación correcta de Certbot y pasaron tres regresiones específicas de Chromium sobre HTTPS (recuperación de catálogo/carrito, persistencia de idioma/tema y vista previa del carrito). El navegador guarda cada carrito por origen: una cesta de localhost o de la IP no se traslada al dominio.
 
