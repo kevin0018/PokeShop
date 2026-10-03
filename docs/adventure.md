@@ -24,13 +24,15 @@ Set `ALLOWED_ORIGINS` to the exact public frontend origin(s), including the HTTP
 
 ## Rules and economy
 
-- Purchases reuse `/catalogo`, its existing cards, search, filters, pagination and detail views. Signed-in trainers see server-priced credits and buy directly into their collection. The catalog initially filters to the 26 Kanto Pokémon currently supported in battle; turning off the playable filter shows the full catalog and marks unsupported Pokémon. Price ordering uses credit prices. The anonymous demonstration keeps its euro cart. There is one copy of each species per trainer, no trading, selling, evolution or real payments.
+- Purchases reuse `/catalogo`, its existing cards, search, filters, pagination and detail views. Signed-in trainers see server-priced credits and add Pokémon to the existing cart and confirm the whole purchase there. The catalog initially filters to the 26 Kanto Pokémon currently supported in battle; turning off the playable filter shows the full catalog and marks unsupported Pokémon. Price ordering uses credit prices. The anonymous demonstration keeps its euro cart. There is one copy of each species per trainer, no trading, evolution or real payments.
 - Credit price is `100 + 2 × max(0, sum(base stats) − 250)`, rounded to the nearest ten, with a minimum of 100. This is independent of the catalog's euro demonstration prices and shared fictional stock. It is an initial balancing policy, not a competitive valuation.
 - Trainer Pokémon use level 50. Gym levels are 28, 34, 38, 42, 46 and 50. Teams and four-move loadouts are defined in `backend/src/adventure/content.py`.
 - Implemented: physical/special damage, STAB, modern type effectiveness (including dual types/immunity), speed, move priority, accuracy, PP, switching and Struggle with recoil. Equal speed/priority uses a server-side random tie-break. Opponents choose the move with the greatest estimated damage adjusted for accuracy.
 - This is a simplified ruleset: passive abilities, critical hits, statuses, stat stages, items, IVs/EVs, secondary move effects and exact historical generation rules are not implemented. Low Kick has fixed power 50; draining moves do not heal and Swift follows the simplified accuracy system. The UI explains these limits before play.
 - Fainted Pokémon are replaced by the next healthy member in team order. Switching voluntarily spends the turn. All-PP exhaustion permits Struggle. A simultaneous wipe is a trainer loss.
 - Gyms unlock sequentially. First victories grant a medal and 150/200/250/300/350/400 credits respectively. Rematches are free practice and grant no additional credits. The unique medal constraint prevents repeated reward claims.
+
+Selling from the collection requires confirmation and returns half the original paid price, rounded down. The server removes the Pokémon from both collection and saved team. Sales are blocked during active battles. Checkout validates every cart line and available credits in one transaction; any failure rolls back all lines. Migration `004` adds durable, trainer-scoped receipts for checkout and sales. Retrying the same request after a lost response returns the original receipt without charging or refunding again. Draft carts persist per trainer in browser storage; they do not grant ownership.
 
 ## Authority and recovery
 
@@ -40,7 +42,7 @@ The browser renders ordered server events and the final authoritative state. If 
 
 ## Verification
 
-Verified locally on 2026-10-03: 21 adventure tests, 21 existing backend regression tests, 19 frontend unit tests and all 34 Chrome browser tests passed. Type checking, ESLint, production build and Ruff passed. Browser coverage includes registration, purchases, team persistence, battle reload, language changes, 320/375/414/768/1280 px layouts, first victory and unlocking, logout/login, and a committed attack whose response is deliberately lost and recovered without replay. A seeded test using imported Kanto base stats verifies an affordable route through all six gyms; this demonstrates feasibility, not comprehensive game balance.
+Verified locally on 2026-10-03: 24 adventure tests, 21 existing backend regression tests, 19 frontend unit tests and all 34 Chrome browser tests passed. Type checking, ESLint, production build and Ruff passed. Browser coverage includes registration, purchases, team persistence, battle reload, language changes, 320/375/414/768/1280 px layouts, first victory and unlocking, logout/login, and a committed attack whose response is deliberately lost and recovered without replay. A seeded test using imported Kanto base stats verifies an affordable route through all six gyms; this demonstrates feasibility, not comprehensive game balance.
 
 Run API tests against a separately created, migrated database whose name starts with `adventure_test`. The suite truncates adventure tables and writes biological fixtures there; never point it at a real catalog database.
 

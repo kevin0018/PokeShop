@@ -1,13 +1,45 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
 import { useCatalogStore } from '@/pokemon/application/catalogStore'
 import { readCart, readRecentIds, saveCart } from '../infrastructure/cartStorage'
 import { i18n } from '@/i18n'
 import { pokemonName } from '@/shared/presentation/format'
+import { useAdventureStore } from '@/adventure/store'
+import { parseCart } from '../domain/cart'
 
 export const useCartStore = defineStore('cart', () => {
   const catalog = useCatalogStore()
-  const entries = ref(readCart())
+  const game = useAdventureStore()
+  const demoEntries = ref(readCart())
+  const trainerEntries = ref<ReturnType<typeof readCart>>([])
+  const checkoutId = ref(crypto.randomUUID())
+  const entries = computed({
+    get: () => (game.trainer ? trainerEntries.value : demoEntries.value),
+    set: (value) => {
+      if (game.trainer) trainerEntries.value = value
+      else demoEntries.value = value
+    },
+  })
+  const trainerKey = () => `pokeshop.trainer-cart.v1.${game.trainer?.username}`
+  watch(
+    () => game.trainer?.username,
+    (username) => {
+      trainerEntries.value = []
+      checkoutId.value = crypto.randomUUID()
+      if (!username) return
+      try {
+        const stored = JSON.parse(localStorage.getItem(trainerKey()) || 'null')
+        trainerEntries.value = parseCart(JSON.stringify(stored?.entries)).map((entry) => ({
+          id: entry.id,
+          quantity: 1,
+        }))
+        if (typeof stored?.request_id === 'string') checkoutId.value = stored.request_id
+      } catch {
+        /* An unavailable storage leaves an empty draft. */
+      }
+    },
+    { immediate: true },
+  )
   const recentIds = ref(readRecentIds())
   const noticeEvent = ref<{
     key: 'adjusted' | 'maximum' | 'added' | 'removed' | 'cartCleared'
@@ -34,6 +66,16 @@ export const useCartStore = defineStore('cart', () => {
   }
   const lines = computed(() =>
     entries.value.flatMap((entry) => {
+      if (game.trainer) {
+        const offer = game.shop.find((p) => p.id === entry.id)
+        if (!offer) return []
+        return [
+          {
+            pokemon: { ...offer, price_cents: offer.price, stock: 1, description: '' },
+            quantity: 1,
+          },
+        ]
+      }
       const pokemon = catalog.items.find((item) => item.id === entry.id)
       if (!pokemon || pokemon.stock === 0) return []
       return [{ pokemon, quantity: Math.min(entry.quantity, pokemon.stock) }]
@@ -41,6 +83,7 @@ export const useCartStore = defineStore('cart', () => {
   )
   const count = computed(() =>
     entries.value.reduce((sum, entry) => {
+      if (game.trainer) return sum + 1
       const product = catalog.items.find((p) => p.id === entry.id)
       return sum + Math.min(entry.quantity, product?.stock ?? entry.quantity)
     }, 0),
@@ -60,17 +103,32 @@ export const useCartStore = defineStore('cart', () => {
       .slice(0, 3)
   })
   function persist() {
+    if (game.trainer) {
+      checkoutId.value = crypto.randomUUID()
+      try {
+        localStorage.setItem(
+          trainerKey(),
+          JSON.stringify({ entries: trainerEntries.value, request_id: checkoutId.value }),
+        )
+        storageFailed.value = false
+      } catch {
+        storageFailed.value = true
+      }
+      return
+    }
     recentIds.value = recentIds.value.filter((id) => entries.value.some((entry) => entry.id === id))
     storageFailed.value = !saveCart(entries.value, recentIds.value)
   }
   const loading = ref(false)
   const error = ref(false)
   async function hydrate() {
+    if (game.trainer) return
     loading.value = true
     error.value = false
     try {
       const requested = new Set(entries.value.map((e) => e.id))
       const fresh = await catalog.hydrate([...requested])
+      if (game.trainer) return
       const updated = entries.value.flatMap((entry) => {
         if (!requested.has(entry.id)) return [entry]
         const product = fresh.find((p) => p.id === entry.id)
@@ -90,6 +148,18 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
   function add(id: number) {
+    if (game.trainer) {
+      if (
+        game.busy ||
+        !game.shop.some((p) => p.id === id) ||
+        game.trainer.collection.some((p) => p.id === id)
+      )
+        return
+      if (!entries.value.some((p) => p.id === id)) entries.value.push({ id, quantity: 1 })
+      noticeEvent.value = { key: 'added', id, count: count.value }
+      persist()
+      return
+    }
     const item = catalog.items.find((item) => item.id === id)
     if (!item || item.stock === 0) return
     const entry = entries.value.find((entry) => entry.id === id)
@@ -104,6 +174,7 @@ export const useCartStore = defineStore('cart', () => {
     persist()
   }
   function setQuantity(id: number, quantity: number) {
+    if (game.trainer) return
     if (!Number.isSafeInteger(quantity) || quantity < 1) return
     const item = catalog.items.find((item) => item.id === id)
     const entry = entries.value.find((entry) => entry.id === id)
@@ -112,18 +183,29 @@ export const useCartStore = defineStore('cart', () => {
     persist()
   }
   function remove(id: number) {
+    if (game.busy) return
     entries.value = entries.value.filter((entry) => entry.id !== id)
     noticeEvent.value = { key: 'removed' }
     persist()
   }
   function clear() {
+    if (game.busy) return
     entries.value = []
     recentIds.value = []
     error.value = false
     noticeEvent.value = { key: 'cartCleared' }
     persist()
   }
+  async function checkout() {
+    const result = await game.mutate('/checkout', 'POST', {
+      ids: entries.value.map((entry) => entry.id),
+      request_id: checkoutId.value,
+    })
+    if (result) clear()
+    return result
+  }
   return {
+    checkout,
     recentLines,
     clear,
     entries,

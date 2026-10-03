@@ -249,6 +249,31 @@
   height: 80px;
   image-rendering: pixelated;
 }
+.collection-member > button {
+  width: 100%;
+  min-height: 44px;
+}
+.collection-member .collection-sell {
+  margin-top: 8px;
+  font-size: 11px;
+}
+.sale-dialog {
+  width: min(460px, calc(100vw - 32px));
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.sale-dialog::backdrop {
+  background: #0008;
+}
+.sale-dialog p {
+  margin: 18px 0;
+}
+.sale-dialog .button {
+  margin: 4px;
+}
 .team-note {
   padding: 14px 0;
   font-size: 13px;

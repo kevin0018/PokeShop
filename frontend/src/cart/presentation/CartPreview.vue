@@ -5,9 +5,13 @@ import { PopoverRoot, PopoverAnchor, PopoverPortal, PopoverContent } from 'reka-
 import { ShoppingBag, ArrowRight, X } from 'lucide-vue-next'
 import { useRoute } from 'vue-router'
 import { useCartStore } from '../application/cartStore'
+import { useAdventureStore } from '@/adventure/store'
 import { money, pokemonName } from '@/shared/presentation/format'
 import PokemonImage from '@/components/PokemonImage.vue'
 const cart = useCartStore()
+const game = useAdventureStore()
+const price = (amount: number) =>
+  game.trainer ? t('adventure.credits', { amount }) : money(amount)
 const route = useRoute()
 watch(
   () => route.fullPath,
@@ -141,16 +145,16 @@ onUnmounted(() => clearTimeout(timer))
                 </div>
                 <div class="cart-preview-copy">
                   <strong>{{ pokemonName(line.pokemon) }}</strong>
-                  <span>{{ line.quantity }} × {{ money(line.pokemon.price_cents) }}</span>
+                  <span>{{ line.quantity }} × {{ price(line.pokemon.price_cents) }}</span>
                 </div>
-                <strong>{{ money(line.quantity * line.pokemon.price_cents) }}</strong>
+                <strong>{{ price(line.quantity * line.pokemon.price_cents) }}</strong>
               </RouterLink>
             </li>
           </ul>
           <p v-else>{{ t('emptyCart') }}</p>
           <div class="cart-preview-total">
             <span>{{ t('total') }} · {{ t('units', cart.count) }}</span
-            ><strong>{{ money(cart.total) }}</strong>
+            ><strong>{{ price(cart.total) }}</strong>
           </div>
         </template>
         <RouterLink class="button primary cart-preview-link" to="/carrito" @click="close()"

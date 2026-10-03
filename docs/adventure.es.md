@@ -24,13 +24,15 @@ Configura `ALLOWED_ORIGINS` con los orígenes exactos del frontend, incluido HTT
 
 ## Reglas y economía
 
-- Las compras reutilizan `/catalogo`, sus tarjetas, búsqueda, filtros, paginación y fichas. Con sesión de entrenador se muestran los precios en créditos del servidor y se compra directamente para la colección. El catálogo filtra inicialmente los 26 Pokémon de Kanto que pueden combatir; desmarcar el filtro muestra todas las especies y señala las no disponibles. El orden por precio utiliza créditos. La demostración sin sesión mantiene su carrito en euros. Un ejemplar por especie y entrenador, sin intercambios, venta, evolución ni pagos reales.
+- Las compras reutilizan `/catalogo`, sus tarjetas, búsqueda, filtros, paginación y fichas. Con sesión de entrenador se muestran los precios en créditos del servidor y se añaden Pokémon al carrito existente y se confirma toda la compra desde allí. El catálogo filtra inicialmente los 26 Pokémon de Kanto que pueden combatir; desmarcar el filtro muestra todas las especies y señala las no disponibles. El orden por precio utiliza créditos. La demostración sin sesión mantiene su carrito en euros. Un ejemplar por especie y entrenador, sin intercambios, evolución ni pagos reales.
 - Precio en créditos: `100 + 2 × máximo(0, suma de estadísticas base − 250)`, redondeado a decenas y con mínimo 100. Es independiente de los precios de demostración en euros y de su stock compartido. Es una política inicial que necesita pruebas de equilibrio.
 - Tus Pokémon tienen nivel 50; los gimnasios, niveles 28, 34, 38, 42, 46 y 50. Los equipos y cuatro movimientos están definidos en `backend/src/adventure/content.py`.
 - Incluye daño físico/especial, bonificación por tipo propio, efectividad moderna con tipos dobles e inmunidades, velocidad, prioridad, precisión, PP, cambios y Forcejeo con retroceso. Los empates de velocidad/prioridad se resuelven al azar en el servidor. El rival elige el mayor daño estimado ajustado por precisión.
 - Las reglas son simplificadas: no se aplican habilidades pasivas, críticos, estados, cambios de estadísticas, objetos, IV/EV, efectos secundarios ni reglas exactas de una generación. Patada baja tiene potencia fija 50; Megaagotar no cura y Rapidez usa la precisión simplificada. La interfaz lo explica antes de jugar.
 - Un Pokémon debilitado se sustituye por el siguiente sano según el orden del equipo. Cambiar voluntariamente consume el turno. Cuando no quedan PP se permite Forcejeo. Si ambos equipos caen a la vez, el entrenador pierde.
 - Los seis gimnasios se desbloquean en orden. La primera victoria concede medalla y 150/200/250/300/350/400 créditos. Las revanchas son prácticas gratuitas sin recompensa adicional. Una restricción única impide duplicar medallas y premios.
+
+La venta desde la colección requiere confirmación y devuelve la mitad del precio original pagado, redondeada hacia abajo. El servidor retira el Pokémon de la colección y del equipo guardado. No se puede vender durante un combate activo. La confirmación del carrito valida todas las líneas y el saldo en una transacción; cualquier fallo revierte toda la compra. La migración `004` añade recibos persistentes por entrenador para compras y ventas. Repetir la misma petición tras perder una respuesta devuelve el recibo original sin volver a cobrar ni abonar. El borrador del carrito se guarda por entrenador en el navegador; no concede propiedad.
 
 ## Autoridad y recuperación
 
@@ -40,7 +42,7 @@ El navegador representa los eventos del servidor y su estado final. Si se pierde
 
 ## Verificación
 
-Verificado localmente el 03/10/2026: pasan 21 pruebas de aventura, 21 regresiones anteriores del backend, 19 pruebas unitarias del frontend y las 34 pruebas de Chrome. También pasan tipos, ESLint, compilación de producción y Ruff. El navegador cubre registro, compras, persistencia del equipo, recarga del combate, cambios de idioma, anchos 320/375/414/768/1280, primera victoria y desbloqueo, salida/entrada y un ataque confirmado cuya respuesta se pierde y recupera sin repetirlo. Una prueba reproducible con estadísticas reales de Kanto verifica una ruta asequible por los seis gimnasios; demuestra viabilidad, no un equilibrio exhaustivo del juego.
+Verificado localmente el 03/10/2026: pasan 24 pruebas de aventura, 21 regresiones anteriores del backend, 19 pruebas unitarias del frontend y las 34 pruebas de Chrome. También pasan tipos, ESLint, compilación de producción y Ruff. El navegador cubre registro, compras, persistencia del equipo, recarga del combate, cambios de idioma, anchos 320/375/414/768/1280, primera victoria y desbloqueo, salida/entrada y un ataque confirmado cuya respuesta se pierde y recupera sin repetirlo. Una prueba reproducible con estadísticas reales de Kanto verifica una ruta asequible por los seis gimnasios; demuestra viabilidad, no un equilibrio exhaustivo del juego.
 
 Las pruebas deben ejecutarse únicamente en una base separada y migrada cuyo nombre comience por `adventure_test`. Vacían las tablas de aventura y escriben fixtures biológicos allí.
 

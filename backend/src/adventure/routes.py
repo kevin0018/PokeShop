@@ -39,6 +39,15 @@ class Purchase(BaseModel):
     pokemon_id: int = Field(gt=0)
 
 
+class Checkout(BaseModel):
+    ids: list[int] = Field(min_length=1, max_length=26)
+    request_id: uuid.UUID
+
+
+class Sale(Purchase):
+    request_id: uuid.UUID
+
+
 class Team(BaseModel):
     ids: list[int] = Field(max_length=6)
 
@@ -168,6 +177,22 @@ async def team(body: Team, request: Request, db=Depends(get_engine)):
         trainer = await service.session(conn, token_from(request), lock=True)
         await service.save_team(conn, trainer, body.ids)
     return {"ok": True}
+
+
+@router.post("/checkout")
+async def checkout(body: Checkout, request: Request, db=Depends(get_engine)):
+    mutation(request)
+    async with db.begin() as conn:
+        trainer = await service.session(conn, token_from(request), lock=True)
+        return await service.checkout(conn, trainer, body.ids, body.request_id)
+
+
+@router.post("/sales")
+async def sell(body: Sale, request: Request, db=Depends(get_engine)):
+    mutation(request)
+    async with db.begin() as conn:
+        trainer = await service.session(conn, token_from(request), lock=True)
+        return await service.sell(conn, trainer, body.pokemon_id, body.request_id)
 
 
 @router.post("/battles", status_code=201)

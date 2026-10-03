@@ -312,6 +312,74 @@ class AdventureAPITests(unittest.TestCase):
             .lower(),
         )
 
+    def test_checkout_is_atomic_and_repeated_confirmation_is_free(self):
+        self.sign_in()
+        request_id = str(uuid.uuid4())
+        body = {"ids": [1, 4], "request_id": request_id}
+        result = self.post("checkout", body)
+        self.assertEqual(result.status_code, 200)
+        self.assertEqual(result.json()["total"], 400)
+        self.assertEqual(self.post("checkout", body).json(), result.json())
+        me = self.client.get("/api/v1/adventure/me").json()
+        self.assertEqual(me["credits"], 600)
+        self.assertEqual(len(me["collection"]), 2)
+        self.assertEqual(
+            self.post("checkout", {"ids": [7], "request_id": request_id}).status_code,
+            409,
+        )
+        self.assertEqual(
+            self.post(
+                "checkout", {"ids": [7, 1], "request_id": str(uuid.uuid4())}
+            ).status_code,
+            409,
+        )
+        me = self.client.get("/api/v1/adventure/me").json()
+        self.assertEqual(me["credits"], 600)
+        self.assertNotIn(7, [p["id"] for p in me["collection"]])
+        self.assertEqual(
+            self.post(
+                "checkout", {"ids": [7, 7], "request_id": str(uuid.uuid4())}
+            ).status_code,
+            422,
+        )
+
+    def test_sale_uses_paid_price_removes_team_and_never_credits_twice(self):
+        self.setup_team()
+        sale = {"pokemon_id": 1, "request_id": str(uuid.uuid4())}
+        result = self.post("sales", sale)
+        self.assertEqual(result.status_code, 200)
+        self.assertEqual(result.json()["refund"], 100)
+        self.assertEqual(self.post("sales", sale).json(), result.json())
+        me = self.client.get("/api/v1/adventure/me").json()
+        self.assertEqual((me["credits"], me["team"], me["collection"]), (900, [], []))
+        self.assertEqual(
+            self.post("sales", {**sale, "request_id": str(uuid.uuid4())}).status_code,
+            404,
+        )
+        self.assertEqual(self.post("purchases", {"pokemon_id": 1}).status_code, 200)
+        self.assertEqual(self.post("sales", sale).status_code, 200)
+        me = self.client.get("/api/v1/adventure/me").json()
+        self.assertEqual(me["credits"], 700)
+        self.assertEqual(len(me["collection"]), 1)
+        self.assertEqual(me["collection"][0]["sale_price"], 100)
+
+    def test_sale_during_battle_and_concurrent_checkout(self):
+        self.setup_team()
+        self.assertEqual(self.post("battles", {"gym_id": 1}).status_code, 201)
+        self.assertEqual(
+            self.post(
+                "sales", {"pokemon_id": 1, "request_id": str(uuid.uuid4())}
+            ).status_code,
+            409,
+        )
+        body = {"ids": [4, 7], "request_id": str(uuid.uuid4())}
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+            results = list(pool.map(lambda _: self.post("checkout", body), range(2)))
+        self.assertEqual([r.status_code for r in results], [200, 200])
+        me = self.client.get("/api/v1/adventure/me").json()
+        self.assertEqual(me["credits"], 400)
+        self.assertEqual(len(me["collection"]), 3)
+
     def test_buy_server_price_duplicate_and_insufficient_balance(self):
         self.sign_in()
         self.assertEqual(

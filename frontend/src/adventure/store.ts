@@ -8,6 +8,7 @@ export interface Companion {
   types: string[]
   image_url: string
   price: number
+  sale_price?: number
   stats: Record<string, number>
 }
 export interface Move {

@@ -169,6 +169,16 @@ def shop_item(pokemon):
 
 
 async def profile(conn, trainer, token):
+    paid = dict(
+        (
+            await conn.execute(
+                text(
+                    "SELECT pokemon_id,price FROM trainer_collection WHERE trainer_id=:id"
+                ),
+                {"id": trainer["id"]},
+            )
+        ).all()
+    )
     ids = list(
         (
             await conn.execute(
@@ -201,7 +211,10 @@ async def profile(conn, trainer, token):
         "username": trainer["username"],
         "credits": trainer["credits"],
         "team": trainer["team"],
-        "collection": [shop_item(p) for p in await pokemon_data(conn, ids)],
+        "collection": [
+            dict(shop_item(p), sale_price=paid[p["id"]] // 2)
+            for p in await pokemon_data(conn, ids)
+        ],
         "medals": medals,
         "csrf_token": csrf_token(token),
         "battle_id": str(battle) if battle else None,
@@ -264,6 +277,96 @@ async def save_team(conn, trainer, ids):
     await conn.execute(
         text("UPDATE trainers SET team=CAST(:team AS jsonb) WHERE id=:id"),
         {"team": json.dumps(ids), "id": trainer["id"]},
+    )
+
+
+async def receipt(conn, trainer, request_id, kind, ids):
+    previous = (
+        (
+            await conn.execute(
+                text(
+                    "SELECT kind,pokemon_ids,result FROM trainer_transactions WHERE trainer_id=:id AND request_id=:request"
+                ),
+                {"id": trainer["id"], "request": request_id},
+            )
+        )
+        .mappings()
+        .first()
+    )
+    if previous:
+        if previous["kind"] != kind or previous["pokemon_ids"] != ids:
+            fail("invalidTransaction", 409)
+        return previous["result"]
+
+
+async def record_receipt(conn, trainer, request_id, kind, ids, result):
+    await conn.execute(
+        text(
+            "INSERT INTO trainer_transactions(trainer_id,request_id,kind,pokemon_ids,result) VALUES (:id,:request,:kind,CAST(:ids AS jsonb),CAST(:result AS jsonb))"
+        ),
+        {
+            "id": trainer["id"],
+            "request": request_id,
+            "kind": kind,
+            "ids": json.dumps(ids),
+            "result": json.dumps(result),
+        },
+    )
+    return result
+
+
+async def checkout(conn, trainer, ids, request_id):
+    if len(ids) != len(set(ids)) or not set(ids) <= set(SHOP_IDS):
+        fail("invalidCart", 422)
+    previous = await receipt(conn, trainer, request_id, "checkout", ids)
+    if previous:
+        return previous
+    total = 0
+    # The surrounding transaction rolls everything back if any line fails.
+    for pokemon_id in ids:
+        before = trainer["credits"]
+        await buy(conn, trainer, pokemon_id)
+        trainer["credits"] = await conn.scalar(
+            text("SELECT credits FROM trainers WHERE id=:id"), {"id": trainer["id"]}
+        )
+        total += before - trainer["credits"]
+    return await record_receipt(
+        conn, trainer, request_id, "checkout", ids, {"ok": True, "total": total}
+    )
+
+
+async def sell(conn, trainer, pokemon_id, request_id):
+    previous = await receipt(conn, trainer, request_id, "sale", [pokemon_id])
+    if previous:
+        return previous
+    await require_idle(conn, trainer["id"])
+    paid = await conn.scalar(
+        text(
+            "SELECT price FROM trainer_collection WHERE trainer_id=:id AND pokemon_id=:pokemon"
+        ),
+        {"id": trainer["id"], "pokemon": pokemon_id},
+    )
+    if paid is None:
+        fail("pokemonNotOwned", 404)
+    refund = paid // 2
+    await conn.execute(
+        text(
+            "DELETE FROM trainer_collection WHERE trainer_id=:id AND pokemon_id=:pokemon"
+        ),
+        {"id": trainer["id"], "pokemon": pokemon_id},
+    )
+    await conn.execute(
+        text(
+            "UPDATE trainers SET credits=credits+:refund, team=CAST(:team AS jsonb) WHERE id=:id"
+        ),
+        {
+            "id": trainer["id"],
+            "refund": refund,
+            "team": json.dumps([p for p in trainer["team"] if p != pokemon_id]),
+        },
+    )
+    return await record_receipt(
+        conn, trainer, request_id, "sale", [pokemon_id], {"ok": True, "refund": refund}
     )
 
 

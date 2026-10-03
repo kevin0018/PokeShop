@@ -3,10 +3,39 @@ import { computed, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from 'v
 import { useI18n } from 'vue-i18n'
 import { Award, LockKeyhole, Coins, Plus, X, ArrowRight, Flag } from 'lucide-vue-next'
 import BattleSprite from './BattleSprite.vue'
-import { type Battle, type BattleEvent, type Fighter, useAdventureStore } from './store'
+import {
+  type Battle,
+  type BattleEvent,
+  type Fighter,
+  type Companion,
+  useAdventureStore,
+} from './store'
 
 const { t, te, locale, n } = useI18n()
 const game = useAdventureStore()
+const saleDialog = ref<HTMLDialogElement>()
+const pendingSale = ref<Companion | null>(null)
+function cancelSale() {
+  saleDialog.value?.close()
+  pendingSale.value = null
+}
+let saleRequest = ''
+async function askSale(member: Companion) {
+  pendingSale.value = member
+  saleRequest = crypto.randomUUID()
+  await nextTick()
+  saleDialog.value?.showModal()
+}
+async function confirmSale() {
+  const result = await game.mutate('/sales', 'POST', {
+    pokemon_id: pendingSale.value?.id,
+    request_id: saleRequest,
+  })
+  if (result) {
+    saleDialog.value?.close()
+    pendingSale.value = null
+  }
+}
 const mode = ref<'login' | 'register'>('login')
 const username = ref(''),
   password = ref(''),
@@ -525,22 +554,37 @@ function health(pokemon: Fighter) {
             </RouterLink>
           </div>
           <div v-else class="collection-picker">
-            <button
+            <div
               v-for="member in game.trainer.collection"
               :key="member.id"
-              :aria-pressed="draft.includes(member.id)"
-              :aria-label="t('adventure.select', { name: name(member) })"
-              :disabled="
-                game.active || blocked || (!draft.includes(member.id) && draft.length === 6)
-              "
-              @click="toggle(member.id)"
+              class="collection-member"
             >
-              <img
-                :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
-                alt=""
-              /><strong>{{ name(member) }}</strong>
-            </button>
+              <button
+                :aria-pressed="draft.includes(member.id)"
+                :aria-label="t('adventure.select', { name: name(member) })"
+                :disabled="
+                  game.active || blocked || (!draft.includes(member.id) && draft.length === 6)
+                "
+                @click="toggle(member.id)"
+              >
+                <img
+                  :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
+                  alt=""
+                /><strong>{{ name(member) }}</strong>
+              </button>
+              <button
+                class="collection-sell"
+                :disabled="game.active || blocked"
+                @click="askSale(member)"
+              >
+                {{ t('adventure.sell', { name: name(member) }) }} ·
+                {{ t('adventure.credits', { amount: member.sale_price ?? 0 }) }}
+              </button>
+            </div>
           </div>
+          <p v-if="game.trainer.collection.length" class="team-note">
+            {{ t('adventure.salePolicy') }}
+          </p>
           <p v-if="draft.length === 6" class="team-note">{{ t('adventure.teamFull') }}</p>
         </section>
 
@@ -606,6 +650,28 @@ function health(pokemon: Fighter) {
       <p>{{ t('adventure.rules') }}</p>
     </details>
   </section>
+  <dialog
+    ref="saleDialog"
+    class="sale-dialog"
+    aria-labelledby="sale-title"
+    @cancel="pendingSale = null"
+  >
+    <template v-if="pendingSale">
+      <h2 id="sale-title">{{ t('adventure.saleTitle') }}</h2>
+      <p>
+        {{
+          t('adventure.saleHelp', { name: name(pendingSale), amount: pendingSale.sale_price ?? 0 })
+        }}
+      </p>
+      <p v-if="game.error" role="alert">{{ errorText }}</p>
+      <button class="button primary" :disabled="blocked" @click="confirmSale">
+        {{ t('adventure.confirmSale') }}
+      </button>
+      <button class="button secondary" :disabled="blocked" @click="cancelSale">
+        {{ t('adventure.cancelSale') }}
+      </button>
+    </template>
+  </dialog>
 </template>
 
 <style src="./adventure.css"></style>

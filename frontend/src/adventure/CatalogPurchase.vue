@@ -5,17 +5,20 @@ import { Plus, Check } from 'lucide-vue-next'
 import type { Pokemon } from '@/pokemon/domain/pokemon'
 import { pokemonName } from '@/shared/presentation/format'
 import { useAdventureStore } from './store'
+import { useCartStore } from '@/cart/application/cartStore'
 
 const props = defineProps<{ pokemon: Pokemon; compact?: boolean }>()
 const { t, n } = useI18n()
 const game = useAdventureStore()
+const cart = useCartStore()
+const inCart = computed(() => cart.entries.some((item) => item.id === props.pokemon.id))
 const offer = computed(() => game.shop.find((item) => item.id === props.pokemon.id))
 const owned = computed(() => game.trainer?.collection.some((item) => item.id === props.pokemon.id))
 const label = computed(() => {
   if (!offer.value) return t('adventure.notPlayable')
   if (owned.value) return t('adventure.owned')
-  if ((game.trainer?.credits ?? 0) < offer.value.price) return t('adventure.insufficient')
-  return t('adventure.buy', { name: pokemonName(props.pokemon) })
+  if (inCart.value) return t('adventure.inCart')
+  return t('addPokemon', { name: pokemonName(props.pokemon) })
 })
 </script>
 
@@ -26,12 +29,12 @@ const label = computed(() => {
     <button
       v-if="offer"
       :class="compact ? 'add-button' : 'button primary'"
-      :disabled="game.busy || owned || (game.trainer?.credits ?? 0) < offer.price"
+      :disabled="game.busy || owned || inCart"
       :aria-label="label"
       :title="label"
-      @click="game.mutate('/purchases', 'POST', { pokemon_id: pokemon.id })"
+      @click="cart.add(pokemon.id)"
     >
-      <Check v-if="owned" :size="18" /><Plus v-else :size="18" />
+      <Check v-if="owned || inCart" :size="18" /><Plus v-else :size="18" />
       <span :class="{ 'add-label': compact }">{{ label }}</span>
     </button>
   </div>

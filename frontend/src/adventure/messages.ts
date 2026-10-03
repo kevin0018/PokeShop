@@ -37,6 +37,16 @@ export const adventureEn = {
   onlyPlayable: 'Only Pokémon available for battles',
   buy: 'Buy {name}',
   owned: 'In your collection',
+  inCart: 'In your cart',
+  confirmPurchase: 'Confirm purchase',
+  purchaseCompleted: 'Purchase completed.',
+  sell: 'Sell {name}',
+  saleTitle: 'Sell Pokémon',
+  saleHelp: 'Sell {name} for {amount} credits? It will also be removed from your team.',
+  salePolicy:
+    'Selling returns half of the credits you paid. Pokémon cannot be sold during a battle.',
+  confirmSale: 'Confirm sale',
+  cancelSale: 'Cancel',
   insufficient: 'Not enough credits',
   gymsTitle: 'Gyms',
   gymsHelp:
@@ -87,6 +97,9 @@ export const adventureEn = {
   rules:
     'Types, speed, physical/special damage, priority, accuracy and PP matter. Passive abilities, statuses and secondary move effects are not active. Low Kick uses fixed power; draining moves do not heal. Switching spends a turn. Defeat costs no credits.',
   errors: {
+    invalidCart: 'Check your cart. Each available Pokémon can be bought once.',
+    invalidTransaction: 'This confirmation belongs to another operation. Refresh and try again.',
+    pokemonNotOwned: 'This Pokémon is not in your collection.',
     connectionRecovered:
       'Your saved progress has been recovered. Check the result before continuing.',
     connectionError:
@@ -156,6 +169,16 @@ export const adventureEs = {
   onlyPlayable: 'Solo Pokémon disponibles para combatir',
   buy: 'Comprar a {name}',
   owned: 'En tu colección',
+  inCart: 'En el carrito',
+  confirmPurchase: 'Confirmar compra',
+  purchaseCompleted: 'Compra completada.',
+  sell: 'Vender a {name}',
+  saleTitle: 'Vender Pokémon',
+  saleHelp: '¿Vender a {name} por {amount} créditos? También se quitará de tu equipo.',
+  salePolicy:
+    'La venta devuelve la mitad de los créditos que pagaste. No puedes vender durante un combate.',
+  confirmSale: 'Confirmar venta',
+  cancelSale: 'Cancelar',
   insufficient: 'Créditos insuficientes',
   gymsTitle: 'Gimnasios',
   gymsHelp:
@@ -206,6 +229,10 @@ export const adventureEs = {
   rules:
     'Importan los tipos, velocidad, daño físico/especial, prioridad, precisión y PP. No se aplican habilidades pasivas, estados ni efectos secundarios. Patada baja tiene potencia fija; los movimientos de absorción no curan. Cambiar consume un turno. Perder no cuesta créditos.',
   errors: {
+    invalidCart: 'Revisa el carrito. Solo puedes comprar un ejemplar de cada Pokémon disponible.',
+    invalidTransaction:
+      'Esta confirmación corresponde a otra operación. Recarga y vuelve a intentarlo.',
+    pokemonNotOwned: 'Este Pokémon no está en tu colección.',
     connectionRecovered:
       'Hemos recuperado tu progreso guardado. Comprueba el resultado antes de continuar.',
     connectionError:

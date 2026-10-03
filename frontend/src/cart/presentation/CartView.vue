@@ -4,11 +4,24 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 import { ArrowLeft, ArrowRight, Minus, Plus, Trash2 } from 'lucide-vue-next'
 import { useCartStore } from '../application/cartStore'
+import { useAdventureStore } from '@/adventure/store'
 
 import { money, pokemonName, number } from '@/shared/presentation/format'
 import PokemonImage from '@/components/PokemonImage.vue'
 import RecommendationsPanel from '@/pokemon/presentation/RecommendationsPanel.vue'
 const cart = useCartStore()
+const game = useAdventureStore()
+const alreadyPurchased = computed(
+  () =>
+    cart.lines.length > 0 &&
+    cart.lines.every((line) => game.trainer?.collection.some((p) => p.id === line.pokemon.id)),
+)
+const price = (amount: number) =>
+  game.trainer ? t('adventure.credits', { amount }) : money(amount)
+const purchased = ref(false)
+async function checkout() {
+  purchased.value = Boolean(await cart.checkout())
+}
 const page = ref(1)
 const pages = computed(() => Math.max(1, Math.ceil(cart.lines.length / 6)))
 const visibleLines = computed(() => cart.lines.slice((page.value - 1) * 6, page.value * 6))
@@ -37,11 +50,23 @@ onMounted(() => {
     </div>
     <div class="cart-heading-actions">
       <span>{{ t('units', cart.count) }}</span>
-      <button v-if="cart.entries.length" class="button secondary" @click="cart.clear">
+      <button
+        v-if="cart.entries.length"
+        class="button secondary"
+        :disabled="game.busy"
+        @click="cart.clear"
+      >
         <Trash2 :size="16" />{{ t('clearCart') }}
       </button>
     </div>
   </div>
+  <p v-if="purchased" role="status" class="state-box">
+    {{ t('adventure.purchaseCompleted') }}
+    <RouterLink to="/aventura">{{ t('adventure.teamTab') }}</RouterLink>
+  </p>
+  <p v-if="game.trainer && game.error" role="alert" class="state-box">
+    {{ t(`adventure.errors.${game.error}`) }}
+  </p>
   <p v-if="cart.loading" role="status" class="state-box">{{ t('loadingCart') }}</p>
   <div v-else-if="cart.error" role="alert" class="state-box">
     <p>{{ t('catalogError') }}</p>
@@ -76,8 +101,8 @@ onMounted(() => {
                 pokemonName(line.pokemon)
               }}</RouterLink>
             </h2>
-            <p>{{ t('perUnit', { price: money(line.pokemon.price_cents) }) }}</p>
-            <div class="quantity-control">
+            <p>{{ t('perUnit', { price: price(line.pokemon.price_cents) }) }}</p>
+            <div v-if="!game.trainer" class="quantity-control">
               <button
                 :aria-label="t('decrease', { name: pokemonName(line.pokemon) })"
                 :disabled="line.quantity === 1"
@@ -97,10 +122,11 @@ onMounted(() => {
             </div>
           </div>
           <div class="cart-line-total">
-            <strong>{{ money(line.pokemon.price_cents * line.quantity) }}</strong
+            <strong>{{ price(line.pokemon.price_cents * line.quantity) }}</strong
             ><button
               class="text-button"
               :aria-label="t('removePokemon', { name: pokemonName(line.pokemon) })"
+              :disabled="game.busy"
               @click="cart.remove(line.pokemon.id)"
             >
               <Trash2 :size="16" />{{ t('remove') }}
@@ -127,14 +153,31 @@ onMounted(() => {
         <h2>{{ t('summary') }}</h2>
         <div>
           <span>{{ t('subtotal', { units: t('units', cart.count) }) }}</span
-          ><strong>{{ money(cart.total) }}</strong>
+          ><strong>{{ price(cart.total) }}</strong>
         </div>
         <div class="summary-total">
           <span>{{ t('total') }}</span
-          ><strong>{{ money(cart.total) }}</strong>
+          ><strong>{{ price(cart.total) }}</strong>
         </div>
         <p>{{ t('cartSaved') }}</p>
-        <p class="demo-note">{{ t('demoCart') }}</p>
+        <template v-if="game.trainer">
+          <p>{{ t('adventure.credits', { amount: game.trainer.credits }) }}</p>
+          <p v-if="cart.total > game.trainer.credits && !alreadyPurchased">
+            {{ t('adventure.insufficient') }}
+          </p>
+          <button
+            class="button primary"
+            :disabled="
+              game.busy ||
+              !cart.lines.length ||
+              (cart.total > game.trainer.credits && !alreadyPurchased)
+            "
+            @click="checkout"
+          >
+            {{ t('adventure.confirmPurchase') }}
+          </button>
+        </template>
+        <p v-else class="demo-note">{{ t('demoCart') }}</p>
         <RouterLink class="button secondary" to="/catalogo">{{ t('keepExploring') }}</RouterLink>
       </aside>
       <div class="chansey-summary">

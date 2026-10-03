@@ -4,7 +4,7 @@
 
 PokeShop is deployed at **https://pokeshop-app.duckdns.org** on the existing Contabo VPS.
 HTTPS is enabled with automatic certificate renewal. The initial release was a demonstration store without
-accounts, checkout or payment processing. The invitation-only adventure is an additive release requiring migration `003`; see [adventure setup](adventure.md).
+accounts, checkout or payment processing. The invitation-only adventure is an additive release requiring migrations `003` and `004`; see [adventure setup](adventure.md).
 Deployment is manual; GitHub pushes
 do not deploy automatically.
 

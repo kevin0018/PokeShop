@@ -61,21 +61,47 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   await expect(page.getByText('Todavía no disponible para combatir').first()).toBeVisible()
   await page.getByRole('checkbox', { name: 'Solo Pokémon disponibles para combatir' }).check()
   for (const name of ['Bulbasaur', 'Squirtle']) {
-    await page.getByRole('button', { name: `Comprar a ${name}`, exact: true }).click()
+    await page.getByRole('button', { name: `Añadir ${name} al carrito`, exact: true }).click()
     await expect(
       page
         .locator('.pokemon-card')
         .filter({ has: page.getByRole('heading', { name, exact: true }) })
         .getByRole('button'),
-    ).toHaveAccessibleName('En tu colección')
+    ).toHaveAccessibleName('En el carrito')
   }
   await page.getByRole('link', { name: 'Charmander', exact: true }).click()
   await expect(page.locator('.detail-copy .catalog-purchase strong')).toHaveText('220 créditos')
   await expect(page.locator('.detail-price')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Comprar a Charmander', exact: true }).click()
-  await expect(page.getByRole('button', { name: 'En tu colección', exact: true })).toBeDisabled()
+  await page.getByRole('button', { name: 'Añadir Charmander al carrito', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'En el carrito', exact: true })).toBeDisabled()
   await page.getByRole('link', { name: 'Volver al catálogo', exact: true }).click()
+  const beforeCheckout = await (await page.request.get('/api/v1/adventure/me')).json()
+  expect(beforeCheckout.credits).toBe(1000)
+  expect(beforeCheckout.collection).toHaveLength(0)
+  await page.goto('/carrito')
   await page.reload()
+  await expect(page.locator('.cart-line')).toHaveCount(3)
+  await expect(page.locator('.summary-total')).toContainText('690 créditos')
+  await expect(page.locator('.quantity-control')).toHaveCount(0)
+  for (const width of [320, 375, 414, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 })
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  }
+  await page.route(
+    '**/api/v1/adventure/checkout',
+    async (route) => {
+      await route.fetch()
+      await route.abort()
+    },
+    { times: 1 },
+  )
+  await page.getByRole('button', { name: 'Confirmar compra', exact: true }).click()
+  await expect(page.getByRole('alert')).toContainText('recuperado tu progreso')
+  await page.reload()
+  await page.getByRole('button', { name: 'Confirmar compra', exact: true }).click()
+  await expect(page.getByText('Compra completada.', { exact: false })).toBeVisible()
+  await expect(page.locator('.cart-line')).toHaveCount(0)
+  await page.goto('/catalogo')
   await expect(page.locator('.catalog-trainer')).toContainText('310 créditos')
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.addStyleTag({ content: '#vue-devtools__anchor { display: none !important; }' })
@@ -149,5 +175,18 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   await page.getByLabel('Contraseña', { exact: true }).fill('adventure-test-password')
   await page.getByRole('button', { name: 'Entrar', exact: true }).last().click()
   await expect(page.locator('.trainer-strip')).toContainText('1 / 6 medallas')
+  await page.getByRole('button', { name: 'Mi equipo', exact: true }).click()
+  await page.getByRole('button', { name: /Vender a Charmander/ }).click()
+  await expect(page.getByRole('dialog')).toContainText('110 créditos')
+  await page.getByRole('button', { name: 'Cancelar', exact: true }).click()
+  await expect(page.locator('.team-slot.occupied')).toHaveCount(3)
+  await page.getByRole('button', { name: /Vender a Charmander/ }).click()
+  await page.getByRole('button', { name: 'Confirmar venta', exact: true }).click()
+  await expect(page.getByRole('dialog')).toBeHidden()
+  await expect(page.locator('.trainer-strip')).toContainText('570 créditos')
+  await expect(page.locator('.team-slot.occupied')).toHaveCount(2)
+  await page.reload()
+  await expect(page.locator('.trainer-strip')).toContainText('570 créditos')
+  await expect(page.getByRole('button', { name: 'Seleccionar a Charmander' })).toHaveCount(0)
   expect(errors).toEqual([])
 })
