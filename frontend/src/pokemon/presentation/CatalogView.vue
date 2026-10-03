@@ -307,108 +307,6 @@ request<typeof metadata.value>('/metadata')
 .catalog-section .search-field {
   flex: 1 1 260px;
 }
-.catalog-bento {
-  display: grid;
-  gap: 20px;
-}
-.catalog-section .bento-block {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
-}
-.catalog-section .bento-block > .pokemon-card {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  border-radius: 16px;
-  background: var(--surface);
-}
-.catalog-section .bento-block .illustrated-card .card-art {
-  position: relative;
-  inset: auto;
-  display: block;
-  height: 220px;
-  flex-shrink: 0;
-  background: radial-gradient(
-    ellipse at 50% 60%,
-    color-mix(in srgb, var(--pokemon-tint) 30%, var(--surface)),
-    color-mix(in srgb, var(--pokemon-tint) 8%, var(--surface))
-  );
-  border-bottom: 1px solid var(--line);
-}
-.catalog-section .bento-block .illustrated-card .card-art::before {
-  width: 150px;
-  height: 150px;
-  left: calc(50% - 75px);
-  right: auto;
-  top: 40px;
-  border-color: color-mix(in srgb, var(--pokemon-tint) 40%, transparent);
-}
-.catalog-section .bento-block .illustrated-card .card-art img {
-  width: 78%;
-  height: 84%;
-  left: 11%;
-  right: auto;
-  top: 24px;
-}
-.catalog-section .bento-block .illustrated-card > .type-list {
-  top: 14px;
-  left: 14px;
-  bottom: auto;
-  max-width: calc(100% - 74px);
-}
-.catalog-section .bento-block .illustrated-card .card-body {
-  position: relative;
-  inset: auto;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  width: 100%;
-  padding: 16px;
-  background: var(--surface);
-}
-.catalog-section .illustrated-card h3 {
-  font-size: 18px;
-  margin: 0 0 8px;
-}
-.catalog-section .illustrated-card .card-measures {
-  margin: 0;
-  font-size: 11px;
-}
-.catalog-section .illustrated-card .card-bottom {
-  margin-top: auto;
-  padding-top: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
-}
-.catalog-section .illustrated-card .catalog-purchase.compact {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
-}
-.catalog-section .illustrated-card .card-bottom strong {
-  font-size: 18px;
-}
-.catalog-section .illustrated-card .add-button {
-  position: static;
-  width: 100%;
-  min-height: 44px;
-  border-radius: 10px;
-  gap: 8px;
-  font-size: 13px;
-}
-.catalog-section .illustrated-card .add-label {
-  display: inline;
-}
-@media (max-width: 900px) {
-  .catalog-section .bento-block {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-  }
-}
 @media (max-width: 700px) {
   .shop-front .shop-heading {
     padding: 18px 16px 8px;
@@ -437,51 +335,122 @@ request<typeof metadata.value>('/metadata')
     flex-basis: 180px;
     min-width: 0;
   }
-  .catalog-section .bento-block {
-    gap: 12px;
-  }
-  .catalog-bento {
-    gap: 12px;
-  }
-  .catalog-section .bento-block .illustrated-card .card-art {
-    height: 160px;
-  }
-  .catalog-section .bento-block .illustrated-card .card-art::before {
-    width: 110px;
-    height: 110px;
-    left: calc(50% - 55px);
-    top: 35px;
-  }
-  .catalog-section .bento-block .illustrated-card .card-art img {
-    width: 92%;
-    height: 78%;
-    left: 4%;
-    top: 30px;
-  }
-  .catalog-section .bento-block .illustrated-card .card-body {
-    padding: 12px;
-  }
-  .catalog-section .illustrated-card h3 {
-    font-size: 15px;
-  }
-  .catalog-section .illustrated-card .card-bottom strong {
-    font-size: 14px;
-  }
-  .catalog-section .illustrated-card .add-button {
-    font-size: 11px;
-    padding-inline: 5px;
-  }
-  .catalog-section .illustrated-card .card-measures {
-    font-size: 9px;
-  }
 }
 @media (max-width: 350px) {
-  .catalog-section .bento-block {
-    grid-template-columns: minmax(0, 1fr);
-  }
   .shop-counter-art {
     width: 96px;
     height: 60px;
+  }
+}
+.catalog-bento {
+  display: grid;
+  gap: 16px;
+}
+.bento-block {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 16px;
+  grid-auto-rows: 200px;
+}
+.bento-block > .pokemon-card {
+  grid-column: span 2;
+}
+.bento-block[data-count='6'] > .pokemon-card:first-child {
+  grid-column: span 3;
+  grid-row: span 2;
+}
+.bento-block[data-count='6'] > .pokemon-card:nth-child(2),
+.bento-block[data-count='6'] > .pokemon-card:nth-child(3) {
+  grid-column: span 3;
+}
+.bento-block[data-count='1'] > .pokemon-card {
+  grid-column: span 6;
+}
+.bento-block[data-count='2'] > .pokemon-card,
+.bento-block[data-count='4'] > .pokemon-card,
+.bento-block[data-count='5'] > .pokemon-card:nth-child(-n + 2) {
+  grid-column: span 3;
+}
+@media (min-width: 901px) {
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-body,
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-body,
+  .bento-block[data-count='1'] .card-body {
+    width: 100%;
+    top: 0;
+    bottom: 0;
+    transform: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-body > h3,
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-body > h3,
+  .bento-block[data-count='1'] .card-body > h3,
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-measures,
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-measures,
+  .bento-block[data-count='1'] .card-measures {
+    max-width: 42%;
+  }
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-bottom,
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-bottom,
+  .bento-block[data-count='1'] .card-bottom {
+    min-height: 44px;
+  }
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .add-button,
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .add-button,
+  .bento-block[data-count='1'] .add-button {
+    position: absolute;
+    right: 18px;
+    bottom: 14px;
+  }
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-art img,
+  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-art img,
+  .bento-block[data-count='1'] .card-art img {
+    width: 54%;
+    height: 95%;
+    left: auto;
+    right: 0;
+    top: 2%;
+  }
+  .bento-block[data-count='6'] > .pokemon-card:first-child .card-art img {
+    height: 76%;
+    width: 88%;
+    left: 6%;
+    top: 0;
+  }
+  .bento-block[data-count='6'] > .pokemon-card:first-child h3 {
+    font-size: 1.6rem;
+  }
+  .bento-block[data-count='6'] > .pokemon-card:first-child .card-body {
+    padding: 24px;
+  }
+}
+@media (min-width: 541px) and (max-width: 900px) {
+  .bento-block {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 250px;
+  }
+  .catalog-bento .bento-block > .pokemon-card:nth-child(n) {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
+  .bento-block[data-count='6'] > .pokemon-card:first-child,
+  .bento-block[data-count='6'] > .pokemon-card:last-child,
+  .bento-block[data-count='1'] > .pokemon-card,
+  .bento-block[data-count='3'] > .pokemon-card:last-child,
+  .bento-block[data-count='5'] > .pokemon-card:last-child {
+    grid-column: span 2;
+  }
+}
+@media (max-width: 540px) {
+  .bento-block {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: 260px;
+  }
+  .catalog-bento .bento-block > .pokemon-card:nth-child(n) {
+    grid-column: span 1;
+    grid-row: span 1;
   }
 }
 </style>
