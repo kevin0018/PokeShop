@@ -954,31 +954,31 @@ nav {
 }
 
 :root[data-theme='dark'] {
-  --ink: #f5eee2;
-  --muted: #a6b6c5;
+  --ink: #f3f1ee;
+  --muted: #aaa7a4;
   --purple: #ff967c;
   --lavender: #b6a0d3;
-  --paper: #182238;
-  --line: #3c4d69;
-  --surface: #24324b;
+  --paper: #101010;
+  --line: #353535;
+  --surface: #1b1b1b;
   --on-accent: #302017;
   --badge: #503b36;
-  --feature: #2d4062;
-  --heading: #fff3df;
-  --muted-strong: #c0ced6;
+  --feature: #252525;
+  --heading: #faf7f2;
+  --muted-strong: #c8c5c0;
   --button-hover: #ffb29b;
-  --surface-hover: #314563;
-  --border-strong: #827063;
-  --orbit-inner: #546f9b;
-  --hero-mark: #674b40;
-  --art-surface: #2a3b57;
-  --control-border: #62799a;
-  --control-surface: #2b3e5d;
-  --control-hover: #3c567e;
-  --empty-border: #607ba1;
-  --panel: #2b3c59;
-  --panel-border: #435c80;
-  --panel-divider: #536e93;
+  --surface-hover: #2b2b2b;
+  --border-strong: #66615d;
+  --orbit-inner: #454545;
+  --hero-mark: #48352f;
+  --art-surface: #222222;
+  --control-border: #535353;
+  --control-surface: #232323;
+  --control-hover: #333333;
+  --empty-border: #555555;
+  --panel: #222222;
+  --panel-border: #3c3c3c;
+  --panel-divider: #4a4a4a;
   color-scheme: dark;
 }
 :root[data-theme='dark'] .storage-warning {

@@ -1216,8 +1216,18 @@
   display: inline-flex;
   gap: 7px;
   align-items: center;
-  margin-top: 18px;
+  margin-top: 24px;
   min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid color-mix(in srgb, var(--purple) 65%, var(--surface));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--purple) 12%, var(--surface));
+  color: var(--purple);
+  font-weight: 600;
+}
+.battle-leave:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--purple) 22%, var(--surface));
+  border-color: var(--purple);
 }
 .leave-confirm {
   margin-top: 22px;
