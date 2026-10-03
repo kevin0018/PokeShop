@@ -5,9 +5,6 @@ defineProps<{ selected: number }>()
 <template>
   <div class="center-reception">
     <div class="reception-window reception-window-left" aria-hidden="true">
-      <span class="reception-heart">♥</span>
-    </div>
-    <div class="reception-window reception-window-right" aria-hidden="true">
       <span
         v-for="i in 6"
         :key="i"

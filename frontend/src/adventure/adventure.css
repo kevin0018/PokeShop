@@ -292,16 +292,8 @@
 }
 .reception-window-left {
   left: 6%;
-}
-.reception-window-right {
-  right: 6%;
   grid-template-columns: repeat(3, 14px);
   gap: 10px;
-}
-.reception-heart {
-  font-size: 42px;
-  line-height: 1;
-  color: var(--center-red);
 }
 .reception-light {
   width: 14px;
@@ -435,18 +427,12 @@
   }
   .reception-window-left {
     left: 4%;
-  }
-  .reception-window-right {
-    right: 4%;
-    gap: 6px;
     grid-template-columns: repeat(3, 10px);
+    gap: 6px;
   }
   .reception-light {
     width: 10px;
     height: 10px;
-  }
-  .reception-heart {
-    font-size: 30px;
   }
   .center-nurse {
     height: 126px;
@@ -515,21 +501,6 @@
 .pc-access:hover .pc-access-label,
 .pc-access:focus-visible .pc-access-label {
   opacity: 1;
-}
-.pc-interaction-hint {
-  position: absolute;
-  top: 0;
-  right: 8px;
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border: 2px solid var(--surface);
-  border-radius: 50%;
-  background: var(--center-red);
-  color: #fff;
-  font: bold 20px monospace;
-  box-shadow: 0 2px 0 #0002;
 }
 .sale-dialog.pc-dialog {
   --pc-accent: #72b8b2;
@@ -603,9 +574,6 @@
     height: 120px;
     right: 2%;
     padding: 10px 4px 0;
-  }
-  .reception-window-right {
-    display: none;
   }
   .collection-pc-art {
     width: 66px;

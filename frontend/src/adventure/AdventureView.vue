@@ -574,7 +574,6 @@ function health(pokemon: Fighter) {
                   aria-haspopup="dialog"
                   @click="pcDialog?.showModal()"
                 >
-                  <span class="pc-interaction-hint" aria-hidden="true">!</span>
                   <CollectionPc />
                   <span class="pc-access-label" aria-hidden="true">{{
                     t('adventure.openPc')
