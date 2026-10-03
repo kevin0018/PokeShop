@@ -323,6 +323,7 @@ onUnmounted(() => {
   }
   .hero-starter:nth-of-type(3) {
     right: 2%;
+    z-index: 3;
   }
   .starter-name {
     gap: 5px;
