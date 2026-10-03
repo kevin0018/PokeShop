@@ -10,6 +10,8 @@ The adventure is a private, single-player Kanto challenge alongside the public c
 
 [Gym leaders](gyms.png) · [Gyms on mobile](gyms-mobile.png). Each gym uses its type palette and a classic trainer PNG from [Pokémon Showdown's trainer sprites](https://play.pokemonshowdown.com/sprites/trainers/). Trainer artwork belongs to its respective rights holders. A portrait failure leaves the leader name and gym controls available.
 
+[Pokémon Center](center.png) · [Collection PC](collection-pc.png)
+
 ## Access and deployment
 
 Apply the additive migration before opening the adventure:
@@ -38,6 +40,8 @@ Gyms use square cards in three desktop columns or two mobile columns. Hover, key
 
 Selling from the collection requires confirmation and returns half the original paid price, rounded down. The server removes the Pokémon from both collection and saved team. Sales are blocked during active battles. Checkout validates every cart line and available credits in one transaction; any failure rolls back all lines. Migration `004` adds durable, trainer-scoped receipts for checkout and sales. Retrying the same request after a lost response returns the original receipt without charging or refunding again. Draft carts persist per trainer in browser storage; they do not grant ownership.
 
+Battle entry uses two consecutive black wipes and skips them with reduced motion. During battle the header, footer, cart notices and rules are hidden, leaving the gym, fighters, turn history and battle controls in focus. Gym-specific scenery covers the viewport as well as the arena. Reloads retain this focused view; returning to the gyms restores navigation.
+
 ## Authority and recovery
 
 The Pokémon Center contains a clickable pixel-art PC. It opens the collection in a modal with 30-slot boxes, team selection and confirmed sales. Boxes display the collection in groups of 30; closing the PC keeps the draft team, which is persisted with Save team.
@@ -50,7 +54,7 @@ The browser renders ordered server events and the final authoritative state. If 
 
 The turn indicator opens a battle history grouped by resolved turn, with the player or gym leader identified for each action. The server stores this history in the battle snapshot, so reloads preserve it and rejected duplicate turns do not add entries. Existing snapshots can recover their last stored turn; earlier overwritten events cannot be reconstructed.
 
-Verified locally on 2026-10-03: 25 adventure tests, 21 existing backend regression tests, 19 frontend unit tests and all 34 Chrome browser tests passed. Type checking, ESLint, production build and Ruff passed. Browser coverage includes registration, purchases, team persistence, battle reload, language changes, 320/375/414/768/1280 px layouts, first victory and unlocking, logout/login, and a committed attack whose response is deliberately lost and recovered without replay. A seeded test using imported Kanto base stats verifies an affordable route through all six gyms; this demonstrates feasibility, not comprehensive game balance.
+Verified locally on 2026-10-03: 25 adventure tests, 22 existing backend regression tests, 19 frontend unit tests passed. The 33-test catalog/cart Chrome suite passed during the redesign, and targeted checks plus the complete adventure journey were repeated after the latest UI changes. Type checking, ESLint, production build and Ruff passed. Browser coverage includes registration, purchases, team persistence, battle reload, language changes, 320/375/414/768/1280 px layouts, first victory and unlocking, logout/login, and a committed attack whose response is deliberately lost and recovered without replay. A seeded test using imported Kanto base stats verifies an affordable route through all six gyms; this demonstrates feasibility, not comprehensive game balance.
 
 Run API tests against a separately created, migrated database whose name starts with `adventure_test`. The suite truncates adventure tables and writes biological fixtures there; never point it at a real catalog database.
 

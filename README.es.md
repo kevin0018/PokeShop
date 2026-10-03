@@ -12,15 +12,17 @@ Una tienda Pokémon de demostración con portada a todo el ancho con los tres in
 
 [Vista del catálogo](docs/catalog.png) · [Catálogo con entrenador](docs/catalog-trainer.png) · [Vista del carrito](docs/cart.png) · [Combate de aventura](docs/adventure.png) · [Combate en móvil](docs/adventure-mobile.png)
 
+[Centro Pokémon](docs/center.png) · [PC de la colección](docs/collection-pc.png) · [Líderes de gimnasio](docs/gyms.png)
+
 ## Funcionalidades
 
-- `/aventura`: invitaciones de un solo uso emitidas por el propietario, cuentas de entrenador, 1.000 créditos iniciales, compras desde el catálogo existente, equipos guardados de hasta seis y seis gimnasios consecutivos. Las primeras victorias conceden medallas y créditos; recargar conserva el combate. Los sprites clásicos de frente y espalda representan eventos del servidor. [Reglas, acceso, despliegue y pruebas](docs/adventure.es.md). La demo pública necesita migración y despliegue para ofrecer esta ampliación.
+- `/aventura`: cuentas por invitación con 1.000 créditos ficticios iniciales. Selecciona y guarda el equipo en un Centro Pokémon; su PC en pixel art abre la colección en cajas de 30 plazas y permite vender con confirmación del reembolso. Seis gimnasios consecutivos tienen retratos de sus líderes y colores por tipo. Dos franjas negras dan paso al combate: desaparecen navegación y footer, el escenario del gimnasio ocupa el fondo de la ventana y el indicador de turno abre un historial persistente por turno y participante. Compras, turnos y premios se resuelven en el servidor y se conservan al recargar. [Reglas, acceso, despliegue y pruebas](docs/adventure.es.md).
 - `/`: collage a todo el ancho de Bulbasaur, Charmander y Squirtle, sin marco de tarjeta. Los colores por tipo forman el fondo; se mantienen los accesos al catálogo y Kanto. La portada se muestra directamente. El movimiento reducido desactiva las animaciones decorativas; el fondo se detiene fuera de pantalla y con la pestaña oculta.
-- `/catalogo`: 24 resultados ordenados en bloques compactos de seis: una tarjeta 3×2, dos 3×1 y tres 2×1, sobre seis columnas de escritorio con filas de 200 px y separación de 16 px. Los bloques incompletos forman filas equilibradas. Dos columnas en tablet y una en móvil. El tamaño es editorial, independiente de la altura; las dimensiones siguen visibles. Los filtros provisionales conservan estado en URL y Aplicar/Cancelar.
+- `/catalogo`: toldo azul y mostrador en pixel art integrados con un catálogo bento ordenado: una tarjeta grande, dos horizontales y tres pequeñas por bloque completo. Dos columnas en tablet y una en móvil; los bloques incompletos conservan el orden sin solaparse. Los entrenadores ven saldo, precios en créditos y los 26 Pokémon de Kanto disponibles para combatir por defecto. Las compras pasan por el carrito existente. Búsqueda y filtros conservan el estado en URL y Aplicar/Cancelar.
 - `/pokemon/:id`: biología localizada, dimensiones y origen. Las estadísticas se abren desde la esquina superior derecha de la ilustración con hover, foco o toque; un clic fija el popover y Escape, pulsación fuera o Cerrar lo cierran. Las habilidades permanecen en la API, pero se omiten en la vista.
-- `/carrito`: seis productos distintos por página y totales calculados sobre toda la cesta. Eliminar el último producto de una página ajusta a la última válida; cambiar cantidades mantiene la página. IDs y cantidades persisten, independientemente de la paginación del catálogo y los fallos de red.
+- `/carrito`: seis productos distintos por página y totales calculados sobre toda la cesta. Eliminar el último producto de una página ajusta a la última válida; cambiar cantidades mantiene la página. IDs y cantidades persisten, independientemente de la paginación del catálogo y los fallos de red. Los entrenadores confirman una compra atómica validada por el servidor; los recibos persistentes evitan cobrar de nuevo tras perder una respuesta. Los visitantes sin sesión mantienen el carrito de demostración en euros.
 - Cuatro recomendaciones disponibles priorizan tipos compartidos, después generación y proximidad de precio. No repiten especie y excluyen las especies seleccionadas. El carrito vacío muestra destacados.
-- Español/inglés con Vue I18n, selectores accesibles de Reka UI, iconos Lucide, temas claro/oscuro con detección inicial de la preferencia del navegador y revelación circular de 700 ms para cambios manuales. El movimiento reducido y los cambios automáticos del sistema omiten la animación; los navegadores sin soporte transicionan los colores durante 300 ms, sin atenuar la página.
+- Español/inglés con Vue I18n, selectores accesibles de Reka UI, iconos Lucide, temas claro/oscuro con detección inicial de la preferencia del navegador y revelación circular de 700 ms para cambios manuales. El movimiento reducido y los cambios automáticos del sistema omiten la animación; los navegadores sin soporte transicionan los colores durante 300 ms, sin atenuar la página. El tema claro utiliza superficies crema; el oscuro combina grafito con matiz violeta y el acento morado original. El inicio conserva el fondo verde, naranja y azul de los tres iniciales.
 
 Chansey aparece con 180–240 px según el ancho de pantalla debajo del resumen con aspecto de ticket, tanto en escritorio como en móvil y también acompaña el estado vacío. Los avisos de tres segundos usan un disco que se vacía, se pausan con hover/foco y se reinician con cada acción. Los errores de almacenamiento permanecen visibles. Un switch animado Espeon/Umbreon selecciona claro/oscuro, usando inicialmente la preferencia del navegador y recordando las elecciones manuales. Se conserva la revelación de página de 700 ms.
 
@@ -89,7 +91,7 @@ El `.env` raíz ignorado guarda `POSTGRES_PASSWORD`; ambos servicios lo referenc
 
 | Endpoint | Comportamiento |
 | --- | --- |
-| `GET /api/v1/pokemon` | `{ items, total }`; `q`, `type`, `region`, `generation`, `forms=all/default/alternative`, `sort`, `limit` (24 por defecto, máximo 100), `offset` |
+| `GET /api/v1/pokemon` | `{ items, total }`; `q`, `type`, `region`, `generation`, `forms=all/default/alternative`, `sort`, `currency=credits`, `playable=true`, `limit` (24 por defecto, máximo 100), `offset` |
 | `/api/v1/pokemon/{id}` | Producto ampliado; 404 si no existe |
 | `/api/v1/pokemon/metadata` | Tipos, generaciones y regiones localizadas disponibles |
 | `/api/v1/pokemon/featured` | Selección editorial |
@@ -97,6 +99,8 @@ El `.env` raíz ignorado guarda `POSTGRES_PASSWORD`; ambos servicios lo referenc
 | `/api/v1/pokemon/recommendations?ids=25` | Cuatro sugerencias disponibles, sin repetir especie, con motivo |
 
 Órdenes: `number`, `name`, `price_asc`, `price_desc`, `weight_asc`, `weight_desc`, `height_asc`, `height_desc`. Las búsquedas numéricas encuentran especies y por tanto incluyen sus formas alternativas. Se conservan los campos anteriores; el contrato tipado completo está en `/docs`.
+
+Los endpoints de aventura se detallan en [su guía](docs/adventure.es.md) y `/docs`: registro/entrada/salida, entrenador actual, tienda, equipo, compra, venta y creación/consulta/turnos del combate. La API valida sesión y propiedad.
 
 ## Arquitectura y decisiones
 
@@ -153,7 +157,7 @@ Total: **2.944 MiB**, sin swap adicional para los contenedores. Redis limita los
 Ejecuta secuencialmente las comprobaciones que consumen más recursos:
 
 ```sh
-docker compose exec backend python -m unittest discover -s tests -v
+docker compose exec backend python -m unittest tests.test_app tests.test_catalog tests.test_database_config tests.test_pricing tests.test_persistent_catalog -v
 docker compose exec frontend pnpm test:unit --run
 docker compose exec frontend pnpm type-check
 docker compose exec frontend pnpm exec eslint .
@@ -170,11 +174,13 @@ docker compose logs -f
 docker compose down
 ```
 
-Verificado el 07/09/2026: 21 pruebas de backend y 19 pruebas unitarias de frontend; tipos, ESLint, build de producción y Ruff. La suite completa de Chromium pasó contra el preview de producción; también se comprobaron las interacciones principales en desarrollo. La cobertura de navegador contiene 13 regresiones de interacción y 20 escenarios responsive, cada uno recorriendo las cuatro rutas a 320/375/414/768/1280 px en español/inglés y claro/oscuro (80 capturas, incluyendo un carrito con siete productos). Se comprueban la carga correcta y los desbordamientos horizontales; las capturas se generan en `frontend/test-results/`, ignorado en Git, para revisión visual. Se cubren selección con teclado, Escape y recuperación del foco, carrito tras paginación/recarga/error de red y persistencia de preferencias. También se ejecutaron repetición, interrupción controlada y recuperación de la importación.
+La verificación local del 03/10/2026 incluye 25 pruebas de aventura, 22 regresiones anteriores del backend y 19 pruebas unitarias del frontend. Las 33 pruebas de catálogo/carrito/navegador pasaron durante el rediseño; se repitieron comprobaciones específicas tras los cambios posteriores de presentación. El último recorrido de aventura comprueba registro, compra con créditos, cajas del PC y ventas, persistencia del equipo, progresión de gimnasios, recuperación tras perder respuestas, historial, transición de entrada y recuperación de la navegación al salir del combate. Pasan tipos, ESLint y compilaciones de producción.
 
-La verificación del despliegue del 07/09/2026 repitió las 33 pruebas de Chromium contra la URL pública de la VPS, incluyendo el favicon y las tarjetas actuales. Todas pasaron. También se verificaron el build de producción, Nginx, la huella de los datos trasladados y la persistencia tras reiniciar el stack. Son verificaciones ejecutadas manualmente, no resultados de CI alojada.
+La cobertura de navegador incluye español/inglés y claro/oscuro a 320/375/414/768/1280 px, comprobando carga y desbordamientos horizontales. Las capturas de `frontend/test-results/` están ignoradas; las imágenes seleccionadas de `docs/` muestran la interfaz local, no acreditan la versión desplegada actualmente.
 
-Las pruebas de integración requieren la migración y sincronización inicial. Las de navegador utilizan Chromium y el servidor de desarrollo encendido; configura `PLAYWRIGHT_BASE_URL` para otro servidor. No se han verificado otros motores de navegador. `pnpm build` también ejecuta tipos y empaquetado secuencialmente.
+Las pruebas de aventura vacían y cargan las tablas del juego: ejecútalas únicamente en una base separada llamada `adventure_test_<sufijo>`. El recorrido de navegador requiere una base desechable de preview y una invitación nueva de un solo uso; sin `PLAYWRIGHT_ADVENTURE_CODE` se omite. Consulta la [configuración aislada](docs/adventure.es.md#verificación). Las integraciones anteriores requieren migración y sincronización del catálogo. Configura `PLAYWRIGHT_BASE_URL` para otro frontend encendido y, opcionalmente, `PLAYWRIGHT_CHANNEL=chrome` para usar Chrome instalado. No se han verificado otros motores.
+
+La última verificación completa de la VPS pública fue el 07/09/2026, con 33 pruebas de navegador. Esa comprobación histórica no confirma que la aventura y el diseño más recientes estén desplegados. Las verificaciones son manuales; no hay CI/CD alojada.
 
 ## Despliegue
 

@@ -10,6 +10,8 @@ La aventura es un reto privado de Kanto para un jugador, junto al catálogo púb
 
 [Líderes de gimnasio](gyms.png) · [Gimnasios en móvil](gyms-mobile.png). Cada gimnasio utiliza la paleta de su tipo y un PNG clásico de [los sprites de entrenadores de Pokémon Showdown](https://play.pokemonshowdown.com/sprites/trainers/). Las ilustraciones pertenecen a sus respectivos titulares. Si falla el retrato, el nombre del líder y los controles siguen disponibles.
 
+[Centro Pokémon](center.png) · [PC de la colección](collection-pc.png)
+
 ## Acceso y despliegue
 
 Antes de abrir la aventura, aplica la migración y crea una invitación:
@@ -38,6 +40,8 @@ Los gimnasios usan tarjetas cuadradas en tres columnas de escritorio o dos de m�
 
 La venta desde la colección requiere confirmación y devuelve la mitad del precio original pagado, redondeada hacia abajo. El servidor retira el Pokémon de la colección y del equipo guardado. No se puede vender durante un combate activo. La confirmación del carrito valida todas las líneas y el saldo en una transacción; cualquier fallo revierte toda la compra. La migración `004` añade recibos persistentes por entrenador para compras y ventas. Repetir la misma petición tras perder una respuesta devuelve el recibo original sin volver a cobrar ni abonar. El borrador del carrito se guarda por entrenador en el navegador; no concede propiedad.
 
+La entrada al combate utiliza dos franjas negras consecutivas y las omite con movimiento reducido. Durante la batalla se ocultan cabecera, footer, avisos del carrito y reglas: quedan el gimnasio, los Pokémon, el historial y los controles. El escenario de cada gimnasio ocupa el fondo de la ventana además de la arena. Al recargar se mantiene esta vista; volver a los gimnasios recupera la navegación.
+
 ## Autoridad y recuperación
 
 El Centro Pokémon incluye un PC en pixel art que se puede pulsar. Abre la colección en un modal con cajas de 30 plazas, selección del equipo y ventas con confirmación. Las cajas muestran la colección en grupos de 30; cerrar el PC conserva el borrador del equipo, que se guarda con «Guardar equipo».
@@ -50,7 +54,7 @@ El navegador representa los eventos del servidor y su estado final. Si se pierde
 
 El indicador de turno abre el historial del combate, agrupado por turno resuelto y con el jugador o líder identificado en cada acción. El servidor guarda el historial dentro del estado de la batalla: se conserva al recargar y los turnos duplicados rechazados no añaden entradas. Los estados anteriores pueden recuperar su último turno guardado; los eventos sobrescritos no se pueden reconstruir.
 
-Verificado localmente el 03/10/2026: pasan 25 pruebas de aventura, 21 regresiones anteriores del backend, 19 pruebas unitarias del frontend y las 34 pruebas de Chrome. También pasan tipos, ESLint, compilación de producción y Ruff. El navegador cubre registro, compras, persistencia del equipo, recarga del combate, cambios de idioma, anchos 320/375/414/768/1280, primera victoria y desbloqueo, salida/entrada y un ataque confirmado cuya respuesta se pierde y recupera sin repetirlo. Una prueba reproducible con estadísticas reales de Kanto verifica una ruta asequible por los seis gimnasios; demuestra viabilidad, no un equilibrio exhaustivo del juego.
+Verificado localmente el 03/10/2026: pasan 25 pruebas de aventura, 22 regresiones anteriores del backend, 19 pruebas unitarias del frontend. Las 33 pruebas de catálogo/carrito en Chrome pasaron durante el rediseño; se repitieron comprobaciones específicas y el recorrido completo de aventura tras los últimos cambios de interfaz. También pasan tipos, ESLint, compilación de producción y Ruff. El navegador cubre registro, compras, persistencia del equipo, recarga del combate, cambios de idioma, anchos 320/375/414/768/1280, primera victoria y desbloqueo, salida/entrada y un ataque confirmado cuya respuesta se pierde y recupera sin repetirlo. Una prueba reproducible con estadísticas reales de Kanto verifica una ruta asequible por los seis gimnasios; demuestra viabilidad, no un equilibrio exhaustivo del juego.
 
 Las pruebas deben ejecutarse únicamente en una base separada y migrada cuyo nombre comience por `adventure_test`. Vacían las tablas de aventura y escriben fixtures biológicos allí.
 

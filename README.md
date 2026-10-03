@@ -12,15 +12,17 @@ A Pokémon shop demo with a full-width Kanto starter collage, a complete importe
 
 [Catalog preview](docs/catalog.png) · [Trainer catalog](docs/catalog-trainer.png) · [Cart preview](docs/cart.png) · [Adventure battle](docs/adventure.png) · [Mobile battle](docs/adventure-mobile.png)
 
+[Pokémon Center](docs/center.png) · [Collection PC](docs/collection-pc.png) · [Gym leaders](docs/gyms.png)
+
 ## Highlights
 
-- `/aventura`: single-use owner-issued invitations, trainer accounts, 1,000 starting credits, purchases through the existing catalog, saved teams of up to six and six sequential gyms. First victories award badges and credits; battles resume after reload. Classic front/back sprites render server events. [Rules, access, deployment and test setup](docs/adventure.md). This addition must be migrated/deployed before it is available on the public demo.
+- `/aventura`: invitation-only accounts with 1,000 fictional starting credits. Build and save a team in a Pokémon Center, open its pixel-art PC to browse 30-slot collection boxes, and sell Pokémon with a confirmed refund. Six sequential gyms use leader portraits and type colors. Battles open with two black wipes and become the only focus: navigation and footer disappear, the gym scenery fills the viewport, and the turn indicator opens persistent history grouped by turn and actor. Server-controlled purchases, turns and rewards survive reloads. [Rules, access, deployment and tests](docs/adventure.md).
 - `/`: a full-width collage of Bulbasaur, Charmander and Squirtle, without a card frame. Shared type colors shape the background; catalog and Kanto links remain. The homepage opens directly. Reduced motion disables decorative animation; the background stops offscreen and in hidden tabs.
-- `/catalogo`: 24 ordered results in compact blocks of six: one 3×2 card, two 3×1 cards and three 2×1 cards, on six desktop columns with 200 px rows and 16 px gaps. Partial blocks fill balanced rows. Tablet uses two columns and mobile one. Size is editorial, independent of height; dimensions remain visible. Draft filters retain URL state and explicit Apply/Cancel.
+- `/catalogo`: a blue-striped shop front and pixel-art counter lead into an ordered bento catalog: one large card, two horizontal cards and three small cards per complete block. Tablet uses two columns and mobile one; partial blocks preserve order without overlap. Signed-in trainers see their balance, credit prices and the 26 battle-ready Kanto Pokémon by default. Purchases go through the existing cart. Search and filters retain URL state and explicit Apply/Cancel.
 - `/pokemon/:id`: localized biology, dimensions and origin. Statistics open from the top-right corner of the illustration on hover, keyboard focus or tap; click pins the popover and Escape/outside/close dismiss it. Abilities remain in the API but are omitted from the view.
-- `/carrito`: six distinct products per page, with totals calculated over the complete cart. Removing the final item on a page selects the last valid page; quantity changes retain the page. IDs and quantities persist, independently of catalog pagination and network failures.
+- `/carrito`: six distinct products per page, with totals calculated over the complete cart. Removing the final item on a page selects the last valid page; quantity changes retain the page. IDs and quantities persist, independently of catalog pagination and network failures. Signed-in trainers confirm an atomic checkout validated by the server; durable receipts prevent repeat charges after a lost response. Anonymous visitors keep the euro-priced demonstration cart.
 - Four available recommendations prioritize shared types, then generation, then price proximity. Species are unique and species already selected are excluded. An empty cart shows featured Pokémon.
-- Spanish/English through Vue I18n, accessible Reka UI selects, Lucide icons, light/dark themes with browser-default detection, and a 700 ms circular manual theme transition. Reduced motion and automatic system changes skip animation; unsupported browsers transition colors for 300 ms without fading the page.
+- Spanish/English through Vue I18n, accessible Reka UI selects, Lucide icons, light/dark themes with browser-default detection, and a 700 ms circular manual theme transition. Reduced motion and automatic system changes skip animation; unsupported browsers transition colors for 300 ms without fading the page. The light theme uses cream surfaces; dark uses violet graphite with the original purple accent. The homepage retains the green/orange/blue backgrounds of the three starters.
 
 Chansey appears at 180–240 px depending on the viewport below the receipt-style summary on desktop and mobile, and accompanies the empty state. Three-second notices use a disappearing pie indicator, pause on hover/focus and restart with each action. Storage errors remain visible. An animated Espeon/Umbreon switch selects light/dark, using the browser preference initially and remembering manual selections. The existing 700 ms page reveal is preserved.
 
@@ -89,7 +91,7 @@ The ignored root `.env` holds `POSTGRES_PASSWORD`; both services reference it. A
 
 | Endpoint | Behavior |
 | --- | --- |
-| `GET /api/v1/pokemon` | `{ items, total }`; `q`, `type`, `region`, `generation`, `forms=all/default/alternative`, `sort`, `limit` (default 24, maximum 100), `offset` |
+| `GET /api/v1/pokemon` | `{ items, total }`; `q`, `type`, `region`, `generation`, `forms=all/default/alternative`, `sort`, `currency=credits`, `playable=true`, `limit` (default 24, maximum 100), `offset` |
 | `/api/v1/pokemon/{id}` | Expanded product; 404 when absent |
 | `/api/v1/pokemon/metadata` | Available types, generations and localized regions |
 | `/api/v1/pokemon/featured` | Editorial selection |
@@ -97,6 +99,8 @@ The ignored root `.env` holds `POSTGRES_PASSWORD`; both services reference it. A
 | `/api/v1/pokemon/recommendations?ids=25` | Four available, distinct-species suggestions with a reason |
 
 Sorting values: `number`, `name`, `price_asc`, `price_desc`, `weight_asc`, `weight_desc`, `height_asc`, `height_desc`. Numeric searches match species IDs and therefore include that species' alternative forms. Existing response fields are retained; the complete typed contract is in `/docs`.
+
+Adventure endpoints are documented in [the adventure guide](docs/adventure.md) and `/docs`: registration/login/logout, current trainer, shop, team, checkout, sales and battle creation/read/turns. Authentication and ownership are enforced by the API.
 
 ## Architecture and decisions
 
@@ -153,7 +157,7 @@ Total: **2,944 MiB**, without additional container swap. Redis data is capped at
 Run resource-intensive checks sequentially:
 
 ```sh
-docker compose exec backend python -m unittest discover -s tests -v
+docker compose exec backend python -m unittest tests.test_app tests.test_catalog tests.test_database_config tests.test_pricing tests.test_persistent_catalog -v
 docker compose exec frontend pnpm test:unit --run
 docker compose exec frontend pnpm type-check
 docker compose exec frontend pnpm exec eslint .
@@ -170,11 +174,13 @@ docker compose logs -f
 docker compose down
 ```
 
-Verified on 2026-09-07: 21 backend tests and 19 frontend unit tests; type checks, ESLint, production build and Ruff. The full Chromium suite passed against the production preview; core interactions were also checked against the development server. Browser coverage comprises 13 interaction regressions and 20 responsive scenarios, each visiting all four routes at 320/375/414/768/1280 px in Spanish/English and light/dark (80 captures, including a populated seven-product cart). The suite checks successful loading and horizontal overflow; screenshots are generated under the ignored `frontend/test-results/` directory for visual review. Keyboard selection, Escape/focus restoration, cart paging/reload/network recovery and preference persistence are covered. Import repeat, controlled interruption and successful recovery were also exercised.
+Local verification on 2026-10-03 includes 25 adventure tests, 22 existing backend regressions and 19 frontend unit tests. The 33-test catalog/cart/browser suite passed during the redesign; targeted checks were repeated after subsequent presentation changes. The final adventure browser run checks registration, credit checkout, PC boxes and sales, team persistence, sequential gym progress, lost-response recovery, battle history, the entry transition and restoration of navigation after battle. Type checking, ESLint and production builds passed.
 
-Deployment verification on 2026-09-07 repeated all 33 Chromium tests against the public VPS URL, including the current favicon and card layout. All passed. The production build, Nginx configuration, database transfer checksum and persistence after restarting the stack were also verified. These are manually executed checks, not hosted CI results.
+Browser coverage includes Spanish/English and light/dark at 320/375/414/768/1280 px, checking loading and horizontal overflow. Captures under `frontend/test-results/` are ignored; the curated images in `docs/` show the local interface, not proof of the currently deployed release.
 
-Integration tests require the migration and initial sync above. Browser tests use Chromium and the running dev server; set `PLAYWRIGHT_BASE_URL` for an external server. Other browser engines are not verified. `pnpm build` also runs type checking and bundling sequentially.
+Adventure tests clear and seed game tables: run them only against a separate database named `adventure_test_<suffix>`. The adventure browser test needs a disposable preview database and a fresh single-use invitation; without `PLAYWRIGHT_ADVENTURE_CODE` it is skipped. See [isolated test setup](docs/adventure.md#verification). Existing integration tests require the migration and catalog sync above. Set `PLAYWRIGHT_BASE_URL` to target another running frontend, and optionally `PLAYWRIGHT_CHANNEL=chrome` to use installed Chrome. Other browser engines are not verified.
+
+The public VPS was last fully verified on 2026-09-07 with 33 browser tests. That historical check does not establish that the latest adventure and design changes are deployed. Checks are manual; there is no hosted CI/CD.
 
 ## Deployment
 
