@@ -542,102 +542,111 @@ function health(pokemon: Fighter) {
           <RouterLink to="/catalogo">{{ t('catalog') }}</RouterLink>
         </nav>
 
-        <section v-if="tab === 'team'" class="adventure-panel">
-          <h2>{{ t('adventure.teamTitle') }}</h2>
-          <p>{{ t('adventure.teamHelp') }}</p>
-          <div class="team-slots">
-            <div
-              v-for="(member, i) in slots"
-              :key="i"
-              class="team-slot"
-              :class="{ occupied: member }"
-            >
-              <div class="slot-header">
-                <small>{{ t('adventure.slot', { number: i + 1 }) }}</small>
+        <section v-if="tab === 'team'" class="adventure-panel pokemon-center">
+          <div class="center-station">
+            <header class="center-canopy">
+              <span class="pokeball" aria-hidden="true"></span>
+              <h2>{{ t('adventure.pokemonCenter') }}</h2>
+            </header>
+            <div class="center-body">
+              <p>{{ t('adventure.teamHelp') }}</p>
+              <div class="team-slots">
+                <div
+                  v-for="(member, i) in slots"
+                  :key="i"
+                  class="team-slot"
+                  :class="{ occupied: member }"
+                >
+                  <div class="slot-header">
+                    <small>{{ t('adventure.slot', { number: i + 1 }) }}</small>
+                    <button
+                      v-if="member"
+                      class="slot-remove"
+                      :disabled="game.active || blocked"
+                      :aria-label="t('adventure.removeFromTeam', { name: name(member) })"
+                      @click="toggle(member.id)"
+                    >
+                      <X :size="16" />
+                    </button>
+                  </div>
+                  <div class="slot-artwork">
+                    <span class="slot-pokeball" aria-hidden="true"></span>
+                    <img
+                      v-if="member"
+                      :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
+                      :alt="name(member)"
+                    />
+                    <Plus v-else :size="26" aria-hidden="true" />
+                  </div>
+                  <template v-if="member">
+                    <strong>{{ name(member) }}</strong>
+                    <span v-if="i === 0" class="slot-lead">{{ t('adventure.lead') }}</span>
+                    <button
+                      v-if="i > 0"
+                      class="lead-button"
+                      :disabled="game.active || blocked"
+                      :aria-label="t('adventure.leadAction', { name: name(member) })"
+                      @click="makeLead(member.id)"
+                    >
+                      {{ t('adventure.lead') }}
+                    </button>
+                  </template>
+                  <span v-else class="slot-empty-label">{{ t('adventure.emptySlot') }}</span>
+                </div>
+              </div>
+              <div class="team-save">
                 <button
-                  v-if="member"
-                  class="slot-remove"
-                  :disabled="game.active || blocked"
-                  :aria-label="t('adventure.removeFromTeam', { name: name(member) })"
+                  class="button primary"
+                  :disabled="!dirty || game.active || blocked"
+                  @click="saveTeam"
+                >
+                  {{ t('adventure.saveTeam') }}</button
+                ><span v-if="saved" role="status">{{ t('adventure.teamSaved') }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="center-collection">
+            <h3>{{ t('adventure.collectionTitle') }}</h3>
+            <div v-if="!game.trainer.collection.length" class="adventure-empty">
+              <p>{{ t('adventure.emptyCollection') }}</p>
+              <RouterLink class="button secondary" to="/catalogo">
+                {{ t('catalog') }}
+              </RouterLink>
+            </div>
+            <div v-else class="collection-picker">
+              <div
+                v-for="member in game.trainer.collection"
+                :key="member.id"
+                class="collection-member"
+              >
+                <button
+                  :aria-pressed="draft.includes(member.id)"
+                  :aria-label="t('adventure.select', { name: name(member) })"
+                  :disabled="
+                    game.active || blocked || (!draft.includes(member.id) && draft.length === 6)
+                  "
                   @click="toggle(member.id)"
                 >
-                  <X :size="16" />
+                  <img
+                    :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
+                    alt=""
+                  /><strong>{{ name(member) }}</strong>
                 </button>
-              </div>
-              <div class="slot-artwork">
-                <span class="slot-pokeball" aria-hidden="true"></span>
-                <img
-                  v-if="member"
-                  :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
-                  :alt="name(member)"
-                />
-                <Plus v-else :size="26" aria-hidden="true" />
-              </div>
-              <template v-if="member">
-                <strong>{{ name(member) }}</strong>
-                <span v-if="i === 0" class="slot-lead">{{ t('adventure.lead') }}</span>
                 <button
-                  v-if="i > 0"
-                  class="lead-button"
+                  class="collection-sell"
+                  :aria-label="t('adventure.sell', { name: name(member) })"
                   :disabled="game.active || blocked"
-                  :aria-label="t('adventure.leadAction', { name: name(member) })"
-                  @click="makeLead(member.id)"
+                  @click="askSale(member)"
                 >
-                  {{ t('adventure.lead') }}
+                  {{ t('adventure.sellButton') }}
                 </button>
-              </template>
-              <span v-else class="slot-empty-label">{{ t('adventure.emptySlot') }}</span>
+              </div>
             </div>
+            <p v-if="game.trainer.collection.length" class="team-note">
+              {{ t('adventure.salePolicy') }}
+            </p>
+            <p v-if="draft.length === 6" class="team-note">{{ t('adventure.teamFull') }}</p>
           </div>
-          <div class="team-save">
-            <button
-              class="button primary"
-              :disabled="!dirty || game.active || blocked"
-              @click="saveTeam"
-            >
-              {{ t('adventure.saveTeam') }}</button
-            ><span v-if="saved" role="status">{{ t('adventure.teamSaved') }}</span>
-          </div>
-          <h3>{{ t('adventure.collectionTitle') }}</h3>
-          <div v-if="!game.trainer.collection.length" class="adventure-empty">
-            <p>{{ t('adventure.emptyCollection') }}</p>
-            <RouterLink class="button secondary" to="/catalogo">
-              {{ t('catalog') }}
-            </RouterLink>
-          </div>
-          <div v-else class="collection-picker">
-            <div
-              v-for="member in game.trainer.collection"
-              :key="member.id"
-              class="collection-member"
-            >
-              <button
-                :aria-pressed="draft.includes(member.id)"
-                :aria-label="t('adventure.select', { name: name(member) })"
-                :disabled="
-                  game.active || blocked || (!draft.includes(member.id) && draft.length === 6)
-                "
-                @click="toggle(member.id)"
-              >
-                <img
-                  :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
-                  alt=""
-                /><strong>{{ name(member) }}</strong>
-              </button>
-              <button
-                class="collection-sell"
-                :aria-label="t('adventure.sell', { name: name(member) })"
-                :disabled="game.active || blocked"
-                @click="askSale(member)"
-              >
-                {{ t('adventure.sellButton') }}
-              </button>
-            </div>
-          </div>
-          <p v-if="game.trainer.collection.length" class="team-note">
-            {{ t('adventure.salePolicy') }}
-          </p>
-          <p v-if="draft.length === 6" class="team-note">{{ t('adventure.teamFull') }}</p>
         </section>
 
         <section v-if="tab === 'gyms'" class="adventure-panel">

@@ -18,6 +18,7 @@ export const adventureEn = {
   teamTab: 'My team',
   gymsTab: 'Gyms',
   teamTitle: 'Who is coming with you?',
+  pokemonCenter: 'Pokémon Center',
   teamHelp:
     'Choose up to six Pokémon. The first slot leads the battle. Your team fights at level 50.',
   slot: 'Slot {number}',
@@ -159,6 +160,7 @@ export const adventureEs = {
   teamTab: 'Mi equipo',
   gymsTab: 'Gimnasios',
   teamTitle: '¿Quién viene contigo?',
+  pokemonCenter: 'Centro Pokémon',
   teamHelp:
     'Elige hasta seis Pokémon. La primera plaza inicia el combate. Tu equipo lucha a nivel 50.',
   slot: 'Plaza {number}',

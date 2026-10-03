@@ -120,6 +120,13 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   await expect(page.getByText('Equipo guardado', { exact: true })).toBeVisible()
   await page.reload()
   await expect(page.locator('.team-slot.occupied')).toHaveCount(3)
+  for (const width of [320, 375, 414, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 })
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+    const remove = await page.locator('.slot-remove').first().boundingBox()
+    expect(remove!.width).toBeGreaterThanOrEqual(44)
+    expect(remove!.height).toBeGreaterThanOrEqual(44)
+  }
   await page.screenshot({ path: testInfo.outputPath('team-desktop.png'), fullPage: true })
   await page.emulateMedia({ colorScheme: 'dark' })
   await page.setViewportSize({ width: 375, height: 900 })
