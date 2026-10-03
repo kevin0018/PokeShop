@@ -6,6 +6,7 @@ import { Award, LockKeyhole, Coins, Plus, X, ArrowRight, Flag, History } from 'l
 import BattleSprite from './BattleSprite.vue'
 import TrainerPortrait from './TrainerPortrait.vue'
 import GymBackdrop from './GymBackdrop.vue'
+import CenterReception from './CenterReception.vue'
 import {
   type Battle,
   type BattleEvent,
@@ -549,6 +550,7 @@ function health(pokemon: Fighter) {
               <h2>{{ t('adventure.pokemonCenter') }}</h2>
             </header>
             <div class="center-body">
+              <CenterReception :selected="draft.length" />
               <p>{{ t('adventure.teamHelp') }}</p>
               <div class="team-slots">
                 <div
@@ -605,47 +607,58 @@ function health(pokemon: Fighter) {
               </div>
             </div>
           </div>
-          <div class="center-collection">
-            <h3>{{ t('adventure.collectionTitle') }}</h3>
-            <div v-if="!game.trainer.collection.length" class="adventure-empty">
-              <p>{{ t('adventure.emptyCollection') }}</p>
-              <RouterLink class="button secondary" to="/catalogo">
-                {{ t('catalog') }}
-              </RouterLink>
+          <div class="center-collection pc-terminal">
+            <div class="pc-hardware" aria-hidden="true">
+              <span class="pc-power"></span><strong>PC</strong><span class="pc-vents"></span>
             </div>
-            <div v-else class="collection-picker">
-              <div
-                v-for="member in game.trainer.collection"
-                :key="member.id"
-                class="collection-member"
-              >
-                <button
-                  :aria-pressed="draft.includes(member.id)"
-                  :aria-label="t('adventure.select', { name: name(member) })"
-                  :disabled="
-                    game.active || blocked || (!draft.includes(member.id) && draft.length === 6)
-                  "
-                  @click="toggle(member.id)"
-                >
-                  <img
-                    :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
-                    alt=""
-                  /><strong>{{ name(member) }}</strong>
-                </button>
-                <button
-                  class="collection-sell"
-                  :aria-label="t('adventure.sell', { name: name(member) })"
-                  :disabled="game.active || blocked"
-                  @click="askSale(member)"
-                >
-                  {{ t('adventure.sellButton') }}
-                </button>
+            <div class="pc-screen">
+              <header class="pc-screen-header">
+                <h3>{{ t('adventure.collectionTitle') }}</h3>
+                <span>{{
+                  t('adventure.collectionCount', { count: game.trainer.collection.length })
+                }}</span>
+              </header>
+              <div v-if="!game.trainer.collection.length" class="adventure-empty">
+                <p>{{ t('adventure.emptyCollection') }}</p>
+                <RouterLink class="button secondary" to="/catalogo">
+                  {{ t('catalog') }}
+                </RouterLink>
               </div>
+              <div v-else class="collection-picker">
+                <div
+                  v-for="member in game.trainer.collection"
+                  :key="member.id"
+                  class="collection-member"
+                >
+                  <button
+                    :aria-pressed="draft.includes(member.id)"
+                    :aria-label="t('adventure.select', { name: name(member) })"
+                    :disabled="
+                      game.active || blocked || (!draft.includes(member.id) && draft.length === 6)
+                    "
+                    @click="toggle(member.id)"
+                  >
+                    <img
+                      :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
+                      alt=""
+                    /><strong>{{ name(member) }}</strong>
+                  </button>
+                  <button
+                    class="collection-sell"
+                    :aria-label="t('adventure.sell', { name: name(member) })"
+                    :disabled="game.active || blocked"
+                    @click="askSale(member)"
+                  >
+                    {{ t('adventure.sellButton') }}
+                  </button>
+                </div>
+              </div>
+              <p v-if="game.trainer.collection.length" class="team-note">
+                {{ t('adventure.salePolicy') }}
+              </p>
+              <p v-if="draft.length === 6" class="team-note">{{ t('adventure.teamFull') }}</p>
             </div>
-            <p v-if="game.trainer.collection.length" class="team-note">
-              {{ t('adventure.salePolicy') }}
-            </p>
-            <p v-if="draft.length === 6" class="team-note">{{ t('adventure.teamFull') }}</p>
+            <div class="pc-base" aria-hidden="true"><span></span><span></span><span></span></div>
           </div>
         </section>
 
