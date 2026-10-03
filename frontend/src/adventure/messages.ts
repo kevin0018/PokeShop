@@ -6,7 +6,7 @@ export const adventureEn = {
     'Choose your companions, take on the gym leaders and build a team that grows with every victory.',
   privateAccess: 'Trainer access',
   accessText:
-    'Have an invitation? Create your trainer account and start with 1,000 credits. To request a code, contact Kevin through his portfolio.',
+    'Have an invitation? Create your trainer account and start with 1,000 credits. To request a code, contact me through my portfolio.',
   register: 'Create trainer',
   login: 'Sign in',
   username: 'Trainer name',
@@ -99,7 +99,7 @@ export const adventureEn = {
     requestInvalid: 'Check the form fields and try again.',
     signInRequired: 'Sign in again to continue.',
     invalidInvitation:
-      'This invitation is invalid, expired or already used. Request a new code from Kevin.',
+      'This invitation is invalid, expired or already used. Contact me to request a new code.',
     usernameTaken: 'That trainer name is already taken.',
     invalidCredentials: 'The trainer name or password is incorrect.',
     tooManyAttempts: 'Too many attempts. Wait 15 minutes before trying again.',
@@ -130,7 +130,7 @@ export const adventureEs = {
     'Elige tus compañeros, reta a los líderes y construye un equipo que crece con cada victoria.',
   privateAccess: 'Acceso de entrenadores',
   accessText:
-    '¿Tienes una invitación? Crea tu cuenta y empieza con 1.000 créditos. Para solicitar un código, contacta con Kevin a través de su portfolio.',
+    '¿Tienes una invitación? Crea tu cuenta y empieza con 1.000 créditos. Para solicitar un código, contacta conmigo a través de mi portfolio.',
   register: 'Crear entrenador',
   login: 'Entrar',
   username: 'Nombre de entrenador',
@@ -223,7 +223,7 @@ export const adventureEs = {
     requestInvalid: 'Revisa los campos del formulario e inténtalo de nuevo.',
     signInRequired: 'Vuelve a entrar para continuar.',
     invalidInvitation:
-      'La invitación no es válida, ha caducado o ya se ha usado. Solicita un nuevo código a Kevin.',
+      'La invitación no es válida, ha caducado o ya se ha usado. Contacta conmigo para solicitar un nuevo código.',
     usernameTaken: 'Ese nombre de entrenador ya está ocupado.',
     invalidCredentials: 'El nombre de entrenador o la contraseña no son correctos.',
     tooManyAttempts: 'Demasiados intentos. Espera 15 minutos antes de volver a probar.',
