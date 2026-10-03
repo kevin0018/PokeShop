@@ -4,6 +4,10 @@
 
 La aventura es un reto privado de Kanto para un jugador, junto al catálogo público y el carrito de demostración. Cada entrenador recibe 1.000 créditos ficticios una vez, compra Pokémon para su colección y guarda un equipo ordenado de hasta seis miembros. El primero inicia el combate. La vida y los PP se recuperan al comenzar otra batalla; perder o abandonar no cuesta créditos.
 
+[![Interfaz real del combate local](adventure.png)](adventure.png)
+
+[Interfaz móvil](adventure-mobile.png). Capturas de la vista local con los controles de desarrollo ocultos.
+
 ## Acceso y despliegue
 
 Antes de abrir la aventura, aplica la migración y crea una invitación:
@@ -36,11 +40,21 @@ El navegador representa los eventos del servidor y su estado final. Si se pierde
 
 ## Verificación
 
+Verificado localmente el 03/10/2026: pasan 21 pruebas de aventura, 21 regresiones anteriores del backend, 19 pruebas unitarias del frontend y las 34 pruebas de Chrome. También pasan tipos, ESLint, compilación de producción y Ruff. El navegador cubre registro, compras, persistencia del equipo, recarga del combate, cambios de idioma, anchos 320/375/414/768/1280, primera victoria y desbloqueo, salida/entrada y un ataque confirmado cuya respuesta se pierde y recupera sin repetirlo. Una prueba reproducible con estadísticas reales de Kanto verifica una ruta asequible por los seis gimnasios; demuestra viabilidad, no un equilibrio exhaustivo del juego.
+
 Las pruebas deben ejecutarse únicamente en una base separada y migrada cuyo nombre comience por `adventure_test`. Vacían las tablas de aventura y escriben fixtures biológicos allí.
 
 ```sh
 # Configura POSTGRES_DB=adventure_test_<sufijo> solo en el proceso de pruebas.
 python -m unittest tests.test_adventure -v
 ```
+
+La prueba de navegador requiere también una base desechable y una invitación nueva:
+
+```sh
+PLAYWRIGHT_BASE_URL=http://localhost:5173 PLAYWRIGHT_ADVENTURE_CODE='<codigo-de-un-uso>' pnpm --dir frontend test:e2e
+```
+
+Sin esa variable se omite el registro de la aventura. `PLAYWRIGHT_CHANNEL=chrome` permite utilizar Chrome instalado en lugar de Chromium de Playwright. No guardes invitaciones ni trazas de Playwright en Git.
 
 Se verifican transacciones reales de PostgreSQL, invitaciones, autenticación, CSRF/origen, compras concurrentes, precios calculados por servidor, propiedad del equipo, recuperación/revisión de combates y premios únicos. Los sprites proceden de [PokeAPI/sprites](https://github.com/PokeAPI/sprites). Pokémon y sus personajes pertenecen a sus respectivos titulares. Sigue siendo una demostración no comercial para portfolio.

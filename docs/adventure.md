@@ -4,6 +4,10 @@
 
 The adventure is a private, single-player Kanto challenge alongside the public catalog and demonstration cart. Trainers receive 1,000 fictional credits once, buy Pokémon for their permanent collection, select an ordered team of up to six, and challenge six gyms. The first team member leads each battle. Pokémon recover and PP reset when a new battle starts. Defeat or surrender costs no credits.
 
+[![Actual local battle interface](adventure.png)](adventure.png)
+
+[Mobile interface](adventure-mobile.png). Captured from the local preview with development controls hidden.
+
 ## Access and deployment
 
 Apply the additive migration before opening the adventure:
@@ -36,11 +40,21 @@ The browser renders ordered server events and the final authoritative state. If 
 
 ## Verification
 
+Verified locally on 2026-10-03: 21 adventure tests, 21 existing backend regression tests, 19 frontend unit tests and all 34 Chrome browser tests passed. Type checking, ESLint, production build and Ruff passed. Browser coverage includes registration, purchases, team persistence, battle reload, language changes, 320/375/414/768/1280 px layouts, first victory and unlocking, logout/login, and a committed attack whose response is deliberately lost and recovered without replay. A seeded test using imported Kanto base stats verifies an affordable route through all six gyms; this demonstrates feasibility, not comprehensive game balance.
+
 Run API tests against a separately created, migrated database whose name starts with `adventure_test`. The suite truncates adventure tables and writes biological fixtures there; never point it at a real catalog database.
 
 ```sh
 # Configure POSTGRES_DB=adventure_test_<suffix> in the test process only.
 python -m unittest tests.test_adventure -v
 ```
+
+The browser integration test also requires a disposable database and a new invitation:
+
+```sh
+PLAYWRIGHT_BASE_URL=http://localhost:5173 PLAYWRIGHT_ADVENTURE_CODE='<single-use-code>' pnpm --dir frontend test:e2e
+```
+
+Without that environment variable, the adventure registration test is skipped. Set `PLAYWRIGHT_CHANNEL=chrome` to use installed Chrome instead of Playwright Chromium. Keep invitation values and Playwright traces out of Git.
 
 The suite verifies actual PostgreSQL transactions, single-use invitation redemption, hashing, authentication, CSRF/origin checks, concurrent purchases, server-calculated prices, team ownership, battle recovery/revisions and one-time rewards. Sprite assets come from [PokeAPI/sprites](https://github.com/PokeAPI/sprites); characters and names belong to their respective owners. This remains a noncommercial portfolio demonstration.

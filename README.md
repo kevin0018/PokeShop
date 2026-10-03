@@ -4,16 +4,17 @@
 
 ![Deployment: VPS / HTTPS](https://img.shields.io/badge/deployment-VPS_HTTPS-71549a)
 
-A Pokémon shop demo with a full-width Kanto starter collage, a complete imported catalog, and a persistent cart. Built with Vue 3, TypeScript and FastAPI. Prices and stock are fictional; accounts, payments and real orders are outside this phase.
+A Pokémon shop demo with a full-width Kanto starter collage, a complete imported catalog, a persistent demonstration cart, and an invitation-only trainer adventure. Build a team with fictional credits and challenge six gym leaders in server-controlled turn-based battles. Built with Vue 3, TypeScript and FastAPI; no real payments or orders.
 
 [Repository](https://github.com/kevin0018/PokeShop) · [Live demo](https://pokeshop-app.duckdns.org) · [Local API documentation](http://localhost:8000/docs)
 
 [![Actual PokeShop interface](docs/home.png)](docs/home.png)
 
-[Catalog preview](docs/catalog.png) · [Cart preview](docs/cart.png)
+[Catalog preview](docs/catalog.png) · [Cart preview](docs/cart.png) · [Adventure battle](docs/adventure.png) · [Mobile battle](docs/adventure-mobile.png)
 
 ## Highlights
 
+- `/aventura`: single-use owner-issued invitations, trainer accounts, 1,000 starting credits, a curated Kanto market, saved teams of up to six and six sequential gyms. First victories award badges and credits; battles resume after reload. Classic front/back sprites render server events. [Rules, access, deployment and test setup](docs/adventure.md). This addition must be migrated/deployed before it is available on the public demo.
 - `/`: a full-width collage of Bulbasaur, Charmander and Squirtle, without a card frame. Shared type colors shape the background; catalog and Kanto links remain. The homepage opens directly. Reduced motion disables decorative animation; the background stops offscreen and in hidden tabs.
 - `/catalogo`: 24 ordered results in compact blocks of six: one 3×2 card, two 3×1 cards and three 2×1 cards, on six desktop columns with 200 px rows and 16 px gaps. Partial blocks fill balanced rows. Tablet uses two columns and mobile one. Size is editorial, independent of height; dimensions remain visible. Draft filters retain URL state and explicit Apply/Cancel.
 - `/pokemon/:id`: localized biology, dimensions and origin. Statistics open from the top-right corner of the illustration on hover, keyboard focus or tap; click pins the popover and Escape/outside/close dismiss it. Abilities remain in the API but are omitted from the view.
@@ -107,6 +108,10 @@ flowchart LR
   Cart --> Storage[Versioned local storage]
   HTTP --> API[FastAPI and response schemas]
   API --> PG[PostgreSQL catalog adapter]
+  Trainer[Trainer UI and animation] --> Game[Adventure API and session checks]
+  Game --> Rules[Pure turn resolver]
+  Game --> GameDB[(Trainers, collections, battles and medals)]
+  Game --> DB
   PG --> Policy[Recommendation policy]
   PG --> DB[(Pokemon and offers)]
   Sync[Explicit importer] --> Cache[(Persistent HTTP cache)]
@@ -118,10 +123,12 @@ Filtering, counts and pagination run in PostgreSQL. Recommendation ranking is a 
 
 ```text
 backend/migrations/                     # Alembic schema versions
+backend/src/adventure/                  # Sessions, transactional game service and turn rules
 backend/src/pokemon/application/        # Catalog and recommendation policies
 backend/src/pokemon/infrastructure/     # PostgreSQL adapter and resumable importer
 backend/src/pokemon/presentation/       # Routes and typed schemas
 frontend/src/pokemon/                   # Entities, HTTP, home/catalog/detail
+frontend/src/adventure/                 # Trainer views, API state and sprite animations
 frontend/src/cart/                      # Persistent selection and presentation
 frontend/src/shared/                    # Formatting, theme and preferences
 frontend/src/i18n/                      # English/Spanish UI dictionaries
@@ -183,6 +190,6 @@ The initial deployment transferred all 1,351 products, offers and cached upstrea
 
 ## Scope and attribution
 
-The default Compose stack uses development servers; production uses the separate configuration above. No accounts, reservations, real checkout or payments are configured. The browser cart is not an authoritative order. `docker compose down -v` deletes local database, Redis and frontend dependency volumes.
+The default Compose stack uses development servers; production uses the separate configuration above. Trainer accounts and fictional-credit purchases belong to the invitation-only adventure. There are no shared-stock reservations, real checkout or payments. The demonstration browser cart is separate from trainer ownership. `docker compose down -v` deletes local database, Redis and frontend dependency volumes.
 
 Data: [PokéAPI](https://pokeapi.co/docs/v2). Artwork: [PokéAPI sprites](https://github.com/PokeAPI/sprites). Pokémon and character artwork belong to their respective rights holders. This is an independent educational demo.

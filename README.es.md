@@ -4,16 +4,17 @@
 
 ![Despliegue: VPS / HTTPS](https://img.shields.io/badge/despliegue-VPS_HTTPS-71549a)
 
-Una tienda Pokémon de demostración con portada a todo el ancho con los tres iniciales de Kanto, catálogo completo importado y carrito persistente. Creada con Vue 3, TypeScript y FastAPI. Precios y stock ficticios; las cuentas, pagos y pedidos reales quedan fuera de esta fase.
+Una tienda Pokémon de demostración con portada a todo el ancho con los tres iniciales de Kanto, catálogo completo importado, carrito de demostración persistente y una aventura de entrenadores por invitación. Forma un equipo con créditos ficticios y reta a seis líderes en combates por turnos controlados por el servidor. Creada con Vue 3, TypeScript y FastAPI, sin pagos ni pedidos reales.
 
 [Repositorio](https://github.com/kevin0018/PokeShop) · [Demo pública](https://pokeshop-app.duckdns.org) · [Documentación local de la API](http://localhost:8000/docs)
 
 [![Interfaz real de PokeShop](docs/home.png)](docs/home.png)
 
-[Vista del catálogo](docs/catalog.png) · [Vista del carrito](docs/cart.png)
+[Vista del catálogo](docs/catalog.png) · [Vista del carrito](docs/cart.png) · [Combate de aventura](docs/adventure.png) · [Combate en móvil](docs/adventure-mobile.png)
 
 ## Funcionalidades
 
+- `/aventura`: invitaciones de un solo uso emitidas por el propietario, cuentas de entrenador, 1.000 créditos iniciales, mercado de Kanto, equipos guardados de hasta seis y seis gimnasios consecutivos. Las primeras victorias conceden medallas y créditos; recargar conserva el combate. Los sprites clásicos de frente y espalda representan eventos del servidor. [Reglas, acceso, despliegue y pruebas](docs/adventure.es.md). La demo pública necesita migración y despliegue para ofrecer esta ampliación.
 - `/`: collage a todo el ancho de Bulbasaur, Charmander y Squirtle, sin marco de tarjeta. Los colores por tipo forman el fondo; se mantienen los accesos al catálogo y Kanto. La portada se muestra directamente. El movimiento reducido desactiva las animaciones decorativas; el fondo se detiene fuera de pantalla y con la pestaña oculta.
 - `/catalogo`: 24 resultados ordenados en bloques compactos de seis: una tarjeta 3×2, dos 3×1 y tres 2×1, sobre seis columnas de escritorio con filas de 200 px y separación de 16 px. Los bloques incompletos forman filas equilibradas. Dos columnas en tablet y una en móvil. El tamaño es editorial, independiente de la altura; las dimensiones siguen visibles. Los filtros provisionales conservan estado en URL y Aplicar/Cancelar.
 - `/pokemon/:id`: biología localizada, dimensiones y origen. Las estadísticas se abren desde la esquina superior derecha de la ilustración con hover, foco o toque; un clic fija el popover y Escape, pulsación fuera o Cerrar lo cierran. Las habilidades permanecen en la API, pero se omiten en la vista.
@@ -107,6 +108,10 @@ flowchart LR
   Cart --> Storage[Almacenamiento local versionado]
   HTTP --> API[FastAPI y esquemas de respuesta]
   API --> PG[Adaptador PostgreSQL]
+  Trainer[Interfaz de entrenador y animación] --> Game[API de aventura y sesiones]
+  Game --> Rules[Resolución pura de turnos]
+  Game --> GameDB[(Entrenadores, colección, combates y medallas)]
+  Game --> DB
   PG --> Policy[Política de recomendaciones]
   PG --> DB[(Pokemon y ofertas)]
   Sync[Importador explícito] --> Cache[(Caché HTTP persistente)]
@@ -118,10 +123,12 @@ Los filtros, totales y paginación se ejecutan en PostgreSQL. La ordenación de 
 
 ```text
 backend/migrations/                     # Versiones Alembic del esquema
+backend/src/adventure/                  # Sesiones, servicio transaccional y reglas de turnos
 backend/src/pokemon/application/        # Políticas de catálogo y recomendaciones
 backend/src/pokemon/infrastructure/     # PostgreSQL e importador reanudable
 backend/src/pokemon/presentation/       # Rutas y esquemas tipados
 frontend/src/pokemon/                   # Entidades, HTTP, portada/catálogo/ficha
+frontend/src/adventure/                 # Vistas, estado de la API y animaciones de sprites
 frontend/src/cart/                      # Selección persistente y presentación
 frontend/src/shared/                    # Formatos, tema y preferencias
 frontend/src/i18n/                      # Diccionarios de interfaz ES/EN
@@ -183,6 +190,6 @@ El primer despliegue trasladó los 1.351 productos, ofertas y caché, conservand
 
 ## Alcance y atribución
 
-Compose por defecto utiliza servidores de desarrollo; producción tiene la configuración independiente anterior. No hay cuentas, reservas de stock, compras reales ni pagos. El carrito del navegador no es un pedido autoritativo. `docker compose down -v` elimina los volúmenes locales de base de datos, Redis y dependencias frontend.
+Compose por defecto utiliza servidores de desarrollo; producción tiene la configuración independiente anterior. Las cuentas y compras con créditos ficticios pertenecen a la aventura por invitación. No hay reservas de stock compartido, compras reales ni pagos. El carrito de demostración es independiente de los Pokémon que posee cada entrenador. `docker compose down -v` elimina los volúmenes locales de base de datos, Redis y dependencias frontend.
 
 Datos: [PokéAPI](https://pokeapi.co/docs/v2). Ilustraciones: [PokéAPI sprites](https://github.com/PokeAPI/sprites). Pokémon y sus ilustraciones pertenecen a sus respectivos titulares. Es un proyecto educativo independiente.

@@ -3,8 +3,9 @@
 [English README](../README.md) · [README en español](../README.es.md)
 
 PokeShop is deployed at **https://pokeshop-app.duckdns.org** on the existing Contabo VPS.
-HTTPS is enabled with automatic certificate renewal. This is a demonstration store with
-no accounts, checkout or payment processing. Deployment is manual; GitHub pushes
+HTTPS is enabled with automatic certificate renewal. The initial release was a demonstration store without
+accounts, checkout or payment processing. The invitation-only adventure is an additive release requiring migration `003`; see [adventure setup](adventure.md).
+Deployment is manual; GitHub pushes
 do not deploy automatically.
 
 ## Runtime
@@ -43,7 +44,9 @@ with three files. Services restart automatically unless manually stopped.
 The production password was generated on the VPS; it is separate from the local
 development password and is never bundled into frontend assets. Required setting:
 `POSTGRES_PASSWORD`; optional settings: `PRODUCTION_PORT` (8091) and
-`ALLOWED_ORIGINS` (JSON array). Keep secrets and database backups out of Git.
+`ALLOWED_ORIGINS` (JSON array). For the adventure, explicitly set
+`ALLOWED_ORIGINS=["https://pokeshop-app.duckdns.org"]` so browser registration and
+authenticated writes pass the origin check. Keep secrets and database backups out of Git.
 
 Run on the VPS:
 
