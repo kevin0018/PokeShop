@@ -74,7 +74,7 @@ request<typeof metadata.value>('/metadata')
   .catch(() => {})
 </script>
 <template>
-  <section class="catalog-section">
+  <section class="catalog-section shop-scene">
     <header class="shop-front">
       <div class="shop-awning" aria-hidden="true"></div>
       <div class="section-heading shop-heading">
@@ -174,12 +174,35 @@ request<typeof metadata.value>('/metadata')
 </template>
 
 <style>
-.catalog-section {
-  --shop-blue: #719acb;
+.shop-scene {
+  --shop-blue: #5a8da8;
+  padding-top: 8px;
+  position: relative;
+  isolation: isolate;
+}
+.shop-scene::before {
+  content: '';
+  position: absolute;
+  inset: 0 -12px;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--shop-blue) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--shop-blue) 7%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 48px 48px;
+  mask-image: linear-gradient(#000, #000 70%, transparent);
+}
+:root[data-theme='dark'] .shop-scene {
+  --shop-blue: #81b6d2;
 }
 .shop-front {
   overflow: hidden;
-  margin-bottom: 24px;
+  margin-bottom: 14px;
+  position: relative;
   border: 1px solid color-mix(in srgb, var(--shop-blue) 45%, var(--line));
   border-radius: 20px;
   background: var(--surface);
@@ -195,7 +218,7 @@ request<typeof metadata.value>('/metadata')
   border-bottom: 4px solid color-mix(in srgb, var(--shop-blue) 45%, var(--surface));
 }
 .shop-front .shop-heading {
-  padding: 24px 28px 0;
+  padding: 20px 280px 8px 24px;
   margin: 0;
   align-items: center;
 }
@@ -203,17 +226,20 @@ request<typeof metadata.value>('/metadata')
   color: var(--purple);
 }
 .shop-heading h1 {
-  font-size: clamp(28px, 4vw, 40px);
+  font-size: clamp(26px, 3vw, 34px);
 }
 .shop-counter-art {
-  width: 180px;
-  height: 112px;
+  position: absolute;
+  right: 24px;
+  top: 28px;
+  width: 216px;
+  height: 134px;
   flex-shrink: 0;
   image-rendering: pixelated;
 }
 .shop-intro {
-  padding: 0 28px 24px;
-  max-width: 820px;
+  padding: 0 280px 18px 24px;
+  min-height: 50px;
   color: var(--muted-strong);
   font-size: 14px;
   line-height: 1.6;
@@ -224,7 +250,7 @@ request<typeof metadata.value>('/metadata')
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
-  padding: 16px 28px;
+  padding: 10px 24px;
   border-top: 1px solid var(--line);
   background: color-mix(in srgb, var(--shop-blue) 9%, var(--surface));
 }
@@ -278,7 +304,7 @@ request<typeof metadata.value>('/metadata')
   font-size: 12px;
 }
 .shop-playable {
-  margin: 0 0 18px;
+  margin: 0 0 6px;
   font-size: 13px;
   color: var(--muted-strong);
 }
@@ -309,16 +335,19 @@ request<typeof metadata.value>('/metadata')
 }
 @media (max-width: 700px) {
   .shop-front .shop-heading {
-    padding: 18px 16px 8px;
+    padding: 16px 140px 8px 16px;
     flex-wrap: nowrap;
     gap: 10px;
   }
   .shop-counter-art {
+    right: 12px;
+    top: 28px;
     width: 120px;
     height: 75px;
   }
   .shop-intro {
-    padding: 0 16px 18px;
+    padding: 0 16px 14px;
+    padding-top: 20px;
     font-size: 13px;
   }
   .shop-checkout-bar {
