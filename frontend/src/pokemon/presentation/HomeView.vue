@@ -365,10 +365,4 @@ onUnmounted(() => {
     transform: none;
   }
 }
-[data-theme='dark'] .starter-haze {
-  background:
-    radial-gradient(ellipse at 18% 66%, #9b96951c, transparent 42%),
-    radial-gradient(ellipse at 53% 54%, #e59c781f, transparent 38%),
-    radial-gradient(ellipse at 88% 65%, #aaa6a41c, transparent 42%);
-}
 </style>
