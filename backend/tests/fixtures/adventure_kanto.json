@@ -1,0 +1,284 @@
+{
+  "source": "Imported PokeAPI Kanto base stats, 2026-10-03",
+  "pokemon": [
+    {
+      "id": 1,
+      "name": "Bulbasaur",
+      "types": [
+        "planta",
+        "veneno"
+      ],
+      "stats": {
+        "hp": 45,
+        "speed": 45,
+        "attack": 49,
+        "defense": 49,
+        "special-attack": 65,
+        "special-defense": 65
+      }
+    },
+    {
+      "id": 3,
+      "name": "Venusaur",
+      "types": [
+        "planta",
+        "veneno"
+      ],
+      "stats": {
+        "hp": 80,
+        "speed": 80,
+        "attack": 82,
+        "defense": 83,
+        "special-attack": 100,
+        "special-defense": 100
+      }
+    },
+    {
+      "id": 6,
+      "name": "Charizard",
+      "types": [
+        "fuego",
+        "volador"
+      ],
+      "stats": {
+        "hp": 78,
+        "speed": 100,
+        "attack": 84,
+        "defense": 78,
+        "special-attack": 109,
+        "special-defense": 85
+      }
+    },
+    {
+      "id": 25,
+      "name": "Pikachu",
+      "types": [
+        "electrico"
+      ],
+      "stats": {
+        "hp": 35,
+        "speed": 90,
+        "attack": 55,
+        "defense": 40,
+        "special-attack": 50,
+        "special-defense": 50
+      }
+    },
+    {
+      "id": 26,
+      "name": "Raichu",
+      "types": [
+        "electrico"
+      ],
+      "stats": {
+        "hp": 60,
+        "speed": 110,
+        "attack": 90,
+        "defense": 55,
+        "special-attack": 90,
+        "special-defense": 80
+      }
+    },
+    {
+      "id": 43,
+      "name": "Oddish",
+      "types": [
+        "planta",
+        "veneno"
+      ],
+      "stats": {
+        "hp": 45,
+        "speed": 30,
+        "attack": 50,
+        "defense": 55,
+        "special-attack": 75,
+        "special-defense": 65
+      }
+    },
+    {
+      "id": 54,
+      "name": "Psyduck",
+      "types": [
+        "agua"
+      ],
+      "stats": {
+        "hp": 50,
+        "speed": 55,
+        "attack": 52,
+        "defense": 48,
+        "special-attack": 65,
+        "special-defense": 50
+      }
+    },
+    {
+      "id": 63,
+      "name": "Abra",
+      "types": [
+        "psiquico"
+      ],
+      "stats": {
+        "hp": 25,
+        "speed": 90,
+        "attack": 20,
+        "defense": 15,
+        "special-attack": 105,
+        "special-defense": 55
+      }
+    },
+    {
+      "id": 65,
+      "name": "Alakazam",
+      "types": [
+        "psiquico"
+      ],
+      "stats": {
+        "hp": 55,
+        "speed": 120,
+        "attack": 50,
+        "defense": 45,
+        "special-attack": 135,
+        "special-defense": 95
+      }
+    },
+    {
+      "id": 74,
+      "name": "Geodude",
+      "types": [
+        "roca",
+        "tierra"
+      ],
+      "stats": {
+        "hp": 40,
+        "speed": 20,
+        "attack": 80,
+        "defense": 100,
+        "special-attack": 30,
+        "special-defense": 30
+      }
+    },
+    {
+      "id": 92,
+      "name": "Gastly",
+      "types": [
+        "fantasma",
+        "veneno"
+      ],
+      "stats": {
+        "hp": 30,
+        "speed": 80,
+        "attack": 35,
+        "defense": 30,
+        "special-attack": 100,
+        "special-defense": 35
+      }
+    },
+    {
+      "id": 94,
+      "name": "Gengar",
+      "types": [
+        "fantasma",
+        "veneno"
+      ],
+      "stats": {
+        "hp": 60,
+        "speed": 110,
+        "attack": 65,
+        "defense": 60,
+        "special-attack": 130,
+        "special-defense": 75
+      }
+    },
+    {
+      "id": 95,
+      "name": "Onix",
+      "types": [
+        "roca",
+        "tierra"
+      ],
+      "stats": {
+        "hp": 35,
+        "speed": 70,
+        "attack": 45,
+        "defense": 160,
+        "special-attack": 30,
+        "special-defense": 45
+      }
+    },
+    {
+      "id": 100,
+      "name": "Voltorb",
+      "types": [
+        "electrico"
+      ],
+      "stats": {
+        "hp": 40,
+        "speed": 100,
+        "attack": 30,
+        "defense": 50,
+        "special-attack": 55,
+        "special-defense": 55
+      }
+    },
+    {
+      "id": 110,
+      "name": "Weezing",
+      "types": [
+        "veneno"
+      ],
+      "stats": {
+        "hp": 65,
+        "speed": 60,
+        "attack": 90,
+        "defense": 120,
+        "special-attack": 85,
+        "special-defense": 70
+      }
+    },
+    {
+      "id": 114,
+      "name": "Tangela",
+      "types": [
+        "planta"
+      ],
+      "stats": {
+        "hp": 65,
+        "speed": 60,
+        "attack": 55,
+        "defense": 115,
+        "special-attack": 100,
+        "special-defense": 40
+      }
+    },
+    {
+      "id": 121,
+      "name": "Starmie",
+      "types": [
+        "agua",
+        "psiquico"
+      ],
+      "stats": {
+        "hp": 60,
+        "speed": 115,
+        "attack": 75,
+        "defense": 85,
+        "special-attack": 100,
+        "special-defense": 85
+      }
+    },
+    {
+      "id": 135,
+      "name": "Jolteon",
+      "types": [
+        "electrico"
+      ],
+      "stats": {
+        "hp": 65,
+        "speed": 130,
+        "attack": 65,
+        "defense": 60,
+        "special-attack": 110,
+        "special-defense": 95
+      }
+    }
+  ]
+}
