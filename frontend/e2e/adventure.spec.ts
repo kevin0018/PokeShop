@@ -113,6 +113,12 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   await expect(page.getByText('Equipo guardado', { exact: true })).toBeVisible()
   await page.reload()
   await expect(page.locator('.team-slot.occupied')).toHaveCount(3)
+  await page.screenshot({ path: testInfo.outputPath('team-desktop.png'), fullPage: true })
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await page.setViewportSize({ width: 375, height: 900 })
+  await page.screenshot({ path: testInfo.outputPath('team-mobile-dark.png'), fullPage: true })
+  await page.emulateMedia({ colorScheme: 'light' })
+  await page.setViewportSize({ width: 1280, height: 900 })
   await page.getByRole('button', { name: 'Gimnasios', exact: true }).click()
   await expect(page.locator('.gym-stop img.trainer-portrait')).toHaveCount(6)
   await expect

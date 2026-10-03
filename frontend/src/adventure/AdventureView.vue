@@ -519,17 +519,10 @@ function health(pokemon: Fighter) {
               class="team-slot"
               :class="{ occupied: member }"
             >
-              <small
-                >{{ t('adventure.slot', { number: i + 1 })
-                }}<span v-if="i === 0 && member"> &middot; {{ t('adventure.lead') }}</span></small
-              >
-              <template v-if="member">
-                <img
-                  :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
-                  :alt="name(member)"
-                />
-                <strong>{{ name(member) }}</strong>
+              <div class="slot-header">
+                <small>{{ t('adventure.slot', { number: i + 1 }) }}</small>
                 <button
+                  v-if="member"
                   class="slot-remove"
                   :disabled="game.active || blocked"
                   :aria-label="t('adventure.removeFromTeam', { name: name(member) })"
@@ -537,6 +530,19 @@ function health(pokemon: Fighter) {
                 >
                   <X :size="16" />
                 </button>
+              </div>
+              <div class="slot-artwork">
+                <span class="slot-pokeball" aria-hidden="true"></span>
+                <img
+                  v-if="member"
+                  :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
+                  :alt="name(member)"
+                />
+                <Plus v-else :size="26" aria-hidden="true" />
+              </div>
+              <template v-if="member">
+                <strong>{{ name(member) }}</strong>
+                <span v-if="i === 0" class="slot-lead">{{ t('adventure.lead') }}</span>
                 <button
                   v-if="i > 0"
                   class="lead-button"
@@ -547,9 +553,7 @@ function health(pokemon: Fighter) {
                   {{ t('adventure.lead') }}
                 </button>
               </template>
-              <template v-else
-                ><Plus :size="26" /><span>{{ t('adventure.emptySlot') }}</span></template
-              >
+              <span v-else class="slot-empty-label">{{ t('adventure.emptySlot') }}</span>
             </div>
           </div>
           <div class="team-save">

@@ -168,10 +168,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 180px;
-  gap: 8px;
-  padding: 12px 8px;
+  min-height: 232px;
+  gap: 4px;
+  padding: 0 8px 12px;
   color: var(--muted-strong);
 }
 .team-slot.occupied {
@@ -179,27 +178,81 @@
   border-style: solid;
   color: var(--ink);
 }
-.team-slot > small {
-  font-size: 10px;
-  align-self: flex-start;
+.slot-header {
+  width: 100%;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
 }
-.team-slot > img {
-  width: 90px;
-  height: 90px;
+.slot-header small {
+  font-size: 11px;
+}
+.slot-artwork {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 112px;
+  flex-shrink: 0;
+}
+.slot-pokeball {
+  position: absolute;
+  width: 88px;
+  height: 88px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  color: var(--purple);
+  opacity: 0.16;
+  background: linear-gradient(to bottom, currentColor 0 48%, transparent 48%);
+}
+.slot-pokeball::before {
+  content: '';
+  position: absolute;
+  top: calc(50% - 1px);
+  left: 0;
+  right: 0;
+  border-top: 2px solid currentColor;
+}
+.slot-pokeball::after {
+  content: '';
+  position: absolute;
+  inset: 32%;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  background: var(--surface);
+}
+.slot-artwork img {
+  position: relative;
+  width: 112px;
+  height: 112px;
   image-rendering: pixelated;
+}
+.slot-artwork > svg {
+  position: relative;
+  padding: 3px;
+  border-radius: 50%;
+  background: var(--control-surface);
 }
 .team-slot > strong {
   font-size: 13px;
   text-align: center;
   overflow-wrap: anywhere;
 }
-.team-slot > span {
+.slot-lead {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
   font-size: 11px;
+  color: var(--purple);
+  font-weight: 600;
+}
+.slot-empty-label {
+  font-size: 12px;
 }
 .slot-remove {
-  position: absolute;
-  right: 0;
-  top: 24px;
+  margin-right: -8px;
   width: 44px;
   height: 44px;
   border: 0;
@@ -815,21 +868,28 @@
     gap: 8px;
   }
   .team-slot {
-    min-height: 160px;
-    padding: 10px 5px;
+    min-height: 210px;
+    padding: 0 6px 10px;
   }
-  .team-slot > img {
-    width: 75px;
-    height: 75px;
+  .slot-artwork,
+  .slot-artwork img {
+    height: 88px;
+  }
+  .slot-artwork img {
+    width: 88px;
+  }
+  .slot-pokeball {
+    width: 72px;
+    height: 72px;
   }
   .team-slot > strong {
     font-size: 11px;
   }
-  .team-slot > small {
-    font-size: 9px;
-  }
-  .team-slot > span {
+  .slot-header small {
     font-size: 10px;
+  }
+  .slot-empty-label {
+    font-size: 11px;
   }
   .battle-arena {
     height: 330px;
