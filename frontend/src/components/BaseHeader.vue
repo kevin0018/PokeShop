@@ -14,6 +14,7 @@ import PreferencesControls from './PreferencesControls.vue'
       <nav :aria-label="t('navigation')">
         <RouterLink to="/" class="catalog-link">{{ t('homeNav') }}</RouterLink
         ><RouterLink to="/catalogo" class="catalog-link">{{ t('catalog') }}</RouterLink
+        ><RouterLink to="/aventura" class="catalog-link">{{ t('adventure.nav') }}</RouterLink
         ><CartPreview />
       </nav>
       <PreferencesControls />

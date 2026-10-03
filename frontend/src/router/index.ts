@@ -4,6 +4,11 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/aventura',
+      name: 'adventure',
+      component: () => import('@/adventure/AdventureView.vue'),
+    },
+    {
       path: '/catalogo',
       name: 'catalog',
       component: () => import('@/pokemon/presentation/CatalogView.vue'),

@@ -1,0 +1,660 @@
+<script setup lang="ts">
+import { computed, nextTick, onMounted, onUnmounted, ref, toRaw, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { Award, LockKeyhole, Coins, Plus, X, ArrowRight, Flag } from 'lucide-vue-next'
+import PokemonImage from '@/components/PokemonImage.vue'
+import BattleSprite from './BattleSprite.vue'
+import { type Battle, type BattleEvent, type Fighter, useAdventureStore } from './store'
+
+const { t, te, locale, n } = useI18n()
+const game = useAdventureStore()
+const mode = ref<'login' | 'register'>('login')
+const username = ref(''),
+  password = ref(''),
+  invitation = ref('')
+const tab = ref<'team' | 'shop' | 'gyms'>('team')
+const draft = ref<number[]>([])
+const saved = ref(false)
+const arenaOpen = ref(false)
+const arenaHeading = ref<HTMLElement>()
+const displayed = ref<Battle | null>(null)
+const playing = ref(false)
+const motion = ref('')
+const leaving = ref(false)
+const log = ref<BattleEvent[]>([])
+let mounted = true
+const name = (pokemon: { name: string; names: Record<string, string> }) =>
+  pokemon.names[locale.value] || pokemon.name
+const gym = computed(() => game.gyms.find((g) => g.id === displayed.value?.gym_id))
+const player = computed(() => displayed.value?.player[displayed.value.player_active])
+const opponent = computed(() => displayed.value?.opponent[displayed.value.opponent_active])
+const dirty = computed(
+  () => JSON.stringify(draft.value) !== JSON.stringify(game.trainer?.team ?? []),
+)
+const blocked = computed(() => game.busy || playing.value)
+const errorText = computed(() =>
+  te(`adventure.errors.${game.error}`)
+    ? t(`adventure.errors.${game.error}`)
+    : t('adventure.errors.connectionError'),
+)
+const slots = computed(() =>
+  Array.from({ length: 6 }, (_, i) =>
+    game.trainer?.collection.find((p) => p.id === draft.value[i]),
+  ),
+)
+const allPpGone = computed(() => player.value?.moves.every((m) => m.pp <= 0))
+
+watch(
+  () => game.trainer?.team,
+  (team) => {
+    draft.value = [...(team ?? [])]
+  },
+  { immediate: true },
+)
+watch(
+  () => game.battle,
+  (battle) => {
+    if (!playing.value) {
+      displayed.value = battle ? structuredClone(toRaw(battle)) : null
+      log.value = battle?.events ?? []
+    }
+  },
+)
+onMounted(async () => {
+  await game.load()
+  displayed.value = game.battle ? structuredClone(toRaw(game.battle)) : null
+  log.value = game.battle?.events ?? []
+  arenaOpen.value = game.active
+})
+onUnmounted(() => {
+  mounted = false
+})
+
+async function authenticate() {
+  const result = await game.mutate(`/${mode.value}`, 'POST', {
+    username: username.value,
+    password: password.value,
+    ...(mode.value === 'register' ? { invitation: invitation.value.trim() } : {}),
+  })
+  if (result) {
+    password.value = ''
+    invitation.value = ''
+    tab.value = game.trainer?.collection.length ? 'team' : 'shop'
+    arenaOpen.value = game.active
+  }
+}
+
+function toggle(id: number) {
+  saved.value = false
+  if (draft.value.includes(id)) draft.value = draft.value.filter((value) => value !== id)
+  else if (draft.value.length < 6) draft.value.push(id)
+}
+
+function setMode(value: 'login' | 'register') {
+  mode.value = value
+  game.error = ''
+}
+
+async function logout() {
+  if (await game.mutate('/logout', 'POST')) {
+    arenaOpen.value = false
+    mode.value = 'login'
+  }
+}
+
+function backToGyms() {
+  arenaOpen.value = false
+  tab.value = 'gyms'
+}
+
+function makeLead(id: number) {
+  draft.value = [id, ...draft.value.filter((value) => value !== id)]
+  saved.value = false
+}
+
+async function saveTeam() {
+  saved.value = !!(await game.mutate('/team', 'PUT', { ids: draft.value }))
+}
+
+async function challenge(gymId: number) {
+  const result = await game.mutate<Battle>('/battles', 'POST', { gym_id: gymId })
+  if (result) {
+    displayed.value = game.battle ? structuredClone(toRaw(game.battle)) : result
+    log.value = []
+    arenaOpen.value = true
+    leaving.value = false
+    await nextTick()
+    arenaHeading.value?.scrollIntoView({ block: 'start' })
+  }
+}
+
+function eventText(event: BattleEvent) {
+  const pokemon = [...(displayed.value?.player ?? []), ...(displayed.value?.opponent ?? [])].find(
+    (p) => p.id === event.pokemon,
+  )
+  const move = pokemon?.moves.find((m) => m.id === event.move)
+  const pokemonName = pokemon ? name(pokemon) : ''
+  if (event.kind === 'attack')
+    return t('adventure.attackLine', {
+      name: pokemonName,
+      move:
+        move?.names[locale.value] ??
+        (event.move === 'struggle'
+          ? locale.value === 'es'
+            ? 'Forcejeo'
+            : 'Struggle'
+          : event.move),
+    })
+  if (event.kind === 'damage') {
+    const effect =
+      event.effectiveness === 0
+        ? 'immune'
+        : (event.effectiveness ?? 1) > 1
+          ? 'superEffective'
+          : (event.effectiveness ?? 1) < 1
+            ? 'notEffective'
+            : ''
+    return `${t('adventure.damageLine', { name: pokemonName, amount: event.amount })}${effect ? ' ' + t(`adventure.${effect}`) : ''}`
+  }
+  const key = {
+    miss: 'missLine',
+    switch: 'switchLine',
+    faint: 'faintLine',
+    recoil: 'recoilLine',
+    surrender: 'surrenderLine',
+  }[event.kind]
+  return t(`adventure.${key}`, { name: pokemonName })
+}
+
+async function play(action: {
+  kind: 'move' | 'switch' | 'surrender'
+  move?: string
+  slot?: number
+}) {
+  if (!displayed.value || blocked.value) return
+  playing.value = true
+  leaving.value = false
+  log.value = []
+  const result = await game.mutate<Battle>(`/battles/${displayed.value.id}/turns`, 'POST', {
+    revision: displayed.value.revision,
+    ...action,
+  })
+  if (result && mounted) {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    for (const event of result.events) {
+      if (!mounted) break
+      log.value.push(event)
+      motion.value =
+        event.kind === 'attack'
+          ? `${event.side}-attack`
+          : event.kind === 'damage'
+            ? `${event.side}-hit`
+            : ''
+      if (event.side && displayed.value) {
+        const member = displayed.value[event.side].find((p) => p.id === event.pokemon)
+        if (member && event.hp !== undefined) member.hp = event.hp
+        if (event.kind === 'switch')
+          displayed.value[`${event.side}_active`] = displayed.value[event.side].findIndex(
+            (p) => p.id === event.pokemon,
+          )
+      }
+      if (!reduced) await new Promise((resolve) => window.setTimeout(resolve, 300))
+    }
+  }
+  if (mounted) {
+    displayed.value = game.battle ? structuredClone(toRaw(game.battle)) : null
+    if (!result) log.value = game.battle?.events ?? []
+    motion.value = ''
+    playing.value = false
+  }
+}
+
+function health(pokemon: Fighter) {
+  return t('adventure.health', { name: name(pokemon), hp: pokemon.hp, max: pokemon.max_hp })
+}
+</script>
+
+<template>
+  <section class="adventure" :class="{ 'is-battling': arenaOpen && displayed }">
+    <header class="adventure-heading">
+      <p class="adventure-eyebrow">{{ t('adventure.eyebrow') }}</p>
+      <h1>{{ t('adventure.title') }}</h1>
+      <p>{{ t('adventure.intro') }}</p>
+    </header>
+
+    <div v-if="game.error" class="adventure-error" role="alert">
+      <p>{{ errorText }}</p>
+      <button class="text-button" :disabled="blocked" @click="game.load()">
+        {{ t('adventure.retry') }}
+      </button>
+    </div>
+    <p v-if="game.loading" class="state-box" role="status">{{ t('adventure.loading') }}</p>
+
+    <div v-else-if="!game.trainer" class="trainer-access">
+      <div class="trainer-pass">
+        <div class="pass-stamp"><Award :size="40" /><span>KANTO</span></div>
+        <h2>{{ t('adventure.privateAccess') }}</h2>
+        <p>{{ t('adventure.accessText') }}</p>
+        <div class="pass-companions" aria-hidden="true">
+          <img
+            v-for="id in [1, 4, 7]"
+            :key="id"
+            :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`"
+            alt=""
+          />
+        </div>
+        <ol class="pass-badges" aria-label="Kanto">
+          <li
+            v-for="g in game.gyms"
+            :key="g.id"
+            :title="g.leader"
+            class="pokemon-palette"
+            :data-type="g.type"
+          >
+            <Award :size="24" /><span>{{ g.id }}</span>
+          </li>
+        </ol>
+      </div>
+      <form class="trainer-form" @submit.prevent="authenticate">
+        <div class="adventure-tabs">
+          <button type="button" :aria-pressed="mode === 'login'" @click="setMode('login')">
+            {{ t('adventure.login') }}
+          </button>
+          <button type="button" :aria-pressed="mode === 'register'" @click="setMode('register')">
+            {{ t('adventure.register') }}
+          </button>
+        </div>
+        <label for="trainer-name">{{ t('adventure.username') }}</label>
+        <input
+          id="trainer-name"
+          v-model="username"
+          name="username"
+          autocomplete="username"
+          required
+          minlength="3"
+          maxlength="24"
+          pattern="[a-zA-Z0-9_]+"
+          autocapitalize="none"
+          :spellcheck="false"
+          aria-describedby="trainer-name-help"
+        />
+        <small id="trainer-name-help">{{ t('adventure.usernameHelp') }}</small>
+        <label for="trainer-password">{{ t('adventure.password') }}</label>
+        <input
+          id="trainer-password"
+          v-model="password"
+          name="password"
+          type="password"
+          :autocomplete="mode === 'login' ? 'current-password' : 'new-password'"
+          required
+          minlength="10"
+          maxlength="128"
+          aria-describedby="trainer-password-help"
+        />
+        <small id="trainer-password-help">{{ t('adventure.passwordHelp') }}</small>
+        <template v-if="mode === 'register'">
+          <label for="trainer-invitation">{{ t('adventure.invitation') }}</label>
+          <input
+            id="trainer-invitation"
+            v-model="invitation"
+            name="invitation"
+            autocomplete="off"
+            required
+            minlength="20"
+            maxlength="128"
+            autocapitalize="none"
+            :spellcheck="false"
+          />
+        </template>
+        <button class="button primary" :disabled="game.busy">
+          {{ t(`adventure.${mode}`) }}<ArrowRight :size="18" />
+        </button>
+      </form>
+    </div>
+
+    <template v-else>
+      <div class="trainer-strip">
+        <strong>{{ game.trainer.username }}</strong>
+        <span
+          ><Coins :size="18" />{{
+            t('adventure.credits', { amount: n(game.trainer.credits) })
+          }}</span
+        >
+        <span
+          ><Award :size="18" />{{
+            t('adventure.medals', { count: game.trainer.medals.length })
+          }}</span
+        >
+        <button class="text-button" :disabled="blocked" @click="logout">
+          {{ t('adventure.logout') }}
+        </button>
+      </div>
+
+      <template v-if="arenaOpen && displayed && player && opponent">
+        <div ref="arenaHeading" class="gym-intro pokemon-palette" :data-type="gym?.type">
+          <Award :size="28" />
+          <div>
+            <p>{{ gym?.names[locale] }}</p>
+            <h2>{{ gym?.leader }}</h2>
+          </div>
+          <span>{{ t('adventure.turn', { turn: displayed.turn }) }}</span>
+        </div>
+        <div class="battle-arena" :class="motion" :aria-busy="blocked">
+          <div class="fighter-hud enemy-hud">
+            <strong>{{ name(opponent) }}</strong
+            ><span>{{ t('adventure.level', { level: opponent.level }) }}</span>
+            <progress :value="opponent.hp" :max="opponent.max_hp" :aria-label="health(opponent)" />
+            <small>{{ opponent.hp }} / {{ opponent.max_hp }}</small>
+          </div>
+          <div class="battle-platform enemy-platform" aria-hidden="true" />
+          <BattleSprite
+            class="battle-sprite enemy-sprite"
+            :src="opponent.front"
+            :name="name(opponent)"
+          />
+          <div class="battle-platform player-platform" aria-hidden="true" />
+          <BattleSprite
+            class="battle-sprite player-sprite"
+            :src="player.back"
+            :name="name(player)"
+            :fallback="player.front"
+          />
+          <div class="fighter-hud player-hud">
+            <strong>{{ name(player) }}</strong
+            ><span>{{ t('adventure.level', { level: player.level }) }}</span>
+            <progress :value="player.hp" :max="player.max_hp" :aria-label="health(player)" />
+            <small>{{ player.hp }} / {{ player.max_hp }}</small>
+          </div>
+        </div>
+        <div class="battle-console">
+          <div
+            class="battle-log"
+            role="log"
+            aria-live="polite"
+            :aria-label="t('adventure.battleLog')"
+          >
+            <p v-for="(event, i) in log" :key="i">{{ eventText(event) }}</p>
+            <p v-if="blocked" role="status">{{ t('adventure.processing') }}</p>
+          </div>
+          <template v-if="displayed.status === 'active'">
+            <div class="battle-moves">
+              <button
+                v-for="move in player.moves"
+                :key="move.id"
+                class="pokemon-palette"
+                :data-type="move.type"
+                :disabled="blocked || move.pp <= 0"
+                :aria-label="t('adventure.move', { name: move.names[locale] })"
+                @click="play({ kind: 'move', move: move.id })"
+              >
+                <strong>{{ move.names[locale] }}</strong
+                ><span>{{ t('adventure.power', { power: move.power }) }}</span
+                ><small>{{ t('adventure.pp', { current: move.pp, max: move.max_pp }) }}</small>
+              </button>
+              <button
+                v-if="allPpGone"
+                :disabled="blocked"
+                @click="play({ kind: 'move', move: 'struggle' })"
+              >
+                {{ locale === 'es' ? 'Forcejeo' : 'Struggle' }}
+              </button>
+            </div>
+            <div class="battle-bench" :aria-label="t('adventure.yourTeam')">
+              <button
+                v-for="(member, slot) in displayed.player"
+                :key="member.id"
+                :disabled="blocked || member.hp <= 0 || slot === displayed.player_active"
+                :aria-label="t('adventure.switch', { name: name(member) })"
+                @click="play({ kind: 'switch', slot })"
+              >
+                <img :src="member.front" alt="" /><span>{{ name(member) }}</span
+                ><small>{{ member.hp }} / {{ member.max_hp }}</small>
+              </button>
+            </div>
+            <div v-if="leaving" class="leave-confirm">
+              <strong>{{ t('adventure.confirmSurrender') }}</strong>
+              <p>{{ t('adventure.surrenderHelp') }}</p>
+              <button class="button secondary" @click="leaving = false">
+                {{ t('adventure.cancel') }}
+              </button>
+              <button
+                class="button primary"
+                :disabled="blocked"
+                @click="play({ kind: 'surrender' })"
+              >
+                {{ t('adventure.surrender') }}
+              </button>
+            </div>
+            <button
+              v-else
+              class="text-button battle-leave"
+              :disabled="blocked"
+              @click="leaving = true"
+            >
+              <Flag :size="16" />{{ t('adventure.surrender') }}
+            </button>
+          </template>
+          <div v-else class="battle-result" role="status">
+            <Award v-if="displayed.status === 'won'" :size="36" />
+            <h2>{{ t(`adventure.${displayed.status}`) }}</h2>
+            <p v-if="displayed.status === 'won'">
+              {{
+                displayed.reward
+                  ? t('adventure.reward', { amount: displayed.reward })
+                  : t('adventure.noReward')
+              }}
+            </p>
+            <p>{{ t('adventure.recovered') }}</p>
+            <button class="button primary" :disabled="blocked" @click="backToGyms">
+              {{ t('adventure.backToGyms') }}
+            </button>
+          </div>
+        </div>
+      </template>
+
+      <template v-else>
+        <button v-if="game.active" class="button primary resume-battle" @click="arenaOpen = true">
+          {{ t('adventure.resume') }}
+        </button>
+        <nav class="adventure-tabs" :aria-label="t('adventure.nav')">
+          <button
+            v-for="item in ['team', 'shop', 'gyms'] as const"
+            :key="item"
+            :aria-pressed="tab === item"
+            @click="tab = item"
+          >
+            {{ t(`adventure.${item}Tab`) }}
+          </button>
+        </nav>
+
+        <section v-if="tab === 'team'" class="adventure-panel">
+          <h2>{{ t('adventure.teamTitle') }}</h2>
+          <p>{{ t('adventure.teamHelp') }}</p>
+          <div class="team-slots">
+            <div
+              v-for="(member, i) in slots"
+              :key="i"
+              class="team-slot"
+              :class="{ occupied: member }"
+            >
+              <small
+                >{{ t('adventure.slot', { number: i + 1 })
+                }}<span v-if="i === 0 && member"> · {{ t('adventure.lead') }}</span></small
+              >
+              <template v-if="member">
+                <img
+                  :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
+                  :alt="name(member)"
+                />
+                <strong>{{ name(member) }}</strong>
+                <button
+                  class="slot-remove"
+                  :disabled="game.active || blocked"
+                  :aria-label="t('adventure.removeFromTeam', { name: name(member) })"
+                  @click="toggle(member.id)"
+                >
+                  <X :size="16" />
+                </button>
+                <button
+                  v-if="i > 0"
+                  class="lead-button"
+                  :disabled="game.active || blocked"
+                  :aria-label="t('adventure.leadAction', { name: name(member) })"
+                  @click="makeLead(member.id)"
+                >
+                  {{ t('adventure.lead') }}
+                </button>
+              </template>
+              <template v-else
+                ><Plus :size="26" /><span>{{ t('adventure.emptySlot') }}</span></template
+              >
+            </div>
+          </div>
+          <div class="team-save">
+            <button
+              class="button primary"
+              :disabled="!dirty || game.active || blocked"
+              @click="saveTeam"
+            >
+              {{ t('adventure.saveTeam') }}</button
+            ><span v-if="saved" role="status">{{ t('adventure.teamSaved') }}</span>
+          </div>
+          <h3>{{ t('adventure.collectionTitle') }}</h3>
+          <div v-if="!game.trainer.collection.length" class="adventure-empty">
+            <p>{{ t('adventure.emptyCollection') }}</p>
+            <button class="button secondary" @click="tab = 'shop'">
+              {{ t('adventure.shopTab') }}
+            </button>
+          </div>
+          <div v-else class="collection-picker">
+            <button
+              v-for="member in game.trainer.collection"
+              :key="member.id"
+              :aria-pressed="draft.includes(member.id)"
+              :aria-label="t('adventure.select', { name: name(member) })"
+              :disabled="
+                game.active || blocked || (!draft.includes(member.id) && draft.length === 6)
+              "
+              @click="toggle(member.id)"
+            >
+              <img
+                :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
+                alt=""
+              /><strong>{{ name(member) }}</strong>
+            </button>
+          </div>
+          <p v-if="draft.length === 6" class="team-note">{{ t('adventure.teamFull') }}</p>
+        </section>
+
+        <section v-if="tab === 'shop'" class="adventure-panel">
+          <h2>{{ t('adventure.shopTitle') }}</h2>
+          <p>{{ t('adventure.shopHelp') }}</p>
+          <p v-if="!game.shop.length" class="state-box">{{ t('adventure.emptyMarket') }}</p>
+          <div class="trainer-market">
+            <article
+              v-for="member in game.shop"
+              :key="member.id"
+              class="recruit-card pokemon-palette"
+              :data-type="member.types[0]"
+            >
+              <div class="recruit-types">
+                <span v-for="type in member.types" :key="type">{{ t(`types.${type}`, type) }}</span>
+              </div>
+              <PokemonImage :src="member.image_url" :name="name(member)" />
+              <h3>{{ name(member) }}</h3>
+              <small>{{
+                t('adventure.totalStats', {
+                  amount: Object.values(member.stats).reduce((sum, value) => sum + value, 0),
+                })
+              }}</small>
+              <strong class="recruit-price"
+                ><Coins :size="16" />{{
+                  t('adventure.credits', { amount: n(member.price) })
+                }}</strong
+              >
+              <button
+                class="button secondary"
+                :disabled="
+                  blocked ||
+                  game.trainer.collection.some((p) => p.id === member.id) ||
+                  game.trainer.credits < member.price
+                "
+                @click="game.mutate('/purchases', 'POST', { pokemon_id: member.id })"
+              >
+                {{
+                  game.trainer.collection.some((p) => p.id === member.id)
+                    ? t('adventure.owned')
+                    : game.trainer.credits < member.price
+                      ? t('adventure.insufficient')
+                      : t('adventure.buy', { name: name(member) })
+                }}
+              </button>
+            </article>
+          </div>
+        </section>
+
+        <section v-if="tab === 'gyms'" class="adventure-panel">
+          <h2>{{ t('adventure.gymsTitle') }}</h2>
+          <p>{{ t('adventure.gymsHelp') }}</p>
+          <p v-if="!game.trainer.team.length" class="team-note">{{ t('adventure.needsTeam') }}</p>
+          <p v-else-if="dirty" class="team-note">{{ t('adventure.unsavedTeam') }}</p>
+          <ol class="gym-route">
+            <li
+              v-for="g in game.gyms"
+              :key="g.id"
+              class="gym-stop pokemon-palette"
+              :data-type="g.type"
+              :class="{ 'gym-locked': g.id > game.trainer.medals.length + 1 }"
+            >
+              <div class="gym-medal">
+                <Award v-if="g.id <= game.trainer.medals.length + 1" :size="36" /><LockKeyhole
+                  v-else
+                  :size="28"
+                /><span>{{ g.id }}</span>
+              </div>
+              <div class="gym-info">
+                <small>{{ g.names[locale] }} · {{ t(`types.${g.type}`, g.type) }}</small>
+                <h3>{{ g.leader }}</h3>
+                <p>
+                  {{ t('adventure.level', { level: g.level }) }} ·
+                  {{ t('adventure.firstReward', { amount: g.reward }) }}
+                </p>
+                <span v-if="game.trainer.medals.includes(g.id)" class="earned-badge">{{
+                  t('adventure.earned')
+                }}</span>
+              </div>
+              <button
+                class="button secondary"
+                :disabled="
+                  blocked ||
+                  game.active ||
+                  dirty ||
+                  !game.trainer.team.length ||
+                  g.id > game.trainer.medals.length + 1
+                "
+                @click="challenge(g.id)"
+              >
+                {{
+                  g.id > game.trainer.medals.length + 1
+                    ? t('adventure.locked')
+                    : t(
+                        game.trainer.medals.includes(g.id)
+                          ? 'adventure.practice'
+                          : 'adventure.challenge',
+                        { name: g.leader },
+                      )
+                }}
+              </button>
+            </li>
+          </ol>
+        </section>
+      </template>
+    </template>
+    <details class="adventure-rules">
+      <summary>{{ t('adventure.rulesTitle') }}</summary>
+      <p>{{ t('adventure.rules') }}</p>
+    </details>
+  </section>
+</template>
+
+<style src="./adventure.css"></style>

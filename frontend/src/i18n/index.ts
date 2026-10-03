@@ -2,13 +2,14 @@ import { createI18n } from 'vue-i18n'
 import { watch } from 'vue'
 import en from './en'
 import es from './es'
+import { adventureEn, adventureEs } from '@/adventure/messages'
 import { initialLocale, LOCALE_KEY, savePreference } from '@/shared/infrastructure/preferences'
 
 export const i18n = createI18n({
   legacy: false,
   locale: initialLocale(),
   fallbackLocale: 'es',
-  messages: { en, es },
+  messages: { en: { ...en, adventure: adventureEn }, es: { ...es, adventure: adventureEs } },
   numberFormats: {
     es: { currency: { style: 'currency', currency: 'EUR' } },
     en: { currency: { style: 'currency', currency: 'EUR' } },

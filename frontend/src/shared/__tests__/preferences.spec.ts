@@ -71,6 +71,7 @@ async function start(path = '/') {
       { path: '/catalogo', component: CatalogView },
       { path: '/carrito', component: CartView },
       { path: '/pokemon/:id', component: PokemonDetailView },
+      { path: '/aventura', component: { template: '<div />' } },
     ],
   })
   await router.push(path)
