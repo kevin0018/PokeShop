@@ -93,7 +93,7 @@ const visible = ref(false)
 const hidden = ref(document.hidden)
 const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
 const reduced = ref(motion.matches)
-const captureKey = 'pokeshop.capture.v1'
+const captureKey = 'pokeshop.capture.v2'
 const intro = ref(!reduced.value && !captureSeen && !readPreference(captureKey))
 const revealing = ref(false)
 const filmReady = computed(() => !intro.value || revealing.value)

@@ -9,13 +9,9 @@ const emit = defineEmits<{ reveal: []; finish: [] }>()
 const { t } = useI18n()
 const dialog = ref<HTMLDialogElement>()
 const ball = ref<HTMLElement>()
-const lid = ref<HTMLElement>()
-const base = ref<HTMLElement>()
-const core = ref<HTMLElement>()
 const actor = ref<HTMLElement>()
 const sprite = ref<HTMLElement>()
 const dark = ref<HTMLElement>()
-const light = ref<HTMLElement>()
 const animations: Animation[] = []
 let ended = false
 
@@ -40,53 +36,39 @@ async function release() {
   const box = dialog.value!
   delete document.documentElement.dataset.captureBoot
   box.showModal()
-  // Rock around the contact point, settle, then split the two shells at the seam.
+  // Each exposure holds one cel. Reusing the resting pose gives the two rocks a beat apart.
+  const exposures = [
+    [0, 0],
+    [280, 1],
+    [370, 2],
+    [510, 3],
+    [600, 0],
+    [790, 4],
+    [880, 5],
+    [1030, 6],
+    [1130, 0],
+    [1270, 7],
+    [1360, 8],
+    [1440, 9],
+    [1510, 10],
+    [1580, 11],
+    [1650, 12],
+    [1730, 13],
+    [1820, 14],
+    [1940, 15],
+  ] as const
+  const duration = 1940
   animate(
     ball.value!,
-    [
-      { transform: 'rotate(0deg)' },
-      { transform: 'rotate(-24deg)', offset: 0.17 },
-      { transform: 'rotate(15deg)', offset: 0.32 },
-      { transform: 'rotate(0deg)', offset: 0.43 },
-      { transform: 'rotate(0deg)', offset: 0.55 },
-      { transform: 'rotate(21deg)', offset: 0.69 },
-      { transform: 'rotate(-11deg)', offset: 0.83 },
-      { transform: 'rotate(0deg)' },
-    ],
-    1040,
-    270,
-    'ease-in-out',
+    exposures.map(([time, cel]) => ({
+      offset: time / duration,
+      backgroundPositionX: `${(cel / 15) * 100}%`,
+      easing: 'steps(1, end)',
+    })),
+    duration,
+    0,
+    'linear',
   )
-  animate(
-    lid.value!,
-    [
-      { transform: 'translateY(0) rotate(0)' },
-      { transform: 'translate(-9%,-75%) rotate(-36deg)', opacity: 0 },
-    ],
-    530,
-    1370,
-  )
-  animate(
-    base.value!,
-    [
-      { transform: 'none', opacity: 1 },
-      { transform: 'translateY(52%) rotate(12deg)', opacity: 0 },
-    ],
-    560,
-    1440,
-  )
-  animate(
-    core.value!,
-    [
-      { transform: 'scale(.025,.005)', opacity: 0 },
-      { transform: 'scale(.65,.08)', opacity: 0.94, offset: 0.25 },
-      { transform: 'scale(1)', opacity: 1, offset: 0.58 },
-      { transform: 'scale(1.45)', opacity: 0 },
-    ],
-    850,
-    1390,
-  )
-  animate(light.value!, [{ opacity: 1 }, { opacity: 0 }], 720, 1440)
   const emergence = animate(
     sprite.value!,
     [
@@ -149,12 +131,7 @@ onUnmounted(() => {
     @cancel.prevent="finish"
   >
     <div ref="dark" class="cinema-black"></div>
-    <div ref="light" class="ball-light" aria-hidden="true"></div>
-    <div ref="ball" class="capture-ball" aria-hidden="true">
-      <div ref="lid" class="capsule-top"><i></i></div>
-      <div ref="base" class="capsule-bottom"></div>
-    </div>
-    <div ref="core" class="capsule-energy"></div>
+    <div ref="ball" class="capture-ball" aria-hidden="true"></div>
     <div ref="actor" class="cinema-actor">
       <div ref="sprite"><StudioSprite :id="id" :tick="tick" /></div>
     </div>
@@ -185,82 +162,21 @@ onUnmounted(() => {
 :global(body:has(.capture-intro[open])) {
   overflow: hidden;
 }
-.cinema-black,
-.ball-light {
+.cinema-black {
   position: absolute;
   inset: 0;
-  pointer-events: none;
-}
-.cinema-black {
   background: #030304;
-}
-.ball-light {
-  background:
-    radial-gradient(ellipse 78px 10px at 50% calc(50% + 58px), #88819856, transparent),
-    radial-gradient(ellipse 120px 150px at 49% 47%, #a4a4b80e, transparent);
+  pointer-events: none;
 }
 .capture-ball {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 108px;
-  aspect-ratio: 1;
+  width: 256px;
+  height: 256px;
   translate: -50% -50%;
-  transform-origin: center 90%;
-  filter: drop-shadow(0 9px 6px #0009);
-}
-.capsule-top,
-.capsule-bottom {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 50%;
-}
-.capsule-top {
-  top: 0;
-  z-index: 2;
-  border-radius: 100px 100px 0 0;
-  background:
-    radial-gradient(ellipse at 34% 29%, #fff6f3 0%, #ffbbb4 3%, #fb6563 10%, transparent 32%),
-    radial-gradient(ellipse at 38% 40%, #fa4741 8%, #b32427 50%, #510f18 80%, #200c11);
-  border-bottom: 4px solid #211b24;
-  box-shadow: inset 1px 2px 2px #ffd4c98c;
-  transform-origin: 0 100%;
-}
-.capsule-top i {
-  position: absolute;
-  left: 39%;
-  bottom: -14px;
-  width: 25%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: 5px solid #201c24;
-  background: radial-gradient(circle at 35% 27%, white, #c7c2c2 64%, #847d87);
-  box-shadow: 0 0 0 1px #766477;
-}
-.capsule-bottom {
-  bottom: 0;
-  border-top: 3px solid #16141b;
-  border-radius: 0 0 100px 100px;
-  background: radial-gradient(ellipse at 30% 2%, #edece7, #c2bdba 32%, #776f76 65%, #302837 88%);
-}
-.capsule-energy {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: min(440px, 85vw);
-  aspect-ratio: 1;
-  translate: -50% -50%;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    #fff 0 9%,
-    #fff9edfa 17%,
-    #fffce2a6 32%,
-    #fffaf73a 46%,
-    transparent 68%
-  );
-  opacity: 0;
+  background: url('../../assets/capture-cels.png') 0 0 / 1600% 100% no-repeat;
+  image-rendering: pixelated;
 }
 .cinema-actor {
   width: clamp(150px, 22vmin, 245px);

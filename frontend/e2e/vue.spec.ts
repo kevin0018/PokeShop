@@ -62,7 +62,7 @@ for (const locale of ['es', 'en'])
       test(`responsive ${locale} ${theme} ${width}`, async ({ page }, testInfo) => {
         await page.addInitScript(
           ({ locale, theme }) => {
-            localStorage.setItem('pokeshop.capture.v1', 'seen')
+            localStorage.setItem('pokeshop.capture.v2', 'seen')
             localStorage.setItem('pokeshop.locale', locale)
             localStorage.setItem('pokeshop.theme', theme)
             localStorage.setItem(

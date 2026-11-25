@@ -17,7 +17,7 @@
 // Cover the first home paint while the capture scene is loading.
 if (location.pathname === '/' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
   try {
-    if (!localStorage.getItem('pokeshop.capture.v1')) {
+    if (!localStorage.getItem('pokeshop.capture.v2')) {
       document.documentElement.dataset.captureBoot = ''
       setTimeout(() => {
         delete document.documentElement.dataset.captureBoot
