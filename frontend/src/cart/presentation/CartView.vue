@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
-import { ArrowLeft, ArrowRight, Minus, Plus, Trash2 } from 'lucide-vue-next'
+import { ArrowDown, ArrowLeft, ArrowRight, Minus, Plus, Trash2 } from 'lucide-vue-next'
 import { useCartStore } from '../application/cartStore'
 import { useAdventureStore } from '@/adventure/store'
 
@@ -50,6 +50,13 @@ onMounted(() => {
     </div>
     <div class="cart-heading-actions">
       <span>{{ t('units', cart.count) }}</span>
+      <a
+        v-if="!cart.loading && !cart.error && cart.lines.length"
+        href="#cart-summary"
+        class="text-button cart-summary-link"
+      >
+        {{ t('total') }} {{ price(cart.total) }}<ArrowDown :size="15" aria-hidden="true" />
+      </a>
       <button
         v-if="cart.entries.length"
         class="button secondary"
@@ -145,6 +152,8 @@ onMounted(() => {
     </div>
     <div class="checkout-scene">
       <aside
+        id="cart-summary"
+        tabindex="-1"
         class="cart-summary pokemon-palette"
         :data-type="cart.recentLines[0]?.pokemon.types[0]"
       >
@@ -198,164 +207,178 @@ onMounted(() => {
 .cart-heading-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
+  color: var(--muted-strong);
 }
+
+.cart-summary-link {
+  display: none;
+}
+
 .cart-layout {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
-  gap: 28px;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 34%);
+  gap: 24px;
 }
-.cart-list-panel {
+
+.cart-list-panel,
+.cart-item-copy {
   min-width: 0;
-  scroll-margin-top: 24px;
 }
-.cart-line {
-  padding: 16px 0;
+
+.cart-lines {
+  display: grid;
+  gap: 10px;
+}
+
+.cart-line,
+.cart-line:first-child {
   gap: 14px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--shop-radius);
+  background: var(--surface);
 }
+
 .cart-art {
   flex-shrink: 0;
 }
+
+.cart-item-copy h2 {
+  overflow-wrap: anywhere;
+}
+
+.cart-line-total {
+  gap: 4px;
+  min-width: max-content;
+}
+
+.quantity-control button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
 .checkout-scene {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
   position: sticky;
   top: 24px;
 }
-.chansey-summary {
-  padding: 20px 0 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+
+.cart-summary.pokemon-palette {
+  margin: 0;
+  padding: 20px;
+  border-radius: var(--shop-radius);
+  scroll-margin-top: 14px;
 }
-.chansey-summary img {
-  width: 220px;
-  max-width: 100%;
-  height: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 10px 8px #0002);
-}
-.chansey-summary p {
-  font-size: 0.78rem;
-  line-height: 1.7;
-  text-align: center;
-  color: var(--muted-strong);
-  padding: 0 10px;
-}
-.cart-summary {
-  border-radius: 12px 12px 0 0;
-  position: relative;
-  padding: 24px 22px 36px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  clip-path: polygon(
-    0 0,
-    100% 0,
-    100% 98%,
-    95% 100%,
-    90% 98%,
-    85% 100%,
-    80% 98%,
-    75% 100%,
-    70% 98%,
-    65% 100%,
-    60% 98%,
-    55% 100%,
-    50% 98%,
-    45% 100%,
-    40% 98%,
-    35% 100%,
-    30% 98%,
-    25% 100%,
-    20% 98%,
-    15% 100%,
-    10% 98%,
-    5% 100%,
-    0 98%
-  );
-}
-.cart-summary .ticket-label {
-  font-family: monospace;
-  letter-spacing: 0.16em;
-  font-size: 0.65rem;
-  text-align: center;
+
+.cart-summary > .ticket-label {
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--control-border);
   color: var(--purple);
-  margin: 0 0 20px;
-  padding: 0 0 16px;
-  border-bottom: 1px dashed var(--line);
+  font: 700 0.7rem/1.45 var(--font-mono);
+  letter-spacing: 0.12em;
 }
+
 .cart-summary h2 {
+  margin-bottom: 14px;
+  font-size: 1.55rem;
+}
+
+.cart-summary .summary-total {
+  align-items: baseline;
+  border-top: 1px dashed var(--control-border);
+  padding-top: 14px;
+  margin-top: 14px;
   font-size: 1.25rem;
 }
-.cart-summary .summary-total {
-  border-top: 1px dashed var(--line);
-  padding-top: 20px;
+
+.cart-summary .summary-total strong {
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(1.3rem, 2.8vw, 2rem);
 }
+
+.cart-summary > p {
+  margin-top: 14px;
+}
+
 .cart-summary > .demo-note {
-  border-top: 1px dashed var(--line);
-  padding-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--control-border);
 }
+
+.cart-summary .button {
+  margin-top: 12px;
+}
+
+.chansey-summary {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--shop-radius);
+  color: var(--muted-strong);
+  font-size: 0.82rem;
+}
+
+.chansey-summary img {
+  width: 70px;
+  height: auto;
+  object-fit: contain;
+}
+
 .chansey-empty {
   display: block;
   object-fit: contain;
   margin: 0 auto 12px;
-  width: 240px;
-  height: 240px;
-  max-width: 100%;
+  width: min(100%, 155px);
+  height: auto;
 }
+
 .cart-pagination {
-  gap: 12px;
   justify-content: space-between;
 }
+
 .cart-pagination .button {
-  padding: 10px;
-  font-size: 0.75rem;
+  padding-inline: 8px;
 }
-@media (max-width: 1100px) {
-  .cart-layout {
-    grid-template-columns: minmax(0, 1fr) 300px;
-  }
-  .checkout-scene {
-    grid-template-columns: 1fr;
-  }
-  .chansey-summary {
-    padding: 20px 0 0;
-  }
-  .chansey-summary img {
-    width: 180px;
-    height: 180px;
-  }
-  .chansey-summary p {
-    max-width: 280px;
-    margin: 0;
-  }
-}
+
 @media (max-width: 760px) {
   .cart-layout {
-    grid-template-columns: 1fr;
-    gap: 32px;
+    grid-template-columns: minmax(0, 1fr);
   }
+
   .checkout-scene {
     position: static;
+  }
+
+  .cart-summary-link {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 460px) {
+  .cart-line,
+  .cart-line:first-child {
+    display: grid;
+    grid-template-columns: minmax(0, 62px) minmax(0, 1fr);
+    align-items: start;
+    gap: 8px 12px;
+  }
+
+  .cart-art img {
     width: 100%;
-    max-width: 460px;
-    justify-self: center;
+    height: 72px;
   }
-  .chansey-summary img {
-    width: 200px;
-    height: 200px;
-  }
-  .cart-pagination {
-    gap: 6px;
-  }
-  .cart-pagination span {
-    font-size: 0.7rem;
-  }
-  .cart-pagination .button {
-    gap: 4px;
-    padding: 9px 7px;
+
+  .cart-line-total {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--line);
   }
 }
 </style>

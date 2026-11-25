@@ -15,6 +15,10 @@ export default {
   heightHigh: 'Altura: mayor primero',
   heightBento: 'Pequeños, medianos y altos: las tarjetas siguen su altura real.',
   removeFilter: 'Quitar filtro',
+  kantoShop: 'Tienda Pokémon de Kanto',
+  kantoIntro: 'Elige a tu primer compañero o explora especies y formas de todas las regiones.',
+  kantoStarters: 'Iniciales de Kanto',
+  filterDescription: 'Afina la búsqueda por tipo, región, generación o forma y elige el orden.',
   starterHeadline: 'Aquí empieza tu historia.',
   adventure: 'Tu próxima aventura empieza con un compañero',
   heroCopy:

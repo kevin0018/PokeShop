@@ -85,6 +85,9 @@ for (const locale of ['es', 'en'])
           expect(
             await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
           ).toBe(true)
+          const themeToggle = await page.getByRole('switch').boundingBox()
+          expect(themeToggle).not.toBeNull()
+          expect(themeToggle!.x + themeToggle!.width).toBeLessThanOrEqual(width)
           // Scroll through real lazy images before capturing the full page.
           for (const image of await page.locator('main img').all()) {
             await image.scrollIntoViewIfNeeded()
@@ -119,9 +122,9 @@ test('draft cancel, region apply, height order and stats interactions', async ({
   await expect(page).not.toHaveURL(/page=2/)
   const response = await page.request.get('/api/v1/pokemon?region=alola&sort=height_desc&limit=24')
   const { items } = await response.json()
-  await expect(page.locator('.catalog-bento .pokemon-card')).toHaveCount(items.length)
+  await expect(page.locator('.catalog-grid .pokemon-card')).toHaveCount(items.length)
   const ids = await page
-    .locator('.catalog-bento .card-art')
+    .locator('.catalog-grid .card-art')
     .evaluateAll((links) => links.map((l) => Number(l.getAttribute('href')?.split('/').pop())))
   expect(ids).toEqual(items.map((p: { id: number }) => p.id))
   await page.goto('/pokemon/3')
@@ -196,7 +199,7 @@ test('touch statistics and timed cart notice', async ({ browser }) => {
   await context.close()
 })
 
-test('complete and partial bento blocks keep order without overlapping cards', async ({ page }) => {
+test('catalog grids of different sizes keep order without overlapping cards', async ({ page }) => {
   const response = await page.request.get('/api/v1/pokemon?limit=7')
   const { items } = await response.json()
   for (const width of [320, 768, 1280]) {
@@ -206,12 +209,12 @@ test('complete and partial bento blocks keep order without overlapping cards', a
         r.fulfill({ json: { items: items.slice(0, count), total: count } }),
       )
       await page.goto('/catalogo')
-      await expect(page.locator('.catalog-bento .pokemon-card')).toHaveCount(count)
+      await expect(page.locator('.catalog-grid .pokemon-card')).toHaveCount(count)
       const ids = await page
-        .locator('.catalog-bento .card-art')
+        .locator('.catalog-grid .card-art')
         .evaluateAll((links) => links.map((l) => Number(l.getAttribute('href')?.split('/').pop())))
       expect(ids).toEqual(items.slice(0, count).map((p: { id: number }) => p.id))
-      const rects = await page.locator('.catalog-bento .pokemon-card').evaluateAll((cards) =>
+      const rects = await page.locator('.catalog-grid .pokemon-card').evaluateAll((cards) =>
         cards.map((c) => {
           const r = c.getBoundingClientRect()
           return { x: r.x, y: r.y, right: r.right, bottom: r.bottom, height: r.height }

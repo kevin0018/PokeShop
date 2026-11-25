@@ -14,6 +14,11 @@ export default {
   heightHigh: 'Height: tallest first',
   heightBento: 'Small, medium and tall: cards follow real height.',
   removeFilter: 'Remove filter',
+  kantoShop: 'Kanto Pokémon Shop',
+  kantoIntro: 'Choose your first partner or browse species and forms from every region.',
+  kantoStarters: 'Kanto starters',
+  filterDescription:
+    'Narrow your search by type, region, generation or form and pick a sort order.',
   starterHeadline: 'Your story starts here.',
   adventure: 'Your next adventure starts with a companion',
   heroCopy:

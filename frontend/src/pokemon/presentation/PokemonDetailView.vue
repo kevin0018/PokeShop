@@ -74,7 +74,7 @@ const inCart = computed(
       ><PokemonImage :src="pokemon.image_url" :name="pokemonName(pokemon)" />
     </div>
     <div class="detail-copy">
-      <p class="eyebrow">{{ t('collection') }} · {{ number(pokemon.species_id ?? pokemon.id) }}</p>
+      <p class="eyebrow">{{ t('collection') }}</p>
       <h1>{{ pokemonName(pokemon) }}</h1>
       <div class="type-list">
         <span v-for="type in pokemon.types" :key="type" class="type-tag" :data-type="type">{{
@@ -110,29 +110,31 @@ const inCart = computed(
           <dd>{{ pokemon.region_names?.[locale] ?? pokemon.region ?? t('missingData') }}</dd>
         </div>
       </dl>
-      <template v-if="game.trainer">
-        <CatalogPurchase :pokemon="pokemon" />
-        <p v-if="game.error" role="alert">{{ t(`adventure.errors.${game.error}`) }}</p>
-      </template>
-      <template v-else>
-        <p class="detail-price">{{ money(pokemon.price_cents) }}</p>
-        <p class="stock-label">
-          {{ pokemon.stock ? t('stock', pokemon.stock) : t('soldOutNow') }}
-        </p>
-        <button
-          class="button primary"
-          :disabled="inCart >= pokemon.stock"
-          @click="cart.add(pokemon.id)"
-        >
-          <Plus :size="19" />
-          {{
-            !pokemon.stock ? t('soldOut') : inCart >= pokemon.stock ? t('stockMax') : t('addCart')
-          }}</button
-        ><RouterLink v-if="inCart" class="back-link" to="/carrito"
-          >{{ t('viewCart', { count: inCart }) }} <ArrowRight :size="16"
-        /></RouterLink>
-        <p class="demo-note">{{ t('demoCatalog') }}</p>
-      </template>
+      <div class="detail-purchase">
+        <template v-if="game.trainer">
+          <CatalogPurchase :pokemon="pokemon" />
+          <p v-if="game.error" role="alert">{{ t(`adventure.errors.${game.error}`) }}</p>
+        </template>
+        <template v-else>
+          <p class="detail-price">{{ money(pokemon.price_cents) }}</p>
+          <p class="stock-label">
+            {{ pokemon.stock ? t('stock', pokemon.stock) : t('soldOutNow') }}
+          </p>
+          <button
+            class="button primary"
+            :disabled="inCart >= pokemon.stock"
+            @click="cart.add(pokemon.id)"
+          >
+            <Plus :size="19" />
+            {{
+              !pokemon.stock ? t('soldOut') : inCart >= pokemon.stock ? t('stockMax') : t('addCart')
+            }}</button
+          ><RouterLink v-if="inCart" class="back-link" to="/carrito"
+            >{{ t('viewCart', { count: inCart }) }} <ArrowRight :size="16"
+          /></RouterLink>
+          <p class="demo-note">{{ t('demoCatalog') }}</p>
+        </template>
+      </div>
     </div>
   </section>
   <RecommendationsPanel v-if="pokemon && !error" :ids="[pokemon.id]" />
@@ -144,30 +146,133 @@ const inCart = computed(
 </template>
 
 <style>
-.detail-art {
-  position: relative;
+.detail-layout {
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(20px, 4vw, 58px);
 }
+
+.detail-art.pokemon-palette {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  aspect-ratio: 1.07;
+  border-radius: var(--shop-radius);
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(circle closest-side, var(--surface) 0 75%, transparent 76%),
+    color-mix(in srgb, var(--pokemon-tint) 28%, var(--surface));
+}
+
+.detail-art img {
+  width: 90%;
+  height: 86%;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 12px var(--shop-shadow));
+}
+
 .detail-art .stats-trigger {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 12px;
+  right: 12px;
   z-index: 2;
-  margin: 0;
+  min-width: 44px;
   min-height: 44px;
-  padding: 10px 12px;
-  font-size: 0.75rem;
-  background: var(--surface);
-  box-shadow: 0 3px 15px #0001;
+  margin-top: 0;
 }
+
 .detail-art > .dex-number {
-  z-index: 1;
+  top: 16px;
+  left: 16px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
 }
-@media (max-width: 400px) {
-  .detail-art .stats-trigger {
-    top: 10px;
-    right: 10px;
-    font-size: 0.65rem;
-    padding: 8px;
+
+.detail-copy {
+  min-width: 0;
+}
+
+.detail-copy h1 {
+  margin: 8px 0 14px;
+  line-height: 0.98;
+}
+
+.detail-copy .type-tag {
+  padding: 4px 9px;
+  font-size: 0.76rem;
+}
+
+.detail-copy .description {
+  margin: 18px 0;
+}
+
+.detail-copy .pokemon-facts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--shop-radius);
+  padding: 0;
+  overflow: clip;
+  background: var(--surface);
+}
+
+.pokemon-facts > div {
+  min-width: 0;
+  padding: 12px;
+}
+
+.pokemon-facts > div:nth-child(odd) {
+  border-right: 1px solid var(--line);
+}
+
+.pokemon-facts > div:nth-child(-n + 2) {
+  border-bottom: 1px solid var(--line);
+}
+
+.pokemon-facts dd {
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+
+.detail-purchase {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--shop-radius);
+  background: var(--surface);
+}
+
+.detail-price {
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.detail-purchase .stock-label {
+  margin-bottom: 12px;
+}
+
+.detail-purchase .back-link {
+  margin: 5px 0 0;
+}
+
+.detail-purchase .demo-note {
+  padding-top: 12px;
+  margin-top: 14px;
+}
+
+@media (max-width: 700px) {
+  .detail-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .detail-art.pokemon-palette {
+    max-width: none;
+    aspect-ratio: 1.3;
+  }
+
+  .detail-purchase .button {
+    width: 100%;
   }
 }
 </style>
