@@ -16,7 +16,7 @@ PokéShop TV is a fictional Pokémon shopping channel built with Vue 3, TypeScri
 
 ## Highlights
 
-- `/` — The studio puts Charizard, Pikachu and Gengar on an animated pedestal with manual channel controls. The Kanto starter stand links to individual products and displays catalog prices. The animation can be paused and respects reduced motion.
+- `/` — On the first visit a spotlit Poké Ball rocks, opens and releases the featured Pokémon into the shopping channel. Charizard, Pikachu and Gengar keep their animated 2D poses throughout the offer. Visitors can add to the cart, switch Pokémon, replay or skip the capture. Reduced motion opens directly on the still offer.
 - `/catalogo` — Browse illustrated product cards with prices and add controls. Type shortcuts, search and advanced filters share their state in the URL. Signed-in trainers see their balance, credit prices and battle-ready Pokémon by default.
 - `/pokemon/:id`: localized biology, dimensions and origin. Statistics open from the top-right corner of the illustration on hover, keyboard focus or tap; click pins the popover and Escape/outside/close dismiss it. Abilities remain in the API but are omitted from the view.
 - `/carrito`: six distinct products per page, with totals calculated over the complete cart. Removing the final item on a page selects the last valid page; quantity changes retain the page. IDs and quantities persist, independently of catalog pagination and network failures. Signed-in trainers confirm an atomic checkout validated by the server; durable receipts prevent repeat charges after a lost response. Anonymous visitors keep the euro-priced demonstration cart.

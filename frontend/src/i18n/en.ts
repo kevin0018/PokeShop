@@ -1,14 +1,20 @@
 export default {
   studio: {
+    skip: 'Skip intro',
+    replay: 'Replay capture',
+    price: 'Price',
+    details: 'View details',
+    pitch6:
+      'Its tail lights the fuse. Its wings do the rest. Charmander’s final evolution takes the stage.',
+    pitch25: 'Ears up, cheeks charged. Six kilos of electricity, ready to join your team.',
+    pitch94:
+      'First comes the grin. Then you spot what’s hiding in your shadow. Make room for Gengar.',
     spotlight: 'In the spotlight',
     special: 'Kanto special',
-    title: 'Your next',
-    intro: 'The stars of Kanto are in the studio. Meet them up close and choose who joins your team.',
     shop: 'Enter the shop',
     stand: 'The starter stand',
     viewKanto: 'Shop all Kanto',
     onScreen: 'On screen',
-    lineup: 'Stars of Kanto',
     previous: 'Previous featured Pokémon',
     next: 'Next featured Pokémon',
     battle: 'Got your team? Step into the Kanto gyms.',

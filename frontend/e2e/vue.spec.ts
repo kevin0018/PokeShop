@@ -36,6 +36,7 @@ test('select keyboard, Escape, theme and locale persistence', async ({ page }) =
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   await page.emulateMedia({ colorScheme: 'light' })
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+  await page.getByRole('button', { name: 'Saltar intro' }).press('Enter')
   const language = page.getByRole('combobox', { name: 'Idioma', exact: true })
   await language.press('ArrowDown')
   await expect(page.getByRole('listbox')).toBeVisible()
@@ -61,6 +62,7 @@ for (const locale of ['es', 'en'])
       test(`responsive ${locale} ${theme} ${width}`, async ({ page }, testInfo) => {
         await page.addInitScript(
           ({ locale, theme }) => {
+            localStorage.setItem('pokeshop.capture.v1', 'seen')
             localStorage.setItem('pokeshop.locale', locale)
             localStorage.setItem('pokeshop.theme', theme)
             localStorage.setItem(
@@ -363,7 +365,7 @@ test('cart preview shows latest three and global total, opens by hover and click
 
 test('switches the studio feature and browses a type shelf', async ({ page }) => {
   await page.goto('/')
-  const feature = page.locator('.stage-caption a')
+  const feature = page.getByRole('link', { name: 'Ver ficha', exact: true })
   await expect(feature).toHaveAttribute('href', '/pokemon/6')
   await page.getByRole('button', { name: 'Siguiente Pokémon destacado' }).click()
   await expect(feature).toHaveAttribute('href', '/pokemon/25')
@@ -379,4 +381,34 @@ test('switches the studio feature and browses a type shelf', async ({ page }) =>
   await expect(page.locator('.catalog-grid .pokemon-card').first()).toContainText('Fuego')
   await fire.click()
   await expect(page).not.toHaveURL(/type=fuego/)
+})
+
+test('plays the capture once and lets the visitor replay or skip it', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await page.goto('/')
+  const intro = page.getByRole('dialog', { name: 'Repetir captura' })
+  await expect(intro).toBeVisible()
+  await expect(intro).toBeHidden({ timeout: 7000 })
+  await expect(page.getByRole('heading', { name: 'Charizard' })).toBeVisible()
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'Repetir captura' })).toBeVisible()
+  await expect(intro).toHaveCount(0)
+  await page.getByRole('button', { name: 'Repetir captura' }).click()
+  await expect(intro).toBeVisible()
+  await page.getByRole('button', { name: 'Saltar intro' }).click()
+  await expect(intro).toHaveCount(0)
+  await page.getByRole('button', { name: 'Añadir al carrito', exact: true }).click()
+  await expect(page.locator('.cart-count')).toHaveText('1')
+})
+
+test('opens directly on a still Pokémon when reduced motion is requested', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: 'Charizard' })).toBeVisible()
+  await expect(page.locator('.capture-intro')).toHaveCount(0)
+  await expect(page.locator('.feature-actor .studio-sprite')).toHaveCSS(
+    'background-position',
+    '0% 0%',
+  )
+  await expect(page.getByRole('button', { name: 'Repetir captura' })).toHaveCount(0)
 })

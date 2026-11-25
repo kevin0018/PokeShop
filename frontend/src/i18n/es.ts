@@ -1,15 +1,22 @@
 import type en from './en'
 export default {
   studio: {
+    skip: 'Saltar intro',
+    replay: 'Repetir captura',
+    price: 'Precio',
+    details: 'Ver ficha',
+    pitch6:
+      'Su cola prende la mecha. Sus alas hacen el resto. La última evolución de Charmander entra en escena.',
+    pitch25:
+      'Orejas en punta, mejillas cargadas. Seis kilos de electricidad listos para unirse a tu equipo.',
+    pitch94:
+      'Primero ves la sonrisa. Luego descubres quién se esconde en tu sombra. Hazle sitio a Gengar.',
     spotlight: 'En el escaparate',
     special: 'Especial Kanto',
-    title: 'Tu próximo',
-    intro: 'Los protagonistas de Kanto pasan por el plató. Conócelos de cerca y elige quién se une a tu equipo.',
     shop: 'Entrar en la tienda',
     stand: 'El stand de iniciales',
     viewKanto: 'Ver todo Kanto',
     onScreen: 'En pantalla',
-    lineup: 'Estrellas de Kanto',
     previous: 'Pokémon destacado anterior',
     next: 'Siguiente Pokémon destacado',
     battle: '¿Ya tienes equipo? Entra en los gimnasios de Kanto.',
