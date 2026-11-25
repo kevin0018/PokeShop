@@ -2,16 +2,36 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { Search, ArrowLeft, ArrowRight, Coins, ShoppingBag, UsersRound } from 'lucide-vue-next'
+import {
+  Search,
+  ArrowLeft,
+  ArrowRight,
+  Coins,
+  ShoppingBag,
+  UsersRound,
+  Radio,
+  Zap,
+  Flame,
+  Droplets,
+  Leaf,
+  Ghost,
+} from 'lucide-vue-next'
 import CatalogFilters from './CatalogFilters.vue'
 import PokemonCard from './PokemonCard.vue'
 import { request } from '../infrastructure/httpPokemonRepository'
 import { useCatalogStore } from '../application/catalogStore'
 import { useAdventureStore } from '@/adventure/store'
 import { useCartStore } from '@/cart/application/cartStore'
-import ShopCounter from './ShopCounter.vue'
+import { typeName } from '@/shared/presentation/format'
 
 import type { Pokemon } from '../domain/pokemon'
+const shelves = [
+  { type: 'planta', icon: Leaf },
+  { type: 'fuego', icon: Flame },
+  { type: 'agua', icon: Droplets },
+  { type: 'electrico', icon: Zap },
+  { type: 'fantasma', icon: Ghost },
+]
 const { t } = useI18n()
 const game = useAdventureStore()
 const cart = useCartStore()
@@ -71,17 +91,18 @@ request<typeof metadata.value>('/metadata')
 <template>
   <section class="catalog-section shop-scene">
     <header class="shop-front">
-      <div class="shop-awning" aria-hidden="true"></div>
       <div class="section-heading shop-heading">
         <div>
-          <p class="eyebrow">{{ t('shopLabel') }}</p>
+          <p class="eyebrow"><Radio :size="15" />PokéShop TV</p>
           <h1>{{ t('catalog') }}</h1>
           <p class="shop-intro">
             {{ game.trainer ? t('adventure.catalogHelp') : t('catalogIntro') }}
           </p>
         </div>
       </div>
-      <ShopCounter />
+      <div class="catalog-mascot" aria-hidden="true">
+        <img src="/studio/25.webp" alt="" width="475" height="475" />
+      </div>
       <div class="shop-checkout-bar">
         <div v-if="game.trainer" class="catalog-trainer">
           <Coins :size="22" aria-hidden="true" />
@@ -114,6 +135,18 @@ request<typeof metadata.value>('/metadata')
     <div v-if="game.trainer && game.error" class="state-box" role="alert">
       {{ t(`adventure.errors.${game.error}`) }}
     </div>
+    <div class="type-shelves" role="group" :aria-label="t('studio.browseType')">
+      <button
+        v-for="shelf in shelves"
+        :key="shelf.type"
+        class="type-shelf pokemon-palette"
+        :data-type="shelf.type"
+        :aria-pressed="value('type') === shelf.type"
+        @click="change('type', value('type') === shelf.type ? '' : shelf.type)"
+      >
+        <component :is="shelf.icon" :size="16" />{{ typeName(shelf.type) }}
+      </button>
+    </div>
     <div class="catalog-tools">
       <label class="search-field"
         ><Search :size="18" /><span class="sr-only">{{ t('search') }}</span
@@ -135,7 +168,11 @@ request<typeof metadata.value>('/metadata')
     <template v-else
       ><div class="results-bar">
         <p role="status">{{ t('found', total) }}</p>
-        <button class="text-button" @click="router.replace({ query: {} })">
+        <button
+          v-if="Object.keys(route.query).length"
+          class="text-button"
+          @click="router.replace({ query: {} })"
+        >
           {{ t('clearFilters') }}
         </button>
       </div>
@@ -175,18 +212,8 @@ request<typeof metadata.value>('/metadata')
   overflow: clip;
   margin-bottom: 20px;
   border-radius: var(--shop-radius);
-  background: var(--sign);
+  background: radial-gradient(ellipse at 77% 84%, #7952ac, transparent 55%), var(--sign);
   color: var(--sign-ink);
-}
-
-.shop-awning {
-  grid-column: 1 / -1;
-  height: 9px;
-  background: repeating-linear-gradient(
-    90deg,
-    var(--sign-accent) 0 36px,
-    var(--sign-ink) 36px 72px
-  );
 }
 
 .shop-front .shop-heading {
@@ -195,13 +222,76 @@ request<typeof metadata.value>('/metadata')
   align-items: center;
 }
 
+.shop-heading .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+}
+.catalog-mascot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  width: clamp(115px, 29vw, 340px);
+  margin-right: 4%;
+  isolation: isolate;
+}
+.catalog-mascot::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: repeating-radial-gradient(
+    circle at center,
+    transparent 0 29px,
+    #dfc4ff45 30px,
+    transparent 31px 48px
+  );
+  mask-image: linear-gradient(90deg, transparent, black 25% 75%, transparent);
+}
+.catalog-mascot img {
+  position: absolute;
+  width: 90%;
+  height: 94%;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 4px #27192e55);
+  transform: rotate(7deg);
+}
+.type-shelves {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+}
+.type-shelf {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--pokemon-tint) 65%, var(--line));
+  background: color-mix(in srgb, var(--pokemon-tint) 19%, var(--surface));
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+.type-shelf:hover,
+.type-shelf[aria-pressed='true'] {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
 .shop-heading .eyebrow,
 .shop-intro {
   color: var(--sign-label);
 }
 
 .shop-heading h1 {
-  font-size: clamp(2.6rem, 6vw, 5.5rem);
+  font: 900 clamp(3.5rem, 6vw, 5.5rem) / 1 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: -0.015em;
   line-height: 0.94;
 }
 
@@ -211,13 +301,6 @@ request<typeof metadata.value>('/metadata')
   line-height: 1.5;
 }
 
-.shop-counter-art {
-  align-self: center;
-  width: clamp(90px, 23vw, 232px);
-  margin: 8px clamp(12px, 3.5vw, 44px) 8px 0;
-  height: auto;
-}
-
 .shop-checkout-bar {
   grid-column: 1 / -1;
   display: flex;
@@ -225,7 +308,8 @@ request<typeof metadata.value>('/metadata')
   flex-wrap: wrap;
   gap: 8px 16px;
   padding: 6px clamp(14px, 3.5vw, 44px);
-  border-top: 1px solid var(--sign-label);
+  border-top: 1px solid #ffffff35;
+  background: #281b3e;
 }
 
 .shop-checkout-bar a,
@@ -328,7 +412,7 @@ request<typeof metadata.value>('/metadata')
   }
 
   .shop-heading h1 {
-    font-size: clamp(2rem, 9vw, 3.5rem);
+    font-size: clamp(2.6rem, 10vw, 3.5rem);
   }
 
   .shop-intro {

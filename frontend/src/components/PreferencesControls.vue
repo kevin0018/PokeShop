@@ -40,13 +40,13 @@ function toggle() {
       >
         <span class="switch-thumb" aria-hidden="true" /><img
           class="switch-espeon"
-          src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/196.png"
+          src="/studio/switch-196.png"
           alt=""
           width="40"
           height="40"
         /><img
           class="switch-umbreon"
-          src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/197.png"
+          src="/studio/switch-197.png"
           alt=""
           width="40"
           height="40"

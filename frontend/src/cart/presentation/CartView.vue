@@ -43,7 +43,7 @@ onMounted(() => {
   <RouterLink class="back-link" to="/catalogo"
     ><ArrowLeft :size="16" />{{ t('keepExploring') }}</RouterLink
   >
-  <div class="section-heading">
+  <div class="section-heading bag-heading">
     <div>
       <p class="eyebrow">{{ t('selection') }}</p>
       <h1>{{ t('cart') }}</h1>
@@ -204,6 +204,38 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.bag-heading {
+  padding: clamp(16px, 3vw, 34px);
+  border-radius: var(--shop-radius);
+  background: var(--sign);
+  color: var(--sign-ink);
+  border-bottom: 5px solid var(--studio-yellow);
+}
+.bag-heading .eyebrow,
+.bag-heading .cart-heading-actions,
+.bag-heading .text-button {
+  color: var(--sign-label);
+}
+.bag-heading h1 {
+  margin: 0;
+}
+.bag-heading .secondary {
+  color: var(--ink);
+}
+.cart-item-copy h2 {
+  font: 900 clamp(1.6rem, 2.5vw, 2.25rem) / 1.14 var(--font-display);
+}
+.checkout-scene .cart-summary {
+  border-top: 5px solid var(--purple);
+}
+@media (max-width: 700px) {
+  .bag-heading {
+    align-items: start;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
 .cart-heading-actions {
   display: flex;
   align-items: center;
@@ -281,7 +313,7 @@ onMounted(() => {
 
 .cart-summary h2 {
   margin-bottom: 14px;
-  font-size: 1.55rem;
+  font: 900 clamp(1.8rem, 2.5vw, 2.4rem) / 1.05 var(--font-display);
 }
 
 .cart-summary .summary-total {

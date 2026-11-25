@@ -21,11 +21,14 @@
   display: grid;
   grid-template-columns: 1.1fr 1fr;
   border: 1px solid var(--line);
-  border-radius: 24px;
+  border-radius: var(--shop-radius);
   overflow: hidden;
 }
 .trainer-pass {
-  background: var(--feature);
+  background:
+    radial-gradient(color-mix(in srgb, var(--purple) 14%, transparent) 1px, transparent 1.2px) 0 0 /
+      9px 9px,
+    var(--feature);
   padding: 38px;
   border-right: 1px dashed var(--border-strong);
 }
@@ -39,7 +42,7 @@
   margin-bottom: 28px;
 }
 .trainer-pass h2 {
-  font-size: 27px;
+  font: 900 clamp(2rem, 4vw, 3rem) / 1.05 var(--font-display);
   margin-bottom: 12px;
 }
 .pass-companions {

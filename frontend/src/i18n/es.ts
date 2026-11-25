@@ -1,9 +1,25 @@
 import type en from './en'
 export default {
+  studio: {
+    spotlight: 'En el escaparate',
+    special: 'Especial Kanto',
+    title: 'Tu próximo',
+    intro: 'Los protagonistas de Kanto pasan por el plató. Conócelos de cerca y elige quién se une a tu equipo.',
+    shop: 'Entrar en la tienda',
+    stand: 'El stand de iniciales',
+    viewKanto: 'Ver todo Kanto',
+    onScreen: 'En pantalla',
+    lineup: 'Estrellas de Kanto',
+    previous: 'Pokémon destacado anterior',
+    next: 'Siguiente Pokémon destacado',
+    battle: '¿Ya tienes equipo? Entra en los gimnasios de Kanto.',
+    browseType: 'Explorar por tipo',
+    channel: 'Canal de coleccionistas',
+  },
   cartPage: 'Productos del carrito',
   shopLabel: 'Tienda Pokémon',
   shopBalance: 'Saldo disponible',
-  ticketLabel: 'PASE DE COMPAÑEROS',
+  ticketLabel: 'TICKET DE COLECCIÓN',
 
   filters: 'Filtros',
   region: 'Región de origen',

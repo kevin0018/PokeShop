@@ -360,3 +360,23 @@ test('cart preview shows latest three and global total, opens by hover and click
     await touch.close()
   }
 })
+
+test('switches the studio feature and browses a type shelf', async ({ page }) => {
+  await page.goto('/')
+  const feature = page.locator('.stage-caption a')
+  await expect(feature).toHaveAttribute('href', '/pokemon/6')
+  await page.getByRole('button', { name: 'Siguiente Pokémon destacado' }).click()
+  await expect(feature).toHaveAttribute('href', '/pokemon/25')
+  await page.getByRole('button', { name: 'Pokémon destacado anterior' }).click()
+  await page.getByRole('button', { name: 'Pokémon destacado anterior' }).click()
+  await feature.click()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Gengar')
+  await page.getByRole('link', { name: 'Volver al catálogo' }).click()
+  const fire = page.getByRole('button', { name: 'Fuego', exact: true })
+  await fire.click()
+  await expect(fire).toHaveAttribute('aria-pressed', 'true')
+  await expect(page).toHaveURL(/type=fuego/)
+  await expect(page.locator('.catalog-grid .pokemon-card').first()).toContainText('Fuego')
+  await fire.click()
+  await expect(page).not.toHaveURL(/type=fuego/)
+})

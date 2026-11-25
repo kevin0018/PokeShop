@@ -74,7 +74,7 @@ const inCart = computed(
       ><PokemonImage :src="pokemon.image_url" :name="pokemonName(pokemon)" />
     </div>
     <div class="detail-copy">
-      <p class="eyebrow">{{ t('collection') }}</p>
+      <p class="eyebrow">{{ t('studio.spotlight') }}</p>
       <h1>{{ pokemonName(pokemon) }}</h1>
       <div class="type-list">
         <span v-for="type in pokemon.types" :key="type" class="type-tag" :data-type="type">{{
@@ -160,11 +160,34 @@ const inCart = computed(
   border-radius: var(--shop-radius);
   border: 1px solid var(--line);
   background:
-    radial-gradient(circle closest-side, var(--surface) 0 75%, transparent 76%),
-    color-mix(in srgb, var(--pokemon-tint) 28%, var(--surface));
+    radial-gradient(
+      circle closest-side,
+      transparent 75%,
+      var(--surface) 75.5% 76%,
+      transparent 76.5% 91%,
+      var(--surface) 91.5% 92%,
+      transparent 92.5%
+    ),
+    radial-gradient(color-mix(in srgb, var(--pokemon-tint) 50%, transparent) 1px, transparent 1.2px)
+      0 0 / 10px 10px,
+    color-mix(in srgb, var(--pokemon-tint) 38%, var(--surface));
 }
 
+.detail-art::after {
+  content: '';
+  position: absolute;
+  left: 25%;
+  right: 25%;
+  bottom: 9%;
+  height: 8%;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--pokemon-tint) 50%, transparent);
+  filter: blur(5px);
+  pointer-events: none;
+}
 .detail-art img {
+  position: relative;
+  z-index: 1;
   width: 90%;
   height: 86%;
   object-fit: contain;
@@ -182,6 +205,7 @@ const inCart = computed(
 }
 
 .detail-art > .dex-number {
+  z-index: 2;
   top: 16px;
   left: 16px;
   padding: 4px 8px;
@@ -239,6 +263,7 @@ const inCart = computed(
 .detail-purchase {
   padding: 18px;
   border: 1px solid var(--line);
+  border-top: 4px solid var(--purple);
   border-radius: var(--shop-radius);
   background: var(--surface);
 }

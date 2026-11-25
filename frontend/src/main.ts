@@ -1,5 +1,6 @@
 import './assets/main.css'
 import './assets/pokemon-palette.css'
+import './assets/station.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'

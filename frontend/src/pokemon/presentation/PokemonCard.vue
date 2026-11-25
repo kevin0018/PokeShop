@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
-import { Plus } from 'lucide-vue-next'
+import { Plus, ArrowUpRight } from 'lucide-vue-next'
 import type { Pokemon } from '../domain/pokemon'
 import { useCartStore } from '@/cart/application/cartStore'
 import { money, pokemonName, number, typeName, decimal } from '@/shared/presentation/format'
@@ -21,6 +21,7 @@ const game = useAdventureStore()
     >
       <span class="dex-number">{{ number(pokemon.species_id ?? pokemon.id) }}</span
       ><PokemonImage :src="pokemon.image_url" :name="pokemonName(pokemon)" />
+      <ArrowUpRight class="card-open" :size="18" aria-hidden="true" />
       <span v-if="!game.trainer && !pokemon.stock" class="sold-out">{{ t('soldOut') }}</span>
     </RouterLink>
     <div class="type-list">
@@ -80,12 +81,32 @@ const game = useAdventureStore()
   position: relative;
   isolation: isolate;
   height: auto;
-  aspect-ratio: 1.35;
+  aspect-ratio: 1.48;
   background:
-    radial-gradient(circle closest-side, var(--surface) 0 73%, transparent 74%),
-    color-mix(in srgb, var(--pokemon-tint) 30%, var(--surface));
+    radial-gradient(
+      circle at center,
+      transparent 35%,
+      color-mix(in srgb, var(--surface) 65%, transparent) 35.5% 36%,
+      transparent 36.5% 43%,
+      color-mix(in srgb, var(--surface) 65%, transparent) 43.5% 44%,
+      transparent 44.5%
+    ),
+    radial-gradient(color-mix(in srgb, var(--pokemon-tint) 48%, transparent) 1px, transparent 1px) 0
+      0 / 8px 8px,
+    color-mix(in srgb, var(--pokemon-tint) 47%, var(--surface));
 }
 
+.card-open {
+  position: absolute;
+  bottom: 9px;
+  right: 9px;
+  color: var(--ink);
+  background: var(--surface);
+  border-radius: 50%;
+  padding: 4px;
+  width: 25px;
+  height: 25px;
+}
 .illustrated-card .card-art:focus-visible {
   outline-offset: -4px;
 }
@@ -129,7 +150,7 @@ const game = useAdventureStore()
 }
 
 .illustrated-card h3 {
-  font-size: clamp(0.98rem, 1.7vw, 1.28rem);
+  font: 900 clamp(1.4rem, 2.1vw, 1.9rem) / 1.12 var(--font-display);
   line-height: 1.16;
   margin: 8px 0 6px;
   overflow-wrap: anywhere;
@@ -142,25 +163,33 @@ const game = useAdventureStore()
   color: var(--muted-strong);
   font-size: 0.69rem;
   line-height: 1.45;
+  margin-bottom: 8px;
 }
 
 .illustrated-card .card-bottom {
   margin-top: auto;
-  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
 }
 
 .illustrated-card .card-bottom strong {
-  font-size: clamp(0.85rem, 1.3vw, 1rem);
+  font-size: clamp(0.95rem, 1.4vw, 1.16rem);
 }
 
 .illustrated-card .add-button {
   width: auto;
   min-width: 44px;
   min-height: 44px;
-  padding: 5px 8px;
+  padding: 5px 10px;
+  background: var(--purple);
+  color: var(--on-accent);
+  border-color: transparent;
   border-radius: 8px;
 }
 
+.illustrated-card .add-button:hover:not(:disabled) {
+  background: var(--button-hover);
+}
 .illustrated-card .catalog-purchase .add-label {
   overflow-wrap: anywhere;
 }

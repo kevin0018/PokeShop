@@ -1,49 +1,5 @@
 @import 'tailwindcss';
-:root {
-  --ink: #162a38;
-  --muted: #526371;
-  --purple: #9e392c;
-  --lavender: #c75644;
-  --paper: #f3f2ea;
-  --line: #d3d9d6;
-  --surface: #fffdf7;
-  --on-accent: #fffaf2;
-  --badge: #f5e0d7;
-  --feature: #e3ebe8;
-  --heading: #162a38;
-  --muted-strong: #435966;
-  --button-hover: #7d271e;
-  --surface-hover: #f5e0d7;
-  --border-strong: #788d91;
-  --orbit-inner: #cadde2;
-  --hero-mark: #e0d4ec;
-  --art-surface: #e5ece6;
-  --control-border: #adbdbb;
-  --control-surface: #eeefea;
-  --control-hover: #e2e8e2;
-  --empty-border: #adbdbb;
-  --panel: #e6ece8;
-  --panel-border: #c8d5d1;
-  --panel-divider: #bfcfca;
-  --sign: #163346;
-  --sign-ink: #fff7e5;
-  --sign-label: #c2d5d8;
-  --sign-rule: #d8ebe820;
-  --sign-accent: #aa4132;
-  --sign-accent-hover: #8e3025;
-  --shop-overlay: #10242dbb;
-  --shop-shadow: #091a2e33;
-  --shop-radius: 14px;
-  --card-inset: clamp(9px, 1.5vw, 16px);
-  --font-head: 'Arial Black', 'Inter', 'Segoe UI', sans-serif;
-  --font-mono: ui-monospace, 'Cascadia Mono', monospace;
-  color-scheme: light;
-  color: var(--ink);
-  background: var(--paper);
-  font-family: 'Inter', 'Segoe UI', sans-serif;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-}
+@import './tokens.css';
 * {
   box-sizing: border-box;
 }
@@ -968,35 +924,6 @@ nav {
   }
 }
 
-:root[data-theme='dark'] {
-  --sign: #162c3c;
-  --ink: #f6f3e8;
-  --muted: #b5c5c7;
-  --purple: #ffab94;
-  --lavender: #ed8875;
-  --paper: #101e28;
-  --line: #3b525c;
-  --surface: #192c38;
-  --on-accent: #2b1814;
-  --badge: #442f32;
-  --feature: #2a4350;
-  --heading: #f6f3e8;
-  --muted-strong: #c4ceca;
-  --button-hover: #ffc0ad;
-  --surface-hover: #273c49;
-  --border-strong: #749198;
-  --orbit-inner: #514957;
-  --hero-mark: #443153;
-  --art-surface: #243b47;
-  --control-border: #59737b;
-  --control-surface: #233945;
-  --control-hover: #334c59;
-  --empty-border: #59737b;
-  --panel: #213542;
-  --panel-border: #415965;
-  --panel-divider: #4b626f;
-  color-scheme: dark;
-}
 :root[data-theme='dark'] .storage-warning {
   background: #493d20;
   color: #f8e8b5;
