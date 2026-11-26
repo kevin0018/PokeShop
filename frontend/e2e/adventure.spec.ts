@@ -183,32 +183,14 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   await page.emulateMedia({ colorScheme: 'light' })
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.getByRole('button', { name: 'Gimnasios', exact: true }).click()
-  await expect(page.locator('.gym-stop img.trainer-portrait')).toHaveCount(6)
-  await expect
-    .poll(() =>
-      page
-        .locator('.gym-stop img.trainer-portrait')
-        .evaluateAll((images) =>
-          images.every(
-            (image) =>
-              (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0,
-          ),
-        ),
-    )
-    .toBe(true)
-  const gymColors = await page
-    .locator('.gym-stop')
-    .evaluateAll((cards) => cards.map((card) => getComputedStyle(card).backgroundImage))
-  expect(new Set(gymColors).size).toBe(6)
+  const markers = page.locator('.city-marker')
+  await expect(markers).toHaveCount(6)
+  await expect(page.locator('.kanto-terrain img')).toHaveJSProperty('naturalWidth', 192)
   for (const width of [320, 375, 414, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 })
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
-    const square = await page.locator('.gym-card-trigger').first().boundingBox()
-    expect(Math.abs(square!.width - square!.height)).toBeLessThan(2)
+    for (const marker of await markers.all()) await expect(marker).toBeVisible()
   }
-  await page.getByRole('button', { name: 'Ver gimnasio de Brock', exact: true }).hover()
-  await expect(page.getByRole('button', { name: 'Retar a Brock', exact: true })).toBeVisible()
-  await page.locator('h1').click()
   await page.screenshot({ path: testInfo.outputPath('gyms-desktop.png'), fullPage: true })
   await page.setViewportSize({ width: 375, height: 900 })
   await page.screenshot({ path: testInfo.outputPath('gyms-mobile.png'), fullPage: true })
@@ -216,15 +198,10 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   await page.screenshot({ path: testInfo.outputPath('gyms-dark.png'), fullPage: true })
   await page.emulateMedia({ colorScheme: 'light' })
   await page.getByRole('button', { name: 'Ver gimnasio de Misty', exact: true }).click()
-  await expect(page.locator('.gym-stop').nth(1).locator('.gym-actions button')).toBeDisabled()
-  await page.keyboard.press('Escape')
-  await expect(page.locator('.gym-actions')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Ver gimnasio de Brock', exact: true }).focus()
-  await expect(page.getByRole('button', { name: 'Retar a Brock', exact: true })).toBeEnabled()
-  await page.keyboard.press('Escape')
-  await page.getByRole('button', { name: 'Ver gimnasio de Brock', exact: true }).click()
+  await expect(page.locator('.gym-dossier h3')).toHaveText('Misty')
+  await expect(page.locator('.gym-dossier button')).toBeDisabled()
   await page.emulateMedia({ reducedMotion: 'no-preference' })
-  await page.getByRole('button', { name: 'Retar a Brock', exact: true }).click()
+  await markers.getByText('1', { exact: true }).click()
   await expect(page.locator('.battle-entry')).toBeVisible()
   await expect(page.locator('.battle-entry')).toBeHidden()
   await page.emulateMedia({ reducedMotion: 'reduce' })
@@ -310,8 +287,9 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   await expect(page.locator('.site-footer')).toBeVisible()
   await expect(page.locator('.gym-world')).toBeHidden()
   await expect(page.locator('.trainer-strip')).toContainText('1 / 6 medallas')
-  await page.getByRole('button', { name: 'Ver gimnasio de Misty', exact: true }).click()
-  await expect(page.getByRole('button', { name: 'Retar a Misty', exact: true })).toBeEnabled()
+  await page.getByRole('button', { name: 'Retar a Misty', exact: true }).and(markers).focus()
+  await expect(page.locator('.gym-dossier button')).toHaveAccessibleName('Retar a Misty')
+  await expect(page.locator('.gym-dossier button')).toBeEnabled()
   await page.getByRole('button', { name: 'Mi cuenta', exact: true }).click()
   await expect(page.getByRole('menu')).toContainText(username)
   await expect(page.getByRole('menu')).toContainText('460 créditos')

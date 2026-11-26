@@ -29,18 +29,34 @@ import {
 const { t, te, locale } = useI18n()
 const game = useAdventureStore()
 const openedGym = ref<number | null>(null)
-function dismissGym(event: PointerEvent) {
-  if (!(event.target instanceof Element) || !event.target.closest('.gym-stop'))
-    openedGym.value = null
+// Coordinates correspond to city markers on the 192 × 144 Kanto map.
+const cityMarkers: Record<number, [number, number]> = {
+  1: [44, 52],
+  2: [124, 44],
+  3: [124, 92],
+  4: [100, 68],
+  5: [108, 116],
+  6: [124, 68],
 }
-onMounted(() => document.addEventListener('pointerdown', dismissGym))
-onUnmounted(() => document.removeEventListener('pointerdown', dismissGym))
-function leaveGym(event: MouseEvent) {
-  if (!(event.currentTarget as HTMLElement).contains(document.activeElement)) openedGym.value = null
+const selectedGym = computed(
+  () =>
+    game.gyms.find((g) => g.id === openedGym.value) ??
+    game.gyms[Math.min(game.trainer?.medals.length ?? 0, game.gyms.length - 1)],
+)
+const arrivalGym = ref<typeof selectedGym.value>()
+const entranceActor = ref<HTMLElement>()
+function canChallenge(id: number) {
+  return (
+    !!game.trainer?.team.length &&
+    !dirty.value &&
+    !game.active &&
+    !blocked.value &&
+    id <= game.trainer.medals.length + 1
+  )
 }
-function blurGym(event: FocusEvent) {
-  if (!(event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null))
-    openedGym.value = null
+function visitGym(id: number) {
+  openedGym.value = id
+  if (canChallenge(id)) void challenge(id)
 }
 const saleDialog = ref<HTMLDialogElement>()
 const pendingSale = ref<Companion | null>(null)
@@ -309,13 +325,18 @@ async function saveTeam() {
 }
 
 async function challenge(gymId: number) {
-  if (blocked.value) return
+  if (!canChallenge(gymId)) return
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   entering.value = !reduced
   revealing.value = false
+  arrivalGym.value = game.gyms.find((g) => g.id === gymId)
   const resultPromise = game.mutate<Battle>('/battles', 'POST', { gym_id: gymId })
-  if (!reduced) await new Promise((resolve) => window.setTimeout(resolve, 600))
-  const result = await resultPromise
+  await nextTick()
+  const walk = entranceActor.value?.getAnimations() ?? []
+  const [result] = await Promise.all([
+    resultPromise,
+    Promise.allSettled(walk.map((a) => a.finished)),
+  ])
   if (!mounted) return
   if (result) {
     displayed.value = game.battle ? structuredClone(toRaw(game.battle)) : result
@@ -329,6 +350,7 @@ async function challenge(gymId: number) {
   revealing.value = true
   if (!reduced) await new Promise((resolve) => window.setTimeout(resolve, 450))
   entering.value = false
+  arrivalGym.value = undefined
 }
 
 function eventText(event: BattleEvent) {
@@ -429,8 +451,13 @@ function health(pokemon: Fighter) {
       <GymBackdrop :type="gym?.type" />
     </div>
     <div v-if="entering" class="battle-entry" :class="{ revealing }" aria-hidden="true">
-      <div class="battle-entry-top" />
-      <div class="battle-entry-bottom" />
+      <div v-if="arrivalGym" class="gym-door-shot">
+        <div class="gym-door-map">
+          <span class="gym-threshold"></span
+          ><span ref="entranceActor" class="gym-visitor"><i></i></span>
+        </div>
+        <strong>{{ arrivalGym.names[locale] }} · {{ arrivalGym.leader }}</strong>
+      </div>
     </div>
   </Teleport>
   <section
@@ -442,7 +469,7 @@ function health(pokemon: Fighter) {
       v-if="game.trainer && accessPhase === 'idle' && tab !== 'team' && (!arenaOpen || !displayed)"
       class="adventure-heading"
     >
-      <h1>{{ t('adventure.title') }}</h1>
+      <h1>{{ t('adventure.gymsTitle') }}</h1>
     </header>
 
     <div v-if="game.error" class="adventure-error" role="alert">
@@ -740,9 +767,10 @@ function health(pokemon: Fighter) {
             <div class="center-body">
               <h1 ref="teamHeading" tabindex="-1">{{ t('adventure.title') }}</h1>
               <p>{{ t('adventure.teamHelp') }}</p>
-              <p v-if="draft.length > 1" class="team-order-help">
+              <details v-if="draft.length > 1" class="team-order-help">
+                <summary>{{ t('adventure.orderHelpTitle') }}</summary>
                 {{ t('adventure.reorderHelp') }}
-              </p>
+              </details>
               <div ref="teamSlots" class="team-slots">
                 <div
                   v-for="(member, i) in slots"
@@ -779,7 +807,11 @@ function health(pokemon: Fighter) {
                     <span class="slot-pokeball" aria-hidden="true"></span>
                     <img
                       v-if="member"
-                      :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
+                      :src="
+                        [1, 4, 7].includes(member.id)
+                          ? `/studio/starter-${member.id}.png`
+                          : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`
+                      "
                       :alt="name(member)"
                     />
                     <Plus v-else :size="26" aria-hidden="true" />
@@ -831,89 +863,81 @@ function health(pokemon: Fighter) {
         </section>
 
         <section v-if="tab === 'gyms'" class="adventure-panel">
-          <h2>{{ t('adventure.gymsTitle') }}</h2>
           <p>{{ t('adventure.gymsHelp') }}</p>
           <p v-if="!game.trainer.team.length" class="team-note">{{ t('adventure.needsTeam') }}</p>
           <p v-else-if="dirty" class="team-note">{{ t('adventure.unsavedTeam') }}</p>
-          <ol class="gym-route">
-            <li
-              v-for="g in game.gyms"
-              :key="g.id"
-              class="gym-stop pokemon-palette"
-              :data-type="g.type"
-              :class="{ 'gym-locked': g.id > game.trainer.medals.length + 1 }"
-              @mouseenter="openedGym = g.id"
-              @mouseleave="leaveGym"
-              @focusin="openedGym = g.id"
-              @focusout="blurGym"
-              @keydown.esc.stop.prevent="openedGym = null"
-            >
-              <button
-                class="gym-card-trigger"
-                :aria-label="t('adventure.gymDetails', { name: g.leader })"
-                :aria-expanded="openedGym === g.id"
-                :aria-controls="`gym-actions-${g.id}`"
-                @click="openedGym = g.id"
-              >
-                <div class="gym-medal">
-                  <TrainerPortrait :gym-id="g.id" :leader="g.leader" />
-                  <span class="gym-status"
-                    ><img
-                      v-if="game.trainer.medals.includes(g.id)"
-                      :src="`/studio/badges/${g.id}.png`"
-                      alt=""
-                      width="20"
-                      height="20"
-                    /><LockKeyhole v-else-if="g.id > game.trainer.medals.length + 1" :size="14" />{{
-                      g.id
-                    }}</span
-                  >
-                </div>
-                <span class="gym-info">
-                  <strong>{{ g.leader }}</strong>
-                  <small>{{ t(`types.${g.type}`, g.type) }}</small>
-                </span>
-              </button>
-              <div
-                v-if="openedGym === g.id"
-                :id="`gym-actions-${g.id}`"
-                class="gym-actions"
-                role="group"
-                :aria-label="g.leader"
-              >
-                <small>{{ g.names[locale] }}</small>
-                <p>
-                  {{ t('adventure.level', { level: g.level }) }} &middot;
-                  {{ t('adventure.firstReward', { amount: g.reward }) }}
-                </p>
-                <span v-if="game.trainer.medals.includes(g.id)" class="earned-badge">{{
-                  t('adventure.earned')
-                }}</span>
+          <div class="kanto-guide">
+            <div class="kanto-chart">
+              <header>
+                KANTO
+                <span>{{ t('adventure.medals', { count: game.trainer.medals.length }) }}</span>
+              </header>
+              <div class="kanto-terrain">
+                <img src="/studio/kanto-atlas.png" width="192" height="144" alt="" />
                 <button
-                  class="button secondary"
-                  :disabled="
-                    blocked ||
-                    game.active ||
-                    dirty ||
-                    !game.trainer.team.length ||
-                    g.id > game.trainer.medals.length + 1
+                  v-for="g in game.gyms"
+                  :key="g.id"
+                  class="city-marker"
+                  :style="{
+                    left: (cityMarkers[g.id]![0] / 192) * 100 + '%',
+                    top: (cityMarkers[g.id]![1] / 144) * 100 + '%',
+                  }"
+                  :aria-label="
+                    canChallenge(g.id)
+                      ? t('adventure.challenge', { name: g.leader })
+                      : t('adventure.gymDetails', { name: g.leader })
                   "
-                  @click="challenge(g.id)"
+                  :data-locked="g.id > game.trainer.medals.length + 1"
+                  :data-selected="selectedGym?.id === g.id"
+                  @focus="openedGym = g.id"
+                  @mouseenter="openedGym = g.id"
+                  @click="visitGym(g.id)"
                 >
-                  {{
-                    g.id > game.trainer.medals.length + 1
-                      ? t('adventure.locked')
-                      : t(
-                          game.trainer.medals.includes(g.id)
-                            ? 'adventure.practice'
-                            : 'adventure.challenge',
-                          { name: g.leader },
-                        )
-                  }}
+                  <span>{{ g.id }}</span>
                 </button>
               </div>
-            </li>
-          </ol>
+            </div>
+            <section
+              v-if="selectedGym"
+              class="gym-dossier pokemon-palette"
+              :data-type="selectedGym.type"
+            >
+              <div class="gym-leader-art">
+                <TrainerPortrait :gym-id="selectedGym.id" :leader="selectedGym.leader" /><img
+                  class="leader-insignia"
+                  :src="`/studio/badges/${selectedGym.id}.png`"
+                  alt=""
+                  width="50"
+                  height="50"
+                />
+              </div>
+              <small>{{ selectedGym.names[locale] }} · {{ t('types.' + selectedGym.type) }}</small>
+              <h3>{{ selectedGym.leader }}</h3>
+              <p>
+                {{ t('adventure.level', { level: selectedGym.level }) }} ·
+                {{ t('adventure.firstReward', { amount: selectedGym.reward }) }}
+              </p>
+              <span v-if="game.trainer.medals.includes(selectedGym.id)">{{
+                t('adventure.earned')
+              }}</span>
+              <button
+                class="button primary"
+                :disabled="!canChallenge(selectedGym.id)"
+                @click="challenge(selectedGym.id)"
+              >
+                <LockKeyhole v-if="selectedGym.id > game.trainer.medals.length + 1" :size="16" />{{
+                  selectedGym.id > game.trainer.medals.length + 1
+                    ? t('adventure.locked')
+                    : t(
+                        game.trainer.medals.includes(selectedGym.id)
+                          ? 'adventure.practice'
+                          : 'adventure.challenge',
+                        { name: selectedGym.leader },
+                      )
+                }}
+              </button>
+            </section>
+          </div>
         </section>
       </template>
     </template>

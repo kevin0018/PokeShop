@@ -1667,46 +1667,82 @@
   position: fixed;
   inset: 0;
   z-index: 300;
-  pointer-events: auto;
+  display: grid;
+  place-items: center;
+  background: #131621f2;
 }
-.battle-entry > div {
+.gym-door-shot {
+  width: min(86vw, 420px);
+  color: #fff5dc;
+  background: #263748;
+  border: 4px solid #738b98;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.gym-door-shot strong {
+  display: block;
+  padding: 10px 14px;
+  font: 750 1rem/1.4 var(--font-mono);
+}
+.gym-door-map {
+  position: relative;
+  aspect-ratio: 112/96;
+  background: url('/studio/gym-door.png') center 65%/100% auto;
+  image-rendering: pixelated;
+}
+.gym-threshold {
   position: absolute;
+  left: 43.5%;
+  top: 54%;
+  width: 13%;
+  height: 16%;
+  background: #1b202a;
+  animation: open-gym 0.25s 1s ease-out both;
+}
+.gym-visitor {
+  position: absolute;
+  left: 50%;
+  width: 14.3%;
+  aspect-ratio: 1/2;
+  translate: -50% -92%;
+  animation: enter-gym 1.65s linear both;
+}
+.gym-visitor i {
+  display: block;
   width: 100%;
-  height: 50%;
-  background: #07090e;
+  height: 100%;
+  background: url('/studio/trainer-walk.png') 50% 0/300% 100%;
+  animation: arrival-steps 0.36s steps(3) infinite;
 }
-.battle-entry-top {
-  top: 0;
-  animation: encounter-close 0.3s ease-out both;
-}
-.battle-entry-bottom {
-  bottom: 0;
-  animation: encounter-close 0.3s 0.25s ease-out both;
-}
-.battle-entry.revealing .battle-entry-top {
-  animation: encounter-open 0.4s ease-in both;
-}
-.battle-entry.revealing .battle-entry-bottom {
-  animation: encounter-open 0.4s 0.05s ease-in both;
-}
-@keyframes encounter-close {
+@keyframes open-gym {
   from {
     transform: scaleX(0);
-    transform-origin: left;
   }
   to {
     transform: scaleX(1);
-    transform-origin: left;
   }
 }
-@keyframes encounter-open {
-  from {
-    transform: scaleX(1);
-    transform-origin: right;
+@keyframes enter-gym {
+  0% {
+    top: 104%;
   }
+  65% {
+    top: 75%;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 66%;
+    opacity: 0;
+  }
+}
+.battle-entry.revealing {
+  animation: gym-reveal 0.4s ease-out both;
+}
+@keyframes gym-reveal {
   to {
-    transform: scaleX(0);
-    transform-origin: right;
+    opacity: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1714,7 +1750,6 @@
     display: none;
   }
 }
-
 .battle-focused .main-content {
   width: min(1440px, calc(100% - 48px));
   padding: 24px 0;
@@ -1995,5 +2030,263 @@
   }
   .pc-dialog .storage-box .pc-box-grid {
     margin-top: 12px;
+  }
+}
+
+.kanto-guide {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(220px, 1fr);
+  gap: 18px;
+  margin-top: 16px;
+  align-items: start;
+}
+.kanto-chart {
+  background: #284658;
+  border: 4px solid #33495a;
+  border-radius: 9px;
+  overflow: hidden;
+}
+.kanto-chart header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #fff5cf;
+  font: 750 1.05rem/1.4 var(--font-mono);
+  padding: 8px 12px;
+}
+.kanto-chart header span {
+  font-size: 0.78rem;
+}
+.kanto-terrain {
+  position: relative;
+}
+.kanto-terrain > img {
+  width: 100%;
+  height: auto;
+  display: block;
+  image-rendering: pixelated;
+}
+.city-marker {
+  position: absolute;
+  translate: -50% -50%;
+  width: clamp(34px, 7%, 52px);
+  aspect-ratio: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+.city-marker span {
+  display: grid;
+  place-items: center;
+  width: 72%;
+  height: 72%;
+  border: 2px solid #fff8cf;
+  border-radius: 50%;
+  background: #a53732;
+  color: #fffced;
+  font: 800 1rem/1 var(--font-mono);
+  box-shadow: 0 2px 0 2px #33424a;
+}
+.city-marker[data-locked='true'] span {
+  background: #475b64;
+}
+.city-marker[data-selected='true'] span,
+.city-marker:focus-visible span {
+  outline: 3px solid #ffe476;
+  outline-offset: 2px;
+}
+.gym-dossier {
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.gym-leader-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  background:
+    repeating-linear-gradient(0deg, #fff2 0 2px, transparent 2px 5px),
+    color-mix(in srgb, var(--pokemon-tint) 60%, #71888c);
+  border: 4px solid #3a4b58;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.gym-leader-art .trainer-portrait {
+  width: clamp(96px, 15vw, 190px);
+  height: auto;
+  aspect-ratio: 1;
+}
+.leader-insignia {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  object-fit: contain;
+}
+.gym-dossier h3 {
+  margin: 4px 0;
+  font: 750 1.8rem/1 var(--font-mono);
+}
+.gym-dossier p {
+  font-size: 0.85rem;
+}
+.gym-dossier .button {
+  display: flex;
+  margin-top: 14px;
+  width: 100%;
+}
+.team-order-help {
+  font-size: 0.8rem;
+  color: var(--muted-strong);
+}
+.team-order-help summary {
+  width: fit-content;
+  cursor: pointer;
+  padding: 8px 0;
+}
+.center-body .team-slots {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 3px;
+  background: #304b59;
+  border: 3px solid #334351;
+  border-radius: 6px;
+  box-shadow: none;
+  padding: 5px;
+  margin: 12px 0;
+}
+.center-body .team-slot {
+  display: grid;
+  grid-template-columns: 44px 50px minmax(0, 1fr) auto 44px;
+  align-items: center;
+  gap: 5px;
+  min-height: 58px;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 3px;
+}
+.center-body .team-slot.occupied {
+  border: 0;
+  background: #e8eee0;
+  color: #223c43;
+}
+.center-body .team-slot.occupied:first-child {
+  background: #f9ebc5;
+}
+.center-body .team-slot .slot-header {
+  display: contents;
+}
+.center-body .slot-header small {
+  grid-column: 1;
+  grid-row: 1;
+  text-align: center;
+  font: 700 0.65rem/1.2 var(--font-mono);
+}
+.center-body .slot-remove {
+  grid-column: 5;
+  grid-row: 1;
+  margin: 0;
+  color: #70464b;
+}
+.center-body .team-slot .slot-artwork {
+  grid-column: 2;
+  grid-row: 1;
+  height: 48px;
+}
+.center-body .slot-artwork img {
+  width: 50px;
+  height: 50px;
+}
+.center-body .slot-artwork::after,
+.center-body .slot-pokeball {
+  display: none;
+}
+.center-body .team-slot > strong {
+  grid-column: 3;
+  grid-row: 1;
+  text-align: left;
+  align-self: center;
+}
+.center-body .team-slot:has(.slot-lead) > strong {
+  padding-bottom: 14px;
+}
+.center-body .slot-lead {
+  grid-column: 3;
+  grid-row: 1;
+  display: block;
+  min-height: 0;
+  align-self: center;
+  padding-top: 21px;
+  color: #705821;
+  font-size: 0.62rem;
+  pointer-events: none;
+}
+.center-body .slot-order-controls {
+  grid-column: 4;
+  grid-row: 1;
+  display: flex;
+  gap: 0;
+  margin: 0;
+}
+.center-body .slot-order-controls button {
+  border: 0;
+  background: transparent;
+  color: #284751;
+  width: 44px;
+  min-height: 44px;
+}
+.center-body .team-slot:not(.occupied) {
+  min-height: 44px;
+  padding: 0 6px;
+  border: 0;
+  background: #3a5562;
+  color: #dce7de;
+}
+.center-body .team-slot:not(.occupied) .slot-artwork svg {
+  color: #dce7de;
+  background: none;
+}
+.center-body .empty-slot-access {
+  grid-column: 3/-1;
+  grid-row: 1;
+  text-align: left;
+}
+@media (max-width: 640px) {
+  .kanto-guide {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .gym-dossier {
+    display: flow-root;
+  }
+  .gym-leader-art {
+    float: left;
+    width: 29%;
+    margin: 0 12px 8px 0;
+  }
+  .leader-insignia {
+    width: 26px;
+    height: 26px;
+  }
+  .gym-dossier .button {
+    clear: both;
+  }
+  .center-body .team-slot {
+    grid-template-columns: 28px 44px minmax(0, 1fr) auto 44px;
+    gap: 1px;
+    padding-inline: 2px;
+  }
+  .center-body .slot-artwork img {
+    width: 44px;
+    height: 44px;
+  }
+  .center-body .slot-order-controls {
+    flex-direction: column;
+  }
+  .center-body .slot-order-controls button {
+    min-height: 44px;
+    height: 44px;
   }
 }

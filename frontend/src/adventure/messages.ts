@@ -31,6 +31,7 @@ export const adventureEn = {
     'Choose up to six Pokémon. The first slot leads the battle. Your team fights at level 50.',
   slot: 'Slot {number}',
   lead: 'Lead',
+  orderHelpTitle: 'Reorder your team',
   reorderHelp:
     'Drag Pokémon or use the arrows to change their order. Keyboard: Alt + left/right arrow.',
   moveEarlier: 'Move {name} earlier',
@@ -74,7 +75,7 @@ export const adventureEn = {
   insufficient: 'Not enough credits',
   gymsTitle: 'Gyms',
   gymsHelp:
-    'Win to unlock the next gym. Your first victory earns credits; rematches are free practice.',
+    'Touch an available city to enter its gym. Win to unlock the next one. Your first victory earns credits; rematches are free practice.',
   challenge: 'Challenge {name}',
   practice: 'Practice with {name}',
   locked: 'Win the previous gym first',
@@ -193,6 +194,7 @@ export const adventureEs = {
     'Elige hasta seis Pokémon. La primera plaza inicia el combate. Tu equipo lucha a nivel 50.',
   slot: 'Plaza {number}',
   lead: 'Inicial',
+  orderHelpTitle: 'Cambiar el orden',
   reorderHelp:
     'Arrastra los Pokémon o usa las flechas para cambiar el orden. Teclado: Alt + flecha izquierda/derecha.',
   moveEarlier: 'Mover a {name} antes',
@@ -236,7 +238,7 @@ export const adventureEs = {
   insufficient: 'Créditos insuficientes',
   gymsTitle: 'Gimnasios',
   gymsHelp:
-    'Gana para desbloquear el siguiente gimnasio. La primera victoria da créditos; las revanchas son prácticas gratuitas.',
+    'Toca una ciudad disponible para entrar en su gimnasio. Gana para desbloquear el siguiente. La primera victoria da créditos; las revanchas son prácticas gratuitas.',
   challenge: 'Retar a {name}',
   practice: 'Practicar con {name}',
   locked: 'Gana primero el gimnasio anterior',
