@@ -37,14 +37,15 @@ const cityMarkers: Record<number, [number, number]> = {
   5: [108, 116],
   6: [124, 68],
 }
-// Each leg ends at the next badge city, including the return north to Saffron.
-const badgeRoads = [
-  { path: 'M44 52 H70 L78 44 H124', arrow: 'translate(92 44)' },
-  { path: 'M124 44 L114 54 V75 L124 85 V92', arrow: 'translate(114 64) rotate(90)' },
-  { path: 'M124 92 H106 L100 86 V68', arrow: 'translate(100 78) rotate(-90)' },
-  { path: 'M100 68 H77 L69 76 V103 L82 116 H108', arrow: 'translate(69 90) rotate(90)' },
-  { path: 'M108 116 H126 L148 94 V79 L137 68 H124', arrow: 'translate(141 101) rotate(-45)' },
-]
+// Trace the existing eight-pixel road tiles. Show just the selected badge leg.
+const badgeTrails: Record<number, string> = {
+  1: '44,108 44,52',
+  2: '44,52 68,52 76,44 124,44',
+  3: '124,44 124,92',
+  4: '124,92 124,68 100,68',
+  5: '100,68 68,68 68,116 108,116',
+  6: '108,116 124,116 156,92 156,68 124,68',
+}
 const selectedGym = computed(
   () =>
     game.gyms.find((g) => g.id === openedGym.value) ??
@@ -942,12 +943,13 @@ function health(pokemon: Fighter) {
               </header>
               <div class="kanto-terrain">
                 <img src="/studio/kanto-atlas.png" width="192" height="144" alt="" />
-                <svg class="badge-roads" viewBox="0 0 192 144" aria-hidden="true">
-                  <g v-for="leg in badgeRoads" :key="leg.path">
-                    <path :d="leg.path" class="road-edge" />
-                    <path :d="leg.path" class="road-fill" />
-                    <path d="M-2.2 -2.2 L1 0 L-2.2 2.2" :transform="leg.arrow" class="road-arrow" />
-                  </g>
+                <svg
+                  v-if="selectedGym"
+                  class="badge-trail"
+                  viewBox="0 0 192 144"
+                  aria-hidden="true"
+                >
+                  <polyline :points="badgeTrails[selectedGym.id]" />
                 </svg>
                 <button
                   v-for="g in game.gyms"
@@ -971,6 +973,15 @@ function health(pokemon: Fighter) {
                 >
                   <span>{{ g.id }}</span>
                 </button>
+              </div>
+              <div v-if="selectedGym" class="map-itinerary">
+                <span>{{
+                  selectedGym.id > 1
+                    ? `${selectedGym.id - 1} · ${game.gyms[selectedGym.id - 2]?.names[locale]}`
+                    : t('adventure.palletTown')
+                }}</span>
+                <span aria-hidden="true">→</span>
+                <strong>{{ selectedGym.id }} · {{ selectedGym.names[locale] }}</strong>
               </div>
             </div>
             <section

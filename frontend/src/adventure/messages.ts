@@ -114,6 +114,7 @@ export const adventureEn = {
   notEffective: 'Not very effective.',
   immune: 'It had no effect.',
   battleLog: 'Battle events',
+  palletTown: 'Pallet Town',
   fight: 'Fight',
   commandPrompt: 'What will {name} do?',
   leaderLines: {
@@ -287,6 +288,7 @@ export const adventureEs = {
   notEffective: 'No es muy eficaz.',
   immune: 'No ha tenido efecto.',
   battleLog: 'Eventos del combate',
+  palletTown: 'Pueblo Paleta',
   fight: 'Luchar',
   commandPrompt: '¿Qué hará {name}?',
   leaderLines: {
