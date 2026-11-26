@@ -202,17 +202,12 @@ const game = useAdventureStore()
 }
 .catalog-grid .card-art {
   background:
-    linear-gradient(
-      150deg,
-      transparent 63%,
-      #fff6 63% 66%,
-      transparent 66% 68%,
-      #fff8 68% 72%,
-      transparent 72%
-    ),
-    radial-gradient(#18141938 1px, transparent 1.4px) 0 0 / 5px 5px,
-    var(--pokemon-tint);
-  border-bottom: 3px solid var(--ink);
+    radial-gradient(ellipse at center, #fff7, transparent 72%),
+    repeating-linear-gradient(0deg, transparent 0 19px, #53624916 19px 20px),
+    repeating-linear-gradient(90deg, transparent 0 19px, #53624916 19px 20px),
+    color-mix(in srgb, var(--pokemon-tint) 68%, #fbf2dc);
+  border-bottom: 1px solid var(--line);
+  box-shadow: inset 0 0 0 5px #fff5;
 }
 .catalog-grid .card-art img {
   filter: drop-shadow(1px 1px 0 white) drop-shadow(2px 3px 0 #181419aa);
@@ -235,21 +230,23 @@ const game = useAdventureStore()
   color: var(--catalog-paper);
 }
 .catalog-grid h3 {
-  text-transform: uppercase;
+  font-family: Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.04em;
   margin-block: 5px;
 }
 .catalog-grid .add-button {
-  background: var(--catalog-red);
+  background: var(--album-accent);
   color: white;
   border-radius: 0;
 }
 .catalog-grid .card-bottom strong {
-  font: 900 clamp(1.26rem, 2vw, 1.7rem) / 1 var(--font-display);
+  font: 700 clamp(0.96rem, 1.5vw, 1.22rem) / 1 var(--font-mono);
 }
 /* Wide tiles keep the artwork beside the offer, even when labels wrap. */
 @container (min-width: 270px) {
   .catalog-grid .card-body h3 {
-    font-size: clamp(1.65rem, 7cqi, 2.75rem);
+    font-size: clamp(1.5rem, 6cqi, 2.5rem);
   }
 }
 @media (min-width: 801px) {

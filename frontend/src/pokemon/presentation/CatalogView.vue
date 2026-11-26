@@ -9,7 +9,7 @@ import {
   Coins,
   ShoppingBag,
   UsersRound,
-  Radio,
+  BookOpen,
   Zap,
   Flame,
   Droplets,
@@ -99,16 +99,18 @@ request<typeof metadata.value>('/metadata')
     <header class="shop-front">
       <div class="section-heading shop-heading">
         <div>
-          <p class="eyebrow"><Radio :size="15" />PokéShop TV</p>
+          <p class="eyebrow"><BookOpen :size="16" />PokéShop</p>
           <h1>{{ t('catalog') }}</h1>
           <p class="shop-intro">
             {{ game.trainer ? t('adventure.catalogHelp') : t('catalogIntro') }}
           </p>
         </div>
       </div>
-      <div class="catalog-mascot" aria-hidden="true">
-        <span class="mascot-number">025</span>
-        <img src="/studio/25.webp" alt="" width="475" height="475" />
+      <div class="album-cards" aria-hidden="true">
+        <div v-for="id in [4, 7, 1]" :key="id" class="album-print">
+          <span>#{{ String(id).padStart(3, '0') }}</span>
+          <img :src="`/studio/${id}.webp`" alt="" width="475" height="475" />
+        </div>
       </div>
       <div class="shop-checkout-bar">
         <div v-if="game.trainer" class="catalog-trainer">
@@ -221,9 +223,9 @@ request<typeof metadata.value>('/metadata')
 
 <style>
 .catalog-section.shop-scene {
-  --catalog-ink: #181419;
+  --catalog-ink: #41304a;
   --catalog-paper: #fff5e7;
-  --catalog-red: #c51933;
+  --album-accent: #644570;
   padding-top: clamp(12px, 2vw, 28px);
 }
 
@@ -234,67 +236,86 @@ request<typeof metadata.value>('/metadata')
   isolation: isolate;
   overflow: clip;
   color: var(--catalog-paper);
-  background: var(--catalog-ink);
-  border: 3px solid var(--catalog-ink);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 2px, #ffffff08 2px 3px),
+    repeating-linear-gradient(90deg, transparent 0 2px, #ffffff08 2px 3px), #46354d;
+  border-radius: 8px 22px 22px 8px;
+  border-left: 10px solid #322638;
+  box-shadow:
+    inset 3px 0 0 #927f8d,
+    0 3px 0 #c5b7a5;
 }
 .shop-front .shop-heading {
   margin: 0;
-  padding: clamp(16px, 3vw, 42px);
+  padding: clamp(18px, 3vw, 42px);
   align-items: center;
 }
 .shop-heading .eyebrow {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 7px;
-  color: var(--catalog-paper);
-  border-bottom: 3px solid #ff3451;
-  font: 700 0.72rem/1.7 var(--font-mono);
-  text-transform: uppercase;
+  gap: 8px;
+  color: #e9d3a5;
+  font: 700 0.78rem/1.4 var(--font-mono);
+  letter-spacing: 0.12em;
 }
 .shop-heading h1 {
-  margin: 9px 0;
-  color: var(--catalog-paper);
-  font: 900 clamp(3.4rem, 8vw, 7rem) / 0.91 var(--font-display);
-  letter-spacing: -0.035em;
-  transform: skewX(-8deg) rotate(-2deg);
-  text-transform: uppercase;
-  text-shadow: 3px 4px 0 var(--catalog-red);
+  text-transform: none;
+  margin: 4px 0;
+  color: #fff0cb;
+  font:
+    500 clamp(3rem, 7vw, 6rem) / 1.04 Georgia,
+    serif;
+  letter-spacing: -0.055em;
 }
 .shop-intro {
   max-width: 44ch;
-  margin-top: 15px;
-  line-height: 1.4;
+  margin-top: 8px;
+  line-height: 1.45;
 }
-.catalog-mascot {
+.album-cards {
+  overflow: clip;
+  min-width: 0;
   position: relative;
+  align-self: stretch;
   isolation: isolate;
+}
+.album-print {
+  position: absolute;
+  top: 8%;
+  height: 106%;
+  aspect-ratio: 0.72;
+  left: 40%;
+  background: #c9dac1;
+  color: #294232;
+  border: 5px solid #fff7dc;
+  border-radius: 7px;
+  box-shadow: 0 3px 9px #23152565;
   display: grid;
   place-items: center;
+  transform: rotate(8deg);
 }
-.catalog-mascot::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 0 -12%;
-  background:
-    radial-gradient(#48251d45 1px, transparent 1.5px) 0 0 / 6px 6px,
-    #ffce49;
-  clip-path: polygon(28% 0, 100% 0, 100% 100%, 0 100%, 19% 63%, 9% 67%, 30% 31%, 17% 36%);
+.album-print:first-child {
+  left: 8%;
+  top: 23%;
+  background: #f1c4aa;
+  transform: rotate(-17deg);
 }
-.mascot-number {
-  position: absolute;
-  right: 2%;
-  color: transparent;
-  -webkit-text-stroke: 2px #39231b75;
-  font: 900 clamp(4.6rem, 14vw, 12rem) / 1 var(--font-display);
-  transform: skewX(-10deg);
-}
-.catalog-mascot img {
-  position: absolute;
-  width: 96%;
-  height: 96%;
-  object-fit: contain;
-  filter: drop-shadow(2px 2px 0 white) drop-shadow(4px 3px 0 #181419);
+.album-print:nth-child(2) {
+  left: 24%;
+  top: 14%;
+  background: #bdd4de;
   transform: rotate(-6deg);
+}
+.album-print span {
+  position: absolute;
+  top: 4%;
+  left: 6%;
+  font: 700 clamp(0.55rem, 1vw, 0.8rem) / 1.2 var(--font-mono);
+}
+.album-print img {
+  width: 94%;
+  height: 78%;
+  object-fit: contain;
 }
 .type-shelves {
   display: flex;
@@ -314,9 +335,8 @@ request<typeof metadata.value>('/metadata')
   border-bottom-color: var(--pokemon-tint);
   background: var(--surface);
   color: var(--ink);
-  font: 900 1.15rem/1 var(--font-display);
-  text-transform: uppercase;
-  transform: skewX(-5deg);
+  font: 650 0.87rem/1.2 var(--font-body, sans-serif);
+  border-radius: 9px 9px 2px 2px;
 }
 .type-shelf:hover,
 .type-shelf[aria-pressed='true'] {
@@ -473,8 +493,13 @@ request<typeof metadata.value>('/metadata')
     padding: 16px 5px 16px 12px;
   }
 
+  .album-print {
+    height: auto;
+    width: 55%;
+    top: 14%;
+  }
   .shop-heading h1 {
-    font-size: clamp(2.55rem, 10vw, 4rem);
+    font-size: clamp(1.85rem, 8vw, 4rem);
   }
 
   .shop-intro {
