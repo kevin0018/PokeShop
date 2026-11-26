@@ -209,6 +209,9 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   await expect(page.locator('.leader-line')).toContainText('Onix')
   await expect(page.locator('.pitched-ball')).toBeVisible()
   await expect(page.locator('.battle-entry')).toBeHidden()
+  await expect(page.locator('.throwing-player')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Luchar', exact: true })).toBeDisabled()
+  await expect(page.locator('.throwing-player')).toBeHidden()
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await expect(page.locator('.gym-world')).toHaveAttribute('data-type', 'roca')
   expect(await page.locator('.gym-world').boundingBox()).toMatchObject({

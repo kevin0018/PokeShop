@@ -171,6 +171,20 @@ function eventActor(event: BattleEvent) {
 const playing = ref(false)
 const motion = ref('')
 const command = ref<'menu' | 'moves' | 'team'>('menu')
+type TransferPhase = 'ready' | 'opening' | 'recall' | 'send'
+const transfer = ref<{ side: 'player' | 'opponent'; phase: TransferPhase }>()
+const transferBall = ref<HTMLElement>()
+
+async function animateTransfer(
+  side: 'player' | 'opponent',
+  phase: Exclude<TransferPhase, 'ready'>,
+) {
+  transfer.value = { side, phase }
+  await nextTick()
+  await Promise.allSettled(
+    (transferBall.value?.getAnimations() ?? []).map((animation) => animation.finished),
+  )
+}
 const leaving = ref(false)
 const log = ref<BattleEvent[]>([])
 let mounted = true
@@ -182,7 +196,7 @@ const opponent = computed(() => displayed.value?.opponent[displayed.value.oppone
 const dirty = computed(
   () => JSON.stringify(draft.value) !== JSON.stringify(game.trainer?.team ?? []),
 )
-const blocked = computed(() => game.busy || playing.value || entering.value)
+const blocked = computed(() => game.busy || playing.value || entering.value || !!transfer.value)
 const errorText = computed(() =>
   te(`adventure.errors.${game.error}`)
     ? t(`adventure.errors.${game.error}`)
@@ -374,6 +388,7 @@ async function challenge(gymId: number) {
       if (!mounted) return
     }
     log.value = []
+    if (!reduced) transfer.value = { side: 'player', phase: 'ready' }
     arenaOpen.value = true
     command.value = 'menu'
     leaving.value = false
@@ -385,6 +400,8 @@ async function challenge(gymId: number) {
   if (!reduced) await new Promise((resolve) => window.setTimeout(resolve, 450))
   entering.value = false
   arrivalGym.value = undefined
+  if (result && !reduced && mounted) await animateTransfer('player', 'opening')
+  transfer.value = undefined
 }
 
 function eventText(event: BattleEvent) {
@@ -443,6 +460,11 @@ async function play(action: {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     for (const [index, event] of result.events.entries()) {
       if (!mounted) break
+      if (event.kind === 'switch' && event.side && !reduced) {
+        motion.value = ''
+        await animateTransfer(event.side, 'recall')
+        if (!mounted) break
+      }
       log.value.push(event)
       motion.value =
         event.kind === 'attack'
@@ -453,10 +475,16 @@ async function play(action: {
       if (event.side && displayed.value) {
         const member = displayed.value[event.side].find((p) => p.id === event.pokemon)
         if (member && event.hp !== undefined) member.hp = event.hp
-        if (event.kind === 'switch')
+        if (event.kind === 'switch') {
           displayed.value[`${event.side}_active`] = displayed.value[event.side].findIndex(
             (p) => p.id === event.pokemon,
           )
+          if (!reduced) {
+            await animateTransfer(event.side, 'send')
+            transfer.value = undefined
+          }
+          continue
+        }
       }
       if (!reduced && event.kind === 'attack' && event.move) {
         await moveEffect.value?.play(
@@ -679,10 +707,20 @@ function health(pokemon: Fighter) {
         <div
           class="battle-arena pokemon-palette"
           :class="motion"
+          :data-transfer="transfer?.phase"
+          :data-side="transfer?.side"
           :data-type="gym?.type"
           :aria-busy="blocked"
         >
           <MoveEffect ref="moveEffect" />
+          <i v-if="transfer?.phase === 'opening'" class="throwing-player" aria-hidden="true"></i>
+          <i
+            v-if="transfer && transfer.phase !== 'ready'"
+            :key="transfer.phase"
+            ref="transferBall"
+            class="party-ball"
+            aria-hidden="true"
+          ></i>
           <div class="fighter-hud enemy-hud">
             <strong>{{ name(opponent) }}</strong
             ><span>{{ t('adventure.level', { level: opponent.level }) }}</span>
@@ -717,11 +755,21 @@ function health(pokemon: Fighter) {
             aria-live="polite"
             :aria-label="t('adventure.battleLog')"
           >
-            <p v-if="!log.length && displayed.status === 'active'">
+            <p v-if="!blocked && !log.length && displayed.status === 'active'">
               {{ t('adventure.commandPrompt', { name: name(player) }) }}
             </p>
             <p v-for="(event, i) in log" :key="i">{{ eventText(event) }}</p>
-            <p v-if="blocked" role="status">{{ t('adventure.processing') }}</p>
+            <p v-if="transfer?.phase === 'opening'">
+              {{ t('adventure.sendFirst', { name: name(player) }) }}
+            </p>
+            <p v-else-if="transfer?.phase === 'recall'">
+              {{
+                t('adventure.recall', {
+                  name: name(transfer.side === 'player' ? player : opponent),
+                })
+              }}
+            </p>
+            <p v-else-if="blocked && !transfer" role="status">{{ t('adventure.processing') }}</p>
           </div>
           <template v-if="displayed.status === 'active'">
             <div v-if="command === 'menu' && !leaving" class="fight-commands">

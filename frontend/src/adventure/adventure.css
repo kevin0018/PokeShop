@@ -2738,3 +2738,210 @@
 .is-battling .battle-result {
   color: #344747;
 }
+
+.battle-arena[data-side='player'] {
+  --platform-x: 25%;
+  --platform-y: 96%;
+  --hand-x: 13%;
+  --hand-y: 59%;
+  --arc-x: 28%;
+  --arc-y: 39%;
+}
+.battle-arena[data-transfer='opening'] {
+  container-type: inline-size;
+  --hand-x: 27%;
+  --hand-y: calc(100% - 16cqw);
+  --arc-x: 35%;
+  --arc-y: 35%;
+}
+.battle-arena[data-side='opponent'] {
+  --platform-x: 74%;
+  --platform-y: 56%;
+  --hand-x: 101%;
+  --hand-y: 25%;
+  --arc-x: 83%;
+  --arc-y: 9%;
+}
+.party-ball {
+  position: absolute;
+  z-index: 2;
+  width: 5%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: url('/studio/gyms/throw-ball.png') center top/100% 300% no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+.throwing-player {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  bottom: 0;
+  width: 29%;
+  aspect-ratio: 1;
+  background: url('/studio/gyms/player-throw.png') center top/100% 500% no-repeat;
+  image-rendering: pixelated;
+  animation:
+    player-windup 1.6s steps(1, end) both,
+    trainer-exit 1.6s linear both;
+}
+@keyframes player-windup {
+  0% {
+    background-position-y: 0;
+  }
+  12% {
+    background-position-y: 25%;
+  }
+  24% {
+    background-position-y: 50%;
+  }
+  34% {
+    background-position-y: 75%;
+  }
+  54%,
+  100% {
+    background-position-y: 100%;
+  }
+}
+@keyframes trainer-exit {
+  0%,
+  42% {
+    translate: 0;
+  }
+  78%,
+  100% {
+    translate: -110% 0;
+  }
+}
+.battle-arena[data-transfer='ready'] .player-sprite {
+  visibility: hidden;
+}
+[data-transfer='opening'] .party-ball,
+[data-transfer='send'] .party-ball {
+  animation: party-send 1s linear both;
+}
+[data-transfer='opening'] .party-ball {
+  animation-duration: 1.6s;
+}
+@keyframes party-send {
+  0%,
+  32% {
+    left: var(--hand-x);
+    top: var(--hand-y);
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  35% {
+    left: var(--hand-x);
+    top: var(--hand-y);
+    opacity: 1;
+    transform: scale(0.75);
+  }
+  48% {
+    left: var(--arc-x);
+    top: var(--arc-y);
+    transform: rotate(160deg);
+  }
+  65% {
+    left: var(--platform-x);
+    top: var(--platform-y);
+    transform: rotate(360deg);
+    background-position-y: 0;
+  }
+  66%,
+  74% {
+    left: var(--platform-x);
+    top: var(--platform-y);
+    background-position-y: 100%;
+    opacity: 1;
+    transform: rotate(360deg);
+  }
+  85%,
+  100% {
+    left: var(--platform-x);
+    top: var(--platform-y);
+    background-position-y: 100%;
+    opacity: 0;
+  }
+}
+[data-transfer='recall'] .party-ball {
+  animation: party-recall 0.85s linear both;
+}
+@keyframes party-recall {
+  0%,
+  38% {
+    left: var(--platform-x);
+    top: var(--platform-y);
+    background-position-y: 100%;
+    opacity: 1;
+  }
+  52% {
+    left: var(--platform-x);
+    top: var(--platform-y);
+    background-position-y: 0;
+    transform: rotate(0);
+  }
+  76% {
+    left: var(--arc-x);
+    top: var(--arc-y);
+    transform: rotate(-140deg);
+  }
+  100% {
+    left: var(--hand-x);
+    top: var(--hand-y);
+    opacity: 0;
+    transform: rotate(-300deg) scale(0.65);
+  }
+}
+[data-side='player'][data-transfer='recall'] .player-sprite,
+[data-side='opponent'][data-transfer='recall'] .enemy-sprite {
+  transform-origin: center bottom;
+  animation: party-withdraw 0.85s both;
+}
+@keyframes party-withdraw {
+  0% {
+    transform: none;
+  }
+  14% {
+    filter: brightness(0) invert(90%) sepia(0.5);
+  }
+  46%,
+  100% {
+    transform: scale(0.04);
+    opacity: 0;
+  }
+}
+[data-transfer='opening'] .player-sprite,
+[data-side='player'][data-transfer='send'] .player-sprite,
+[data-side='opponent'][data-transfer='send'] .enemy-sprite {
+  transform-origin: center bottom;
+  animation: party-emerge 1s both;
+}
+[data-transfer='opening'] .player-sprite {
+  animation-duration: 1.6s;
+}
+@keyframes party-emerge {
+  0%,
+  65% {
+    opacity: 0;
+    transform: scale(0.03);
+  }
+  68% {
+    opacity: 1;
+    filter: brightness(0) invert(1);
+  }
+  88% {
+    transform: scale(1.05, 0.96);
+    filter: brightness(1.2);
+  }
+  100% {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .battle-arena[data-transfer] .battle-sprite,
+  .battle-arena[data-transfer] .party-ball,
+  .throwing-player {
+    animation: none !important;
+  }
+}
