@@ -291,6 +291,7 @@ function backToGyms() {
 }
 
 const draggedSlot = ref<number | null>(null)
+const dropTarget = ref<number | null>(null)
 const teamSlots = ref<HTMLElement>()
 async function moveSlot(from: number, to: number, focus = false) {
   if (game.active || blocked.value || from < 0 || from >= draft.value.length) return
@@ -313,11 +314,20 @@ function startDrag(event: DragEvent, index: number) {
   }
   draggedSlot.value = index
   event.dataTransfer?.setData('text/plain', String(index))
-  if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move'
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move'
+    const artwork = (event.currentTarget as HTMLElement).querySelector<HTMLElement>('.slot-artwork')
+    if (artwork)
+      event.dataTransfer.setDragImage(artwork, artwork.offsetWidth / 2, artwork.offsetHeight / 2)
+  }
+}
+function endDrag() {
+  draggedSlot.value = null
+  dropTarget.value = null
 }
 function dropSlot(index: number) {
   if (draggedSlot.value !== null) void moveSlot(draggedSlot.value, index)
-  draggedSlot.value = null
+  endDrag()
 }
 
 async function saveTeam() {
@@ -771,12 +781,22 @@ function health(pokemon: Fighter) {
                 <summary>{{ t('adventure.orderHelpTitle') }}</summary>
                 {{ t('adventure.reorderHelp') }}
               </details>
-              <div ref="teamSlots" class="team-slots">
+              <div
+                ref="teamSlots"
+                class="team-slots"
+                @dragleave="
+                  !teamSlots?.contains($event.relatedTarget as Node | null) && (dropTarget = null)
+                "
+              >
                 <div
                   v-for="(member, i) in slots"
                   :key="i"
                   class="team-slot"
-                  :class="{ occupied: member, dragging: draggedSlot === i }"
+                  :class="{
+                    occupied: member,
+                    dragging: draggedSlot === i,
+                    'drop-target': draggedSlot !== null && dropTarget === i && draggedSlot !== i,
+                  }"
                   :draggable="Boolean(member) && !game.active && !blocked"
                   :tabindex="member ? 0 : undefined"
                   :aria-label="
@@ -785,8 +805,8 @@ function health(pokemon: Fighter) {
                       : undefined
                   "
                   @dragstart="startDrag($event, i)"
-                  @dragend="draggedSlot = null"
-                  @dragover.prevent
+                  @dragend="endDrag"
+                  @dragover.prevent="dropTarget = Math.min(i, draft.length - 1)"
                   @drop.prevent="dropSlot(i)"
                   @keydown.alt.left.prevent="moveSlot(i, i - 1, true)"
                   @keydown.alt.right.prevent="moveSlot(i, i + 1, true)"
@@ -807,6 +827,7 @@ function health(pokemon: Fighter) {
                     <span class="slot-pokeball" aria-hidden="true"></span>
                     <img
                       v-if="member"
+                      draggable="false"
                       :src="
                         [1, 4, 7].includes(member.id)
                           ? `/studio/starter-${member.id}.png`
@@ -823,14 +844,14 @@ function health(pokemon: Fighter) {
                       <button
                         :disabled="i === 0 || game.active || blocked"
                         :aria-label="t('adventure.moveEarlier', { name: name(member) })"
-                        @click="moveSlot(i, i - 1, true)"
+                        @click="moveSlot(i, i - 1, $event.detail === 0)"
                       >
                         <ChevronLeft :size="18" />
                       </button>
                       <button
                         :disabled="i === draft.length - 1 || game.active || blocked"
                         :aria-label="t('adventure.moveLater', { name: name(member) })"
-                        @click="moveSlot(i, i + 1, true)"
+                        @click="moveSlot(i, i + 1, $event.detail === 0)"
                       >
                         <ChevronRight :size="18" />
                       </button>
