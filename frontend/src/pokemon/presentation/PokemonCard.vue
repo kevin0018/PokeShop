@@ -195,8 +195,10 @@ const game = useAdventureStore()
 }
 
 .catalog-grid .illustrated-card {
-  border: 2px solid var(--ink);
-  border-radius: 0;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  container-type: inline-size;
+  background: color-mix(in srgb, var(--pokemon-tint) 10%, var(--surface));
 }
 .catalog-grid .card-art {
   background:
@@ -243,6 +245,51 @@ const game = useAdventureStore()
 }
 .catalog-grid .card-bottom strong {
   font: 900 clamp(1.26rem, 2vw, 1.7rem) / 1 var(--font-display);
+}
+/* Wide tiles keep the artwork beside the offer, even when labels wrap. */
+@container (min-width: 270px) {
+  .catalog-grid .card-body h3 {
+    font-size: clamp(1.65rem, 7cqi, 2.75rem);
+  }
+}
+@media (min-width: 801px) {
+  .bento-block[data-count='6'] > :first-child {
+    grid-template-rows: minmax(200px, 1fr) auto auto;
+  }
+  .bento-block[data-count='6'] > :first-child .card-art {
+    aspect-ratio: auto;
+  }
+  .bento-block[data-count='6'] > :first-child .card-art img {
+    position: absolute;
+    width: 85%;
+    height: 92%;
+  }
+  .bento-block[data-count='6'] > :is(:nth-child(2), :nth-child(3)),
+  .bento-block[data-count='1'] > article {
+    grid-template-rows: auto 1fr;
+    --art-ratio: auto;
+    --art-rows: 2;
+    --art-min-height: clamp(165px, 17vw, 214px);
+    --tile-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  }
+}
+@media (max-width: 800px) {
+  .bento-block[data-count='6'] > :is(:first-child, :last-child),
+  .bento-block:is([data-count='1'], [data-count='3'], [data-count='5']) > :first-child {
+    grid-template-rows: auto 1fr;
+    --art-ratio: auto;
+    --art-rows: 2;
+    --art-min-height: clamp(165px, 17vw, 214px);
+    --tile-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+}
+.bento-block .illustrated-card {
+  grid-template-columns: var(--tile-columns, minmax(0, 1fr));
+}
+.bento-block .card-art {
+  min-height: var(--art-min-height, 0);
+  aspect-ratio: var(--art-ratio, 1.48);
+  grid-row: 1 / span var(--art-rows, 1);
 }
 @media (prefers-reduced-motion: reduce) {
   .catalog-grid .card-art img {

@@ -47,6 +47,12 @@ const metadata = ref<{
   generations: number[]
   regions?: { id: string; names: Record<string, string> }[]
 }>({ types: [], generations: [] })
+const blockSize = 6
+const blocks = computed(() =>
+  Array.from({ length: Math.ceil(items.value.length / blockSize) }, (_, index) =>
+    items.value.slice(index * blockSize, (index + 1) * blockSize),
+  ),
+)
 const page = computed(() => Math.max(1, Number(route.query.page) || 1))
 const pages = computed(() => Math.max(1, Math.ceil(total.value / 24)))
 const value = (key: string) => String(route.query[key] || '')
@@ -177,8 +183,20 @@ request<typeof metadata.value>('/metadata')
           {{ t('clearFilters') }}
         </button>
       </div>
-      <div v-if="items.length" class="pokemon-grid catalog-grid">
-        <PokemonCard v-for="pokemon in items" :key="pokemon.id" :pokemon="pokemon" show-measures />
+      <div v-if="items.length" class="catalog-grid">
+        <div
+          v-for="block in blocks"
+          :key="block[0]!.id"
+          class="bento-block"
+          :data-count="block.length"
+        >
+          <PokemonCard
+            v-for="pokemon in block"
+            :key="pokemon.id"
+            :pokemon="pokemon"
+            show-measures
+          />
+        </div>
       </div>
       <div v-else class="state-box">{{ t('noMatches') }}</div>
       <nav class="pagination" :aria-label="t('pagination')">
@@ -404,21 +422,44 @@ request<typeof metadata.value>('/metadata')
   border-bottom: 1px solid var(--line);
 }
 
-.shop-scene .catalog-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+.catalog-grid,
+.bento-block {
+  display: grid;
+  gap: clamp(10px, 1.5vw, 20px);
 }
-
-@media (max-width: 880px) {
-  .shop-scene .catalog-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+.bento-block {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
-
-@media (max-width: 640px) {
-  .shop-scene .catalog-grid {
+.bento-block > article {
+  grid-column: span 2;
+}
+.bento-block[data-count='6'] > :nth-child(-n + 3),
+.bento-block:is([data-count='2'], [data-count='4']) > article,
+.bento-block[data-count='5'] > :nth-child(-n + 2) {
+  grid-column: span 3;
+}
+.bento-block[data-count='6'] > :first-child {
+  grid-row: span 2;
+}
+.bento-block[data-count='1'] > article {
+  grid-column: 1 / -1;
+}
+@media (max-width: 800px) {
+  .bento-block {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
+  .catalog-grid .bento-block > article:nth-child(n) {
+    grid-column: span 1;
+    grid-row: auto;
+  }
+  .catalog-grid .bento-block[data-count='6'] > :is(article:first-child, article:last-child),
+  .catalog-grid
+    .bento-block:is([data-count='1'], [data-count='3'], [data-count='5'])
+    > article:first-child {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 640px) {
   .catalog-section .catalog-tools .button {
     padding-inline: 10px;
     gap: 5px;
