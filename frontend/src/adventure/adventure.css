@@ -216,6 +216,57 @@
   font: 750 1rem/1.3 var(--font-mono);
   box-shadow: 0 3px 0 #986d68;
 }
+.arrival-door {
+  position: absolute;
+  left: 47.45%;
+  top: 58%;
+  width: 5.2%;
+  height: 7.3%;
+  background: #261b30;
+  transform: scaleX(0);
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-phase='crossing'] .arrival-door {
+    animation: door-open 220ms ease-out both;
+  }
+  [data-phase='crossing'] .arrival-player {
+    animation: cross-threshold 800ms ease-in both;
+  }
+  [data-phase='crossing'] .arrival-player i {
+    animation: arrival-steps 0.35s steps(3) 2;
+  }
+  [data-phase='crossing'] .arrival-scene {
+    animation: leave-exterior 1s linear both;
+  }
+  @keyframes door-open {
+    to {
+      transform: scaleX(1);
+    }
+  }
+  @keyframes cross-threshold {
+    0%,
+    18% {
+      top: 64%;
+      opacity: 1;
+    }
+    70% {
+      opacity: 1;
+    }
+    100% {
+      top: 59%;
+      opacity: 0;
+    }
+  }
+  @keyframes leave-exterior {
+    0%,
+    75% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+}
 @media (prefers-reduced-motion: no-preference) {
   .arrival-player {
     animation: walk-to-center 1.7s linear both;
@@ -317,57 +368,32 @@
   --center-mint: #72b8b2;
 }
 .center-station {
-  border: 1px solid color-mix(in srgb, var(--center-red) 45%, var(--line));
-  border-radius: 26px;
-  overflow: hidden;
-  background: var(--surface);
-  box-shadow: 0 8px 0 color-mix(in srgb, var(--center-red) 18%, var(--surface));
-}
-.center-canopy {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  min-height: 84px;
-  padding: 18px;
-  background: linear-gradient(
-    var(--center-red),
-    color-mix(in srgb, var(--center-red) 88%, #853947)
-  );
-  color: #fff;
-  border-bottom: 6px solid color-mix(in srgb, var(--center-red) 80%, #582332);
-}
-.center-canopy::before,
-.center-canopy::after {
-  content: '';
-  width: 48px;
-  height: 6px;
-  border-radius: 4px;
-  background: #fff5;
-  box-shadow: 0 10px 0 #fff2;
-}
-.center-canopy h2 {
-  margin: 0;
-  font-size: 25px;
-}
-.center-canopy .pokeball {
-  flex-shrink: 0;
-  margin: 0;
-  --purple: #fff;
-  --lavender: transparent;
-  --surface: var(--center-red);
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(16px, 2.4vw, 32px);
 }
 .center-body {
-  padding: 24px;
-  background:
-    linear-gradient(90deg, var(--line) 1px, transparent 1px),
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(var(--surface), color-mix(in srgb, var(--center-mint) 12%, var(--surface)));
-  background-size:
-    48px 48px,
-    48px 48px,
-    100% 100%;
+  min-width: 0;
+  background: var(--surface);
+  border-top: 4px solid #cc8068;
+  padding: clamp(14px, 2vw, 24px);
+}
+.center-body h1 {
+  margin: 0 0 8px;
+  font: 750 clamp(1.6rem, 3vw, 2.7rem) / 1.05 var(--font-mono);
+}
+.center-body .team-slots {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 850px) {
+  .center-station {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lobby {
+    width: min(100%, 650px);
+    justify-self: center;
+  }
 }
 .center-body > p {
   max-width: 720px;
@@ -390,7 +416,39 @@
   border-top: 4px solid var(--center-red);
 }
 .center-body .team-slot:not(.occupied) {
-  border-top: 4px solid transparent;
+  min-height: 112px;
+  padding-bottom: 8px;
+  gap: 2px;
+  border-top: 2px solid var(--line);
+}
+.center-body .team-slot:not(.occupied) .slot-header {
+  height: 28px;
+}
+.center-body .team-slot:not(.occupied) .slot-artwork {
+  height: 44px;
+}
+.center-body .team-slot:not(.occupied) .slot-pokeball {
+  width: 42px;
+  height: 42px;
+}
+.empty-slot-access {
+  color: inherit;
+  font: inherit;
+  background: transparent;
+  border: 0;
+}
+.empty-slot-access::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.team-slot:has(.empty-slot-access:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.center-body .team-slot:has(.empty-slot-access:hover) {
+  background: var(--surface);
 }
 .center-body .slot-pokeball {
   color: var(--center-red);
@@ -406,13 +464,6 @@
   flex-wrap: wrap;
 }
 @media (max-width: 700px) {
-  .center-canopy {
-    min-height: 70px;
-    padding: 14px;
-  }
-  .center-canopy h2 {
-    font-size: 22px;
-  }
   .center-body {
     padding: 14px 8px;
   }
@@ -425,84 +476,6 @@
   .center-body .team-slots {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
-.center-reception {
-  position: relative;
-  height: 170px;
-  margin-bottom: 22px;
-  border: 1px solid color-mix(in srgb, var(--center-mint) 35%, var(--line));
-  border-radius: 16px;
-  overflow: hidden;
-  background: linear-gradient(
-    var(--surface) 0 75%,
-    color-mix(in srgb, var(--center-mint) 15%, var(--surface)) 75%
-  );
-}
-.reception-window {
-  position: absolute;
-  top: 20px;
-  width: min(25%, 260px);
-  height: 84px;
-  border: 6px solid color-mix(in srgb, var(--center-mint) 30%, var(--surface));
-  border-radius: 12px;
-  background:
-    repeating-linear-gradient(135deg, #ffffff08 0 20px, #ffffff28 20px 40px),
-    color-mix(in srgb, var(--center-mint) 32%, var(--surface));
-  box-shadow: 0 4px 0 color-mix(in srgb, var(--center-mint) 45%, var(--surface));
-  display: grid;
-  place-content: center;
-}
-.reception-window-left {
-  left: 6%;
-  grid-template-columns: repeat(3, 14px);
-  gap: 10px;
-}
-.reception-light {
-  width: 14px;
-  height: 14px;
-  border: 2px solid var(--surface);
-  border-radius: 50%;
-  background: var(--line);
-}
-.reception-light.active {
-  background: #489980;
-  box-shadow: 0 0 8px #72b8b280;
-}
-.center-nurse {
-  position: absolute;
-  z-index: 1;
-  left: 50%;
-  bottom: 15px;
-  transform: translateX(-50%);
-  height: 142px;
-  width: 102px;
-  image-rendering: pixelated;
-}
-.reception-counter {
-  position: absolute;
-  z-index: 2;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 42px;
-  border-top: 8px solid color-mix(in srgb, var(--center-mint) 65%, var(--surface));
-  background: color-mix(in srgb, var(--center-red) 18%, var(--surface));
-  display: grid;
-  place-items: center;
-  box-shadow: inset 0 -6px 0 color-mix(in srgb, var(--center-red) 28%, var(--surface));
-}
-.counter-emblem.pokeball {
-  margin: 0;
-  width: 24px;
-  height: 24px;
-  --purple: var(--center-red);
-  --lavender: var(--center-red);
-}
-.counter-emblem.pokeball::after {
-  width: 8px;
-  height: 8px;
-  top: 6px;
-  left: 6px;
 }
 .center-body .team-slots {
   box-shadow:
@@ -575,31 +548,6 @@
   background: var(--surface);
 }
 @media (max-width: 700px) {
-  .center-canopy::before,
-  .center-canopy::after {
-    width: 18px;
-    flex-shrink: 0;
-  }
-  .center-reception {
-    height: 150px;
-  }
-  .reception-window {
-    height: 68px;
-    border-width: 4px;
-  }
-  .reception-window-left {
-    left: 4%;
-    grid-template-columns: repeat(3, 10px);
-    gap: 6px;
-  }
-  .reception-light {
-    width: 10px;
-    height: 10px;
-  }
-  .center-nurse {
-    height: 126px;
-    width: 90px;
-  }
   .pc-screen {
     padding: 14px 8px;
     border-width: 5px;

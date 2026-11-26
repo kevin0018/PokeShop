@@ -3,6 +3,7 @@ export const adventureEn = {
   title: 'Your team',
   privateAccess: 'Trainer access',
   viridianCity: 'Viridian City',
+  enterCenter: 'Come on in. Your team is at reception.',
   reception: 'Pokémon Center · Reception',
   passwordGreeting:
     'All right, {name}. Enter your password at the terminal to open your trainer pass.',
@@ -162,6 +163,7 @@ export const adventureEs = {
   title: 'Tu equipo',
   privateAccess: 'Acceso de entrenadores',
   viridianCity: 'Ciudad Verde',
+  enterCenter: 'Adelante. Te esperamos en recepción.',
   reception: 'Centro Pokémon · Recepción',
   passwordGreeting:
     'De acuerdo, {name}. Introduce tu contraseña en el terminal para abrir tu ficha.',

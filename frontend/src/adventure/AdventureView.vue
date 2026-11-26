@@ -17,7 +17,6 @@ import BattleSprite from './BattleSprite.vue'
 import TrainerPortrait from './TrainerPortrait.vue'
 import GymBackdrop from './GymBackdrop.vue'
 import CenterReception from './CenterReception.vue'
-import CollectionPc from './CollectionPc.vue'
 import {
   type Battle,
   type BattleEvent,
@@ -187,18 +186,46 @@ onUnmounted(() => {
   game.battleFocused = false
 })
 
+const accessPhase = ref<'idle' | 'checking' | 'crossing'>('idle')
+const exterior = ref<HTMLElement>()
+const teamHeading = ref<HTMLElement>()
+const justEntered = ref(false)
+
 async function authenticate() {
-  const result = await game.mutate(`/${mode.value}`, 'POST', {
-    username: username.value,
-    password: password.value,
-    ...(mode.value === 'register' ? { invitation: invitation.value.trim() } : {}),
-  })
-  if (result) {
+  if (accessPhase.value !== 'idle' || game.busy) return
+  accessPhase.value = 'checking'
+  try {
+    const result = await game.mutate(`/${mode.value}`, 'POST', {
+      username: username.value,
+      password: password.value,
+      ...(mode.value === 'register' ? { invitation: invitation.value.trim() } : {}),
+    })
+    if (!mounted || !result || !game.trainer) return
     password.value = ''
     invitation.value = ''
+    const scene = exterior.value
+    if (scene && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      scene.scrollIntoView({ block: 'nearest', behavior: 'instant' })
+      // A fast login can complete before the walk up to the door has finished.
+      await Promise.allSettled(
+        (scene.querySelector('.arrival-player')?.getAnimations() ?? []).map(
+          (animation) => animation.finished,
+        ),
+      )
+      if (!mounted) return
+      accessPhase.value = 'crossing'
+      await nextTick()
+      await Promise.allSettled(scene.getAnimations().map((animation) => animation.finished))
+    }
+    if (!mounted) return
     tab.value = 'team'
+    justEntered.value = true
     arenaOpen.value = game.active
+  } finally {
+    accessPhase.value = 'idle'
   }
+  await nextTick()
+  teamHeading.value?.focus({ preventScroll: true })
 }
 
 function toggle(id: number) {
@@ -381,7 +408,10 @@ function health(pokemon: Fighter) {
     :data-type="arenaOpen && displayed ? gym?.type : undefined"
     :class="{ 'is-battling': arenaOpen && displayed }"
   >
-    <header v-if="game.trainer && (!arenaOpen || !displayed)" class="adventure-heading">
+    <header
+      v-if="game.trainer && accessPhase === 'idle' && tab !== 'team' && (!arenaOpen || !displayed)"
+      class="adventure-heading"
+    >
       <h1>{{ t('adventure.title') }}</h1>
     </header>
 
@@ -393,9 +423,13 @@ function health(pokemon: Fighter) {
     </div>
     <p v-if="game.loading" class="state-box" role="status">{{ t('adventure.loading') }}</p>
 
-    <div v-else-if="!game.trainer" class="trainer-access">
+    <div
+      v-else-if="!game.trainer || accessPhase !== 'idle'"
+      class="trainer-access"
+      :data-phase="accessPhase"
+    >
       <div class="trainer-pass">
-        <div class="arrival-scene" aria-hidden="true">
+        <div ref="exterior" class="arrival-scene" aria-hidden="true">
           <img
             src="/studio/viridian-night.png"
             class="arrival-map"
@@ -403,6 +437,7 @@ function health(pokemon: Fighter) {
             width="272"
             height="160"
           />
+          <span class="arrival-door"></span>
           <span class="arrival-player"><i></i></span>
           <span class="night-motes"></span>
         </div>
@@ -410,7 +445,7 @@ function health(pokemon: Fighter) {
         <div class="reception-dialogue">
           <strong>{{ t('adventure.reception') }}</strong>
           <p :key="mode">
-            {{ receptionText }}
+            {{ accessPhase === 'crossing' ? t('adventure.enterCenter') : receptionText }}
           </p>
         </div>
         <ol class="pass-badges" aria-label="Kanto">
@@ -430,7 +465,7 @@ function health(pokemon: Fighter) {
           </li>
         </ol>
       </div>
-      <form class="trainer-form" @submit.prevent="authenticate">
+      <form :inert="accessPhase !== 'idle'" class="trainer-form" @submit.prevent="authenticate">
         <h1>{{ t('adventure.privateAccess') }}</h1>
         <div class="adventure-tabs">
           <button type="button" :aria-pressed="mode === 'login'" @click="setMode('login')">
@@ -666,27 +701,17 @@ function health(pokemon: Fighter) {
 
         <section v-if="tab === 'team'" class="adventure-panel pokemon-center">
           <div class="center-station">
-            <header class="center-canopy">
-              <span class="pokeball" aria-hidden="true"></span>
-              <h2>{{ t('adventure.pokemonCenter') }}</h2>
-            </header>
+            <CenterReception
+              :arriving="justEntered"
+              @arrived="justEntered = false"
+              @open-pc="pcDialog?.showModal()"
+            />
             <div class="center-body">
-              <CenterReception :selected="draft.length">
-                <button
-                  class="pc-access"
-                  :aria-label="t('adventure.openPc')"
-                  :title="t('adventure.openPc')"
-                  aria-haspopup="dialog"
-                  @click="pcDialog?.showModal()"
-                >
-                  <CollectionPc />
-                  <span class="pc-access-label" aria-hidden="true">{{
-                    t('adventure.openPc')
-                  }}</span>
-                </button>
-              </CenterReception>
+              <h1 ref="teamHeading" tabindex="-1">{{ t('adventure.title') }}</h1>
               <p>{{ t('adventure.teamHelp') }}</p>
-              <p class="team-order-help">{{ t('adventure.reorderHelp') }}</p>
+              <p v-if="draft.length > 1" class="team-order-help">
+                {{ t('adventure.reorderHelp') }}
+              </p>
               <div ref="teamSlots" class="team-slots">
                 <div
                   v-for="(member, i) in slots"
@@ -748,7 +773,17 @@ function health(pokemon: Fighter) {
                       </button>
                     </div>
                   </template>
-                  <span v-else class="slot-empty-label">{{ t('adventure.emptySlot') }}</span>
+                  <button
+                    v-else
+                    class="slot-empty-label empty-slot-access"
+                    :aria-label="
+                      t('adventure.slot', { number: i + 1 }) + ' · ' + t('adventure.openPc')
+                    "
+                    aria-haspopup="dialog"
+                    @click="pcDialog?.showModal()"
+                  >
+                    {{ t('adventure.emptySlot') }}
+                  </button>
                 </div>
               </div>
               <div class="team-save">
