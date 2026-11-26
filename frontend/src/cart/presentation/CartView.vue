@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
-import { ArrowDown, ArrowLeft, ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from 'lucide-vue-next'
+import { ArrowDown, ArrowLeft, ArrowRight, Minus, Plus, Trash2 } from 'lucide-vue-next'
 import { useCartStore } from '../application/cartStore'
 import { useAdventureStore } from '@/adventure/store'
 
@@ -40,386 +40,363 @@ onMounted(() => {
 })
 </script>
 <template>
-  <RouterLink class="back-link" to="/catalogo"
-    ><ArrowLeft :size="16" />{{ t('keepExploring') }}</RouterLink
-  >
-  <header class="bag-heading">
-    <div>
-      <p class="eyebrow"><ShoppingBag :size="16" />{{ t('selection') }}</p>
-      <h1>{{ t('cart') }}</h1>
+  <section class="order-sheet" aria-labelledby="order-title">
+    <RouterLink class="back-link" to="/catalogo"
+      ><ArrowLeft :size="16" />{{ t('keepExploring') }}</RouterLink
+    >
+    <header class="bag-heading">
+      <h1 id="order-title">{{ t('cart') }}</h1>
+      <div class="cart-heading-actions">
+        <span>{{ t('units', cart.count) }}</span>
+        <a
+          v-if="!cart.loading && !cart.error && cart.lines.length"
+          href="#cart-summary"
+          class="text-button cart-summary-link"
+        >
+          {{ t('total') }} {{ price(cart.total) }}<ArrowDown :size="15" aria-hidden="true" />
+        </a>
+        <button
+          v-if="cart.entries.length"
+          class="button secondary"
+          :disabled="game.busy"
+          @click="cart.clear"
+        >
+          <Trash2 :size="16" />{{ t('clearCart') }}
+        </button>
+      </div>
+    </header>
+    <p v-if="purchased" role="status" class="state-box">
+      {{ t('adventure.purchaseCompleted') }}
+      <RouterLink to="/aventura">{{ t('adventure.teamTab') }}</RouterLink>
+    </p>
+    <p v-if="game.trainer && game.error" role="alert" class="state-box">
+      {{ t(`adventure.errors.${game.error}`) }}
+    </p>
+    <p v-if="cart.loading" role="status" class="state-box">{{ t('loadingCart') }}</p>
+    <div v-else-if="cart.error" role="alert" class="state-box">
+      <p>{{ t('catalogError') }}</p>
+      <button class="button primary" @click="cart.hydrate">{{ t('retry') }}</button>
     </div>
-    <div class="bag-host" aria-hidden="true">
-      <img
-        src="/studio/113.webp"
-        :class="{ 'chansey-empty': !cart.entries.length }"
-        alt=""
-        width="310"
-        height="310"
-      />
+    <div v-else-if="!cart.lines.length" class="state-box empty-cart">
+      <img class="chansey-empty" src="/studio/113.webp" alt="" width="96" height="96" />
+      <div>
+        <h2>{{ t('emptyCart') }}</h2>
+        <p>{{ t('emptyCartBody') }}</p>
+        <RouterLink class="button primary" to="/catalogo">{{ t('explore') }}</RouterLink>
+      </div>
     </div>
-    <div class="cart-heading-actions">
-      <span>{{ t('units', cart.count) }}</span>
-      <a
-        v-if="!cart.loading && !cart.error && cart.lines.length"
-        href="#cart-summary"
-        class="text-button cart-summary-link"
-      >
-        {{ t('total') }} {{ price(cart.total) }}<ArrowDown :size="15" aria-hidden="true" />
-      </a>
-      <button
-        v-if="cart.entries.length"
-        class="button secondary"
-        :disabled="game.busy"
-        @click="cart.clear"
-      >
-        <Trash2 :size="16" />{{ t('clearCart') }}
-      </button>
-    </div>
-  </header>
-  <p v-if="purchased" role="status" class="state-box">
-    {{ t('adventure.purchaseCompleted') }}
-    <RouterLink to="/aventura">{{ t('adventure.teamTab') }}</RouterLink>
-  </p>
-  <p v-if="game.trainer && game.error" role="alert" class="state-box">
-    {{ t(`adventure.errors.${game.error}`) }}
-  </p>
-  <p v-if="cart.loading" role="status" class="state-box">{{ t('loadingCart') }}</p>
-  <div v-else-if="cart.error" role="alert" class="state-box">
-    <p>{{ t('catalogError') }}</p>
-    <button class="button primary" @click="cart.hydrate">{{ t('retry') }}</button>
-  </div>
-  <div v-else-if="!cart.lines.length" class="state-box empty-cart">
-    <h2>{{ t('emptyCart') }}</h2>
-    <p>{{ t('emptyCartBody') }}</p>
-    <RouterLink class="button primary" to="/catalogo">{{ t('explore') }}</RouterLink>
-  </div>
-  <div v-else class="cart-layout">
-    <div class="cart-list-panel">
-      <div class="cart-lines">
-        <article v-for="line in visibleLines" :key="line.pokemon.id" class="cart-line">
-          <RouterLink
-            :to="`/pokemon/${line.pokemon.id}`"
-            class="cart-art pokemon-palette"
-            :data-type="line.pokemon.types[0]"
-            ><PokemonImage :src="line.pokemon.image_url" :name="pokemonName(line.pokemon)"
-          /></RouterLink>
-          <div class="cart-item-copy">
-            <span class="dex-number">{{ number(line.pokemon.species_id ?? line.pokemon.id) }}</span>
-            <h2>
-              <RouterLink :to="`/pokemon/${line.pokemon.id}`">{{
-                pokemonName(line.pokemon)
-              }}</RouterLink>
-            </h2>
-            <p>{{ t('perUnit', { price: price(line.pokemon.price_cents) }) }}</p>
-            <div v-if="!game.trainer" class="quantity-control">
-              <button
-                :aria-label="t('decrease', { name: pokemonName(line.pokemon) })"
-                :disabled="line.quantity === 1"
-                @click="cart.setQuantity(line.pokemon.id, line.quantity - 1)"
-              >
-                <Minus :size="15" /></button
-              ><span :aria-label="t('quantity', { name: pokemonName(line.pokemon) })">{{
-                line.quantity
-              }}</span
+    <div v-else class="order-ledger">
+      <div class="cart-list-panel">
+        <div class="cart-lines">
+          <article v-for="line in visibleLines" :key="line.pokemon.id" class="cart-line">
+            <RouterLink
+              :to="`/pokemon/${line.pokemon.id}`"
+              class="cart-art pokemon-palette"
+              :data-type="line.pokemon.types[0]"
+              ><PokemonImage :src="line.pokemon.image_url" :name="pokemonName(line.pokemon)"
+            /></RouterLink>
+            <div class="cart-item-copy">
+              <span class="dex-number">{{
+                number(line.pokemon.species_id ?? line.pokemon.id)
+              }}</span>
+              <h2>
+                <RouterLink :to="`/pokemon/${line.pokemon.id}`">{{
+                  pokemonName(line.pokemon)
+                }}</RouterLink>
+              </h2>
+              <p>{{ t('perUnit', { price: price(line.pokemon.price_cents) }) }}</p>
+              <div v-if="!game.trainer" class="quantity-control">
+                <button
+                  :aria-label="t('decrease', { name: pokemonName(line.pokemon) })"
+                  :disabled="line.quantity === 1"
+                  @click="cart.setQuantity(line.pokemon.id, line.quantity - 1)"
+                >
+                  <Minus :size="15" /></button
+                ><span :aria-label="t('quantity', { name: pokemonName(line.pokemon) })">{{
+                  line.quantity
+                }}</span
+                ><button
+                  :aria-label="t('increase', { name: pokemonName(line.pokemon) })"
+                  :disabled="line.quantity >= line.pokemon.stock"
+                  @click="cart.setQuantity(line.pokemon.id, line.quantity + 1)"
+                >
+                  <Plus :size="15" />
+                </button>
+              </div>
+            </div>
+            <div class="cart-line-total">
+              <strong>{{ price(line.pokemon.price_cents * line.quantity) }}</strong
               ><button
-                :aria-label="t('increase', { name: pokemonName(line.pokemon) })"
-                :disabled="line.quantity >= line.pokemon.stock"
-                @click="cart.setQuantity(line.pokemon.id, line.quantity + 1)"
+                class="text-button"
+                :aria-label="t('removePokemon', { name: pokemonName(line.pokemon) })"
+                :disabled="game.busy"
+                @click="cart.remove(line.pokemon.id)"
               >
-                <Plus :size="15" />
+                <Trash2 :size="16" />{{ t('remove') }}
               </button>
             </div>
-          </div>
-          <div class="cart-line-total">
-            <strong>{{ price(line.pokemon.price_cents * line.quantity) }}</strong
-            ><button
-              class="text-button"
-              :aria-label="t('removePokemon', { name: pokemonName(line.pokemon) })"
-              :disabled="game.busy"
-              @click="cart.remove(line.pokemon.id)"
-            >
-              <Trash2 :size="16" />{{ t('remove') }}
-            </button>
-          </div>
-        </article>
-      </div>
-      <nav v-if="pages > 1" class="pagination cart-pagination" :aria-label="t('cartPage')">
-        <button class="button secondary" :disabled="page === 1" @click="changePage(page - 1)">
-          <ArrowLeft :size="16" />{{ t('previous') }}</button
-        ><span>{{ t('pageOf', { page, pages }) }}</span
-        ><button class="button secondary" :disabled="page === pages" @click="changePage(page + 1)">
-          {{ t('next') }}<ArrowRight :size="16" />
-        </button>
-      </nav>
-    </div>
-    <div class="checkout-scene">
-      <aside
-        id="cart-summary"
-        tabindex="-1"
-        class="cart-summary pokemon-palette"
-        :data-type="cart.recentLines[0]?.pokemon.types[0]"
-      >
-        <h2>{{ t('summary') }}</h2>
-        <div>
-          <span>{{ t('subtotal', { units: t('units', cart.count) }) }}</span
-          ><strong>{{ price(cart.total) }}</strong>
+          </article>
         </div>
-        <div class="summary-total">
-          <span>{{ t('total') }}</span
-          ><strong>{{ price(cart.total) }}</strong>
-        </div>
-        <p>{{ t('cartSaved') }}</p>
-        <template v-if="game.trainer">
-          <div class="cart-balance">
-            <span>{{ t('shopBalance') }}</span
-            ><strong>{{ t('adventure.credits', { amount: game.trainer.credits }) }}</strong>
-          </div>
-          <p v-if="cart.total > game.trainer.credits && !alreadyPurchased">
-            {{ t('adventure.insufficient') }}
-          </p>
-          <button
-            class="button primary"
-            :disabled="
-              game.busy ||
-              !cart.lines.length ||
-              (cart.total > game.trainer.credits && !alreadyPurchased)
-            "
-            @click="checkout"
+        <nav v-if="pages > 1" class="pagination cart-pagination" :aria-label="t('cartPage')">
+          <button class="button secondary" :disabled="page === 1" @click="changePage(page - 1)">
+            <ArrowLeft :size="16" />{{ t('previous') }}</button
+          ><span>{{ t('pageOf', { page, pages }) }}</span
+          ><button
+            class="button secondary"
+            :disabled="page === pages"
+            @click="changePage(page + 1)"
           >
-            {{ t('adventure.confirmPurchase') }}
+            {{ t('next') }}<ArrowRight :size="16" />
           </button>
-        </template>
-        <p v-else class="demo-note">{{ t('demoCart') }}</p>
-        <RouterLink class="button secondary" to="/catalogo">{{ t('keepExploring') }}</RouterLink>
-      </aside>
+        </nav>
+      </div>
+      <footer id="cart-summary" class="order-foot" tabindex="-1">
+        <div class="order-tally">
+          <img src="/studio/113.webp" alt="" width="68" height="68" />
+          <div>
+            <p>{{ t('subtotal', { units: t('units', cart.count) }) }}</p>
+            <div class="summary-total">
+              <span class="sr-only">{{ t('total') }}</span
+              ><strong>{{ price(cart.total) }}</strong>
+            </div>
+            <p v-if="game.trainer" class="cart-balance">
+              {{ t('shopBalance') }} ·
+              {{ t('adventure.credits', { amount: game.trainer.credits }) }}
+            </p>
+          </div>
+        </div>
+        <div class="order-actions">
+          <template v-if="game.trainer">
+            <p v-if="cart.total > game.trainer.credits && !alreadyPurchased">
+              {{ t('adventure.insufficient') }}
+            </p>
+            <button
+              class="button primary"
+              :disabled="
+                game.busy ||
+                !cart.lines.length ||
+                (cart.total > game.trainer.credits && !alreadyPurchased)
+              "
+              @click="checkout"
+            >
+              {{ t('adventure.confirmPurchase') }}
+            </button>
+          </template>
+          <p v-else>{{ t('demoCart') }}</p>
+          <RouterLink class="button secondary" to="/catalogo">{{ t('keepExploring') }}</RouterLink>
+        </div>
+      </footer>
     </div>
-  </div>
+  </section>
   <RecommendationsPanel :ids="cart.entries.map((entry) => entry.id)" />
 </template>
 
 <style scoped>
+.order-sheet {
+  width: min(100%, 900px);
+  margin: 0 auto;
+}
+.order-sheet > .back-link {
+  margin-bottom: 12px;
+}
 .bag-heading {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0 14px;
-  padding: 0 clamp(14px, 2vw, 26px);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  color: var(--ink);
-  border-radius: 14px;
-  margin-bottom: 20px;
-}
-.bag-heading > div:first-child {
-  padding: 18px 0;
-}
-.bag-heading .eyebrow {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  font: 700 0.72rem/1.4 var(--font-mono);
-  color: var(--purple);
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  padding-bottom: 14px;
+  border-bottom: 3px double var(--border-strong);
 }
 .bag-heading h1 {
-  margin: 4px 0 0;
-  font: 750 clamp(1.8rem, 4vw, 3rem) / 1.05 var(--font-body, sans-serif);
-  letter-spacing: -0.045em;
-}
-.bag-host img {
-  display: block;
-  width: clamp(56px, 8vw, 96px);
-  height: auto;
+  margin: 0;
+  font:
+    600 clamp(2.2rem, 5vw, 4.2rem) / 1.08 Georgia,
+    serif;
+  letter-spacing: -0.055em;
 }
 .cart-heading-actions {
-  grid-column: 1/-1;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
+  flex-wrap: wrap;
   gap: 4px 14px;
-  border-top: 1px solid var(--line);
-  padding: 4px clamp(12px, 2vw, 26px);
-  min-height: 44px;
-  font: 700 0.78rem/1.4 var(--font-mono);
+  font-size: 0.82rem;
+}
+.cart-heading-actions > span {
+  color: var(--muted-strong);
 }
 .cart-heading-actions .secondary {
-  margin-left: auto;
-  background: transparent;
   border: 0;
-  color: var(--ink);
+  background: transparent;
+  color: var(--muted-strong);
+  padding: 0 4px;
   min-height: 44px;
-  padding: 4px;
 }
 .cart-summary-link {
   display: none;
 }
-.cart-layout {
-  grid-template-columns: minmax(0, 1fr) minmax(285px, 32%);
-  gap: clamp(16px, 3vw, 38px);
-}
-.cart-lines {
-  display: grid;
-  gap: 12px;
-}
 .cart-line,
 .cart-line:first-child {
   display: grid;
-  grid-template-columns: minmax(76px, 18%) minmax(0, 1fr) auto;
-  gap: 14px;
-  padding: 0;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--surface);
+  grid-template-columns: clamp(96px, 15vw, 148px) minmax(0, 1fr) auto;
+  gap: clamp(12px, 3vw, 32px);
+  align-items: center;
+  padding: 16px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
 }
 .cart-art.pokemon-palette {
   display: grid;
   place-items: center;
-  align-self: stretch;
+  position: relative;
+  isolation: isolate;
+  background: transparent;
   border-radius: 0;
-  background: color-mix(in srgb, var(--pokemon-tint) 22%, var(--surface));
+}
+.cart-art::before {
+  content: '';
+  position: absolute;
+  inset: 12% 8%;
+  border-radius: 50%;
+  z-index: -1;
+  background: color-mix(in srgb, var(--pokemon-tint) 33%, var(--surface));
+  box-shadow:
+    0 0 0 3px var(--surface),
+    0 0 0 4px color-mix(in srgb, var(--pokemon-tint) 40%, var(--line));
 }
 .cart-art img {
   width: 100%;
-  height: clamp(105px, 11vw, 150px);
+  height: clamp(90px, 12vw, 128px);
+  padding: 2px;
   object-fit: contain;
-  filter: drop-shadow(2px 2px 0 #241c2266);
+  filter: drop-shadow(1px 3px 1px #241c2222);
 }
 .cart-item-copy {
   min-width: 0;
-  padding-block: 10px;
 }
 .cart-item-copy h2 {
-  font: 750 clamp(1.1rem, 2vw, 1.6rem) / 1.2 var(--font-body, sans-serif);
+  margin: 2px 0 4px;
+  font:
+    600 clamp(1.25rem, 2.4vw, 1.9rem) / 1.12 Georgia,
+    serif;
   overflow-wrap: anywhere;
 }
 .quantity-control {
-  margin-top: 8px;
-  border-radius: 2px;
+  margin-top: 6px;
 }
-.quantity-control button {
+.quantity-control button,
+.cart-line-total button {
   min-width: 44px;
   min-height: 44px;
-  color: var(--ink);
 }
 .cart-line-total {
-  padding: 8px 12px 8px 0;
   gap: 2px;
-}
-.cart-line-total strong {
-  font: 700 clamp(1rem, 1.6vw, 1.3rem) / 1.2 var(--font-body, sans-serif);
-}
-.cart-line-total button {
-  min-height: 44px;
-}
-.checkout-scene {
-  position: sticky;
-  top: 12px;
   min-width: 0;
 }
-.checkout-scene .cart-summary {
-  position: relative;
-  margin: 0;
-  scroll-margin-top: 14px;
-  padding: clamp(16px, 2vw, 26px);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  color: var(--ink);
-  background: var(--surface);
-}
-.cart-summary h2,
-.empty-cart h2 {
-  font: 750 clamp(1.25rem, 2vw, 1.6rem) / 1.2 var(--font-body, sans-serif);
-  letter-spacing: -0.035em;
-}
-.cart-summary > p {
-  margin-top: 12px;
-  color: var(--muted-strong);
-}
-.cart-summary .summary-total {
-  border-top: 1px solid var(--line);
-  padding-top: 14px;
-  margin-top: 12px;
-  align-items: baseline;
-}
-.summary-total strong {
-  font: 750 clamp(1.4rem, 2vw, 1.75rem) / 1.1 var(--font-body, sans-serif);
-  overflow-wrap: anywhere;
-}
-.cart-balance {
-  margin-top: 12px;
-  color: var(--muted-strong);
-}
-.cart-summary .button,
-.empty-cart .button {
-  margin-top: 12px;
-  min-height: 44px;
-  border-radius: 8px;
-}
-.empty-cart {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface);
-  text-align: left;
-  padding: clamp(20px, 3vw, 40px);
-}
-.empty-cart p {
-  margin-block: 10px;
+.cart-line-total strong {
+  font: 700 clamp(1rem, 2vw, 1.35rem) / 1.3 var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 .cart-pagination {
   justify-content: space-between;
 }
-.cart-pagination .button {
-  padding-inline: 8px;
+.order-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px 24px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  padding: clamp(14px, 2.5vw, 26px);
+  border-bottom: 3px double var(--border-strong);
+  scroll-margin-top: 16px;
 }
-@media (prefers-reduced-motion: no-preference) {
-  .bag-host img {
-    animation: bag-host-enter 320ms ease-out both;
-  }
-  @keyframes bag-host-enter {
-    from {
-      opacity: 0;
-      transform: translateX(14px) rotate(4deg);
-    }
-  }
+.order-tally {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
-@media (max-width: 760px) {
-  .cart-layout {
-    grid-template-columns: minmax(0, 1fr);
+.order-tally img {
+  width: clamp(42px, 6vw, 68px);
+  height: auto;
+}
+.order-tally p,
+.order-actions p {
+  font-size: 0.82rem;
+  color: var(--muted-strong);
+  line-height: 1.4;
+  margin: 0;
+}
+.summary-total strong {
+  font: 750 clamp(1.65rem, 3vw, 2.4rem) / 1.2 var(--font-body, sans-serif);
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+}
+.order-actions {
+  display: grid;
+  gap: 6px;
+  justify-items: stretch;
+  max-width: 32ch;
+}
+.order-actions .button {
+  min-height: 44px;
+}
+.empty-cart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: left;
+  gap: 20px;
+  padding: clamp(24px, 5vw, 56px) 10px;
+  border: 0;
+  border-bottom: 3px double var(--border-strong);
+  border-radius: 0;
+  background: transparent;
+}
+.empty-cart img {
+  width: clamp(60px, 12vw, 96px);
+  height: auto;
+}
+.empty-cart p {
+  margin: 6px 0 12px;
+}
+@media (max-width: 600px) {
+  .bag-heading {
+    display: block;
+    padding-bottom: 4px;
   }
-  .checkout-scene {
-    position: static;
+  .cart-heading-actions {
+    gap: 3px 9px;
+  }
+  .cart-heading-actions .secondary {
+    margin-left: auto;
   }
   .cart-summary-link {
     display: inline-flex;
     min-height: 44px;
-    color: var(--ink);
-  }
-}
-@media (max-width: 520px) {
-  .bag-heading > div:first-child {
-    padding: 16px 4px 18px 12px;
-  }
-  .cart-heading-actions {
-    gap: 0 8px;
-  }
-  .cart-heading-actions .secondary {
-    font-size: 0.78rem;
   }
   .cart-line,
   .cart-line:first-child {
-    grid-template-columns: minmax(75px, 32%) minmax(0, 1fr);
-    gap: 0 12px;
+    grid-template-columns: minmax(66px, 25%) minmax(0, 1fr);
+    gap: 4px 16px;
+    padding: 12px 0;
   }
-  .cart-item-copy {
-    padding-right: 8px;
+  .cart-art {
+    grid-row: span 2;
   }
   .cart-line-total {
-    grid-column: 1/-1;
+    grid-column: 2;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    border-top: 1px solid var(--line);
-    padding: 0 12px;
+    flex-wrap: wrap;
+  }
+  .cart-line-total .text-button {
+    font-size: 0.75rem;
+  }
+  .order-actions {
+    width: 100%;
+    max-width: none;
   }
 }
 </style>
