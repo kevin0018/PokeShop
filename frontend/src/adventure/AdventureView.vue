@@ -364,6 +364,7 @@ async function challenge(gymId: number) {
   const [result] = await Promise.all([resultPromise, finishEntranceShot()])
   if (!mounted) return
   if (result) {
+    displayed.value = structuredClone(toRaw(game.battle ?? result))
     if (!reduced) {
       insideGym.value = true
       await finishEntranceShot()
@@ -372,7 +373,6 @@ async function challenge(gymId: number) {
       await finishEntranceShot()
       if (!mounted) return
     }
-    displayed.value = game.battle ? structuredClone(toRaw(game.battle)) : result
     log.value = []
     arenaOpen.value = true
     command.value = 'menu'
@@ -492,8 +492,16 @@ function health(pokemon: Fighter) {
     </div>
     <div v-if="entering" class="battle-entry" :class="{ revealing }" role="status">
       <div v-if="arrivalGym" class="gym-door-shot">
-        <div v-if="throwing" class="leader-pitch">
+        <div v-if="throwing" class="leader-pitch" :data-leader="arrivalGym.id">
           <img :src="`/studio/gyms/leader-${arrivalGym.id}.png`" alt="" width="64" height="64" />
+          <i class="release-ring" aria-hidden="true"></i>
+          <BattleSprite
+            v-if="opponent"
+            class="released-fighter"
+            :id="opponent.id"
+            :name="name(opponent)"
+            :src="opponent.front"
+          />
           <i ref="entranceActor" class="pitched-ball" aria-hidden="true"></i>
         </div>
         <div
@@ -683,11 +691,14 @@ function health(pokemon: Fighter) {
           </div>
           <BattleSprite
             class="battle-sprite enemy-sprite"
+            :id="opponent.id"
             :src="opponent.front"
             :name="name(opponent)"
           />
           <BattleSprite
             class="battle-sprite player-sprite"
+            :id="player.id"
+            back
             :src="player.back"
             :name="name(player)"
             :fallback="player.front"

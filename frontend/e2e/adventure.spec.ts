@@ -223,7 +223,7 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   await expect(page.locator('.site-footer')).toBeHidden()
   await expect(page.locator('.adventure-rules')).toBeHidden()
   await expect(page.locator('.battle-arena')).toHaveAttribute('data-type', 'roca')
-  await expect(page.locator('.player-sprite')).toHaveAttribute('src', /\/back\/1.png$/)
+  await expect(page.locator('.player-sprite')).toHaveAttribute('data-view', 'back')
   await page.reload()
   await expect(page.locator('.battle-arena')).toBeVisible()
   await checkBattleWidths(page)

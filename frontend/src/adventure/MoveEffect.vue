@@ -63,6 +63,24 @@ function play(move: string, opponent: boolean, hit: boolean) {
   const ctx = surface?.getContext('2d')
   if (!surface || !ctx) return
   const [tile, motion, count, size, arc, color] = effects[move] ?? effects.tackle!
+  // Use the painted silhouette, including the different front and rear sprite heights.
+  const arena = surface.getBoundingClientRect()
+  function anchor(selector: string, x: number, y: number) {
+    const sprite = surface?.parentElement?.querySelector<HTMLElement>(selector)
+    if (!sprite || !arena.width || !arena.height) return { x, y }
+    const rect = sprite.getBoundingClientRect()
+    return {
+      x: ((rect.left + rect.width / 2 - arena.left) / arena.width) * 240,
+      y:
+        ((rect.bottom - (rect.height * Number(sprite.dataset.height)) / 2 - arena.top) /
+          arena.height) *
+        112,
+    }
+  }
+  const player = anchor('.player-sprite', 58, 76)
+  const enemy = anchor('.enemy-sprite', 176, 35)
+  const from = opponent ? enemy : player
+  const to = opponent ? player : enemy
   const endX = hit ? 176 : 197
   const endY = hit ? 35 : 16
   function stamp(x: number, y: number, scale: number, index = tile) {
@@ -89,10 +107,9 @@ function play(move: string, opponent: boolean, hit: boolean) {
     ctx.clearRect(0, 0, 240, 112)
     ctx.save()
     ctx.imageSmoothingEnabled = false
-    if (opponent) {
-      ctx.translate(235, 112)
-      ctx.scale(-1, -1)
-    }
+    ctx.translate(from.x, from.y)
+    ctx.scale((to.x - from.x) / 118, (to.y - from.y) / -41)
+    ctx.translate(-58, -76)
     const wave = Math.sin(progress * Math.PI)
     if (motion === 'whip') {
       for (let strand = 0; strand < count; strand++) {
