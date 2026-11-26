@@ -212,7 +212,10 @@ function remove(key: string) {
 }
 
 .filter-heading h2 {
-  font-size: 2rem;
+  font: 900 2.5rem/1 var(--font-display);
+  text-transform: uppercase;
+  transform: skewX(-6deg);
+  border-bottom: 4px solid #c51933;
 }
 
 .filter-description {
@@ -249,6 +252,12 @@ function remove(key: string) {
 
 .filter-actions > * {
   flex: 1;
+  border-radius: 2px;
+}
+
+.filter-actions .primary {
+  background: #c51933;
+  color: white;
 }
 
 .active-filters {

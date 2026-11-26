@@ -194,6 +194,63 @@ const game = useAdventureStore()
   overflow-wrap: anywhere;
 }
 
+.catalog-grid .illustrated-card {
+  border: 2px solid var(--ink);
+  border-radius: 0;
+}
+.catalog-grid .card-art {
+  background:
+    linear-gradient(
+      150deg,
+      transparent 63%,
+      #fff6 63% 66%,
+      transparent 66% 68%,
+      #fff8 68% 72%,
+      transparent 72%
+    ),
+    radial-gradient(#18141938 1px, transparent 1.4px) 0 0 / 5px 5px,
+    var(--pokemon-tint);
+  border-bottom: 3px solid var(--ink);
+}
+.catalog-grid .card-art img {
+  filter: drop-shadow(1px 1px 0 white) drop-shadow(2px 3px 0 #181419aa);
+}
+.catalog-grid .card-art .dex-number {
+  left: 0;
+  top: 7px;
+  border-radius: 0;
+  padding: 1px 12px 2px 8px;
+  clip-path: polygon(0 0, 100% 0, 87% 100%, 0 100%);
+  background: var(--catalog-ink);
+  color: var(--catalog-paper);
+  font-weight: 700;
+}
+.catalog-grid .card-open {
+  border-radius: 0;
+  bottom: 0;
+  right: 0;
+  background: var(--catalog-ink);
+  color: var(--catalog-paper);
+}
+.catalog-grid h3 {
+  text-transform: uppercase;
+  margin-block: 5px;
+}
+.catalog-grid .add-button {
+  background: var(--catalog-red);
+  color: white;
+  border-radius: 0;
+}
+.catalog-grid .card-bottom strong {
+  font: 900 clamp(1.26rem, 2vw, 1.7rem) / 1 var(--font-display);
+}
+@media (prefers-reduced-motion: reduce) {
+  .catalog-grid .card-art img {
+    transition: none;
+    transform: none;
+  }
+}
+
 @media (max-width: 700px) {
   .illustrated-card .card-bottom > .add-button .add-label,
   .illustrated-card .catalog-purchase .add-button:not(:disabled) .add-label {

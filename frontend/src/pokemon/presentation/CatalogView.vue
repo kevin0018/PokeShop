@@ -101,6 +101,7 @@ request<typeof metadata.value>('/metadata')
         </div>
       </div>
       <div class="catalog-mascot" aria-hidden="true">
+        <span class="mascot-number">025</span>
         <img src="/studio/25.webp" alt="" width="475" height="475" />
       </div>
       <div class="shop-checkout-bar">
@@ -201,106 +202,110 @@ request<typeof metadata.value>('/metadata')
 </template>
 
 <style>
-.shop-scene {
-  padding-top: 0;
+.catalog-section.shop-scene {
+  --catalog-ink: #181419;
+  --catalog-paper: #fff5e7;
+  --catalog-red: #c51933;
+  padding-top: clamp(12px, 2vw, 28px);
 }
 
 .shop-front {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
   position: relative;
+  isolation: isolate;
   overflow: clip;
-  margin-bottom: 20px;
-  border-radius: var(--shop-radius);
-  background: radial-gradient(ellipse at 77% 84%, #7952ac, transparent 55%), var(--sign);
-  color: var(--sign-ink);
+  color: var(--catalog-paper);
+  background: var(--catalog-ink);
+  border: 3px solid var(--catalog-ink);
 }
-
 .shop-front .shop-heading {
   margin: 0;
-  padding: clamp(16px, 2.8vw, 36px);
+  padding: clamp(16px, 3vw, 42px);
   align-items: center;
 }
-
 .shop-heading .eyebrow {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
+  color: var(--catalog-paper);
+  border-bottom: 3px solid #ff3451;
+  font: 700 0.72rem/1.7 var(--font-mono);
   text-transform: uppercase;
+}
+.shop-heading h1 {
+  margin: 9px 0;
+  color: var(--catalog-paper);
+  font: 900 clamp(3.4rem, 8vw, 7rem) / 0.91 var(--font-display);
+  letter-spacing: -0.035em;
+  transform: skewX(-8deg) rotate(-2deg);
+  text-transform: uppercase;
+  text-shadow: 3px 4px 0 var(--catalog-red);
+}
+.shop-intro {
+  max-width: 44ch;
+  margin-top: 15px;
+  line-height: 1.4;
 }
 .catalog-mascot {
   position: relative;
+  isolation: isolate;
   display: grid;
   place-items: center;
-  align-self: stretch;
-  width: clamp(115px, 29vw, 340px);
-  margin-right: 4%;
-  isolation: isolate;
 }
 .catalog-mascot::before {
   content: '';
   position: absolute;
-  z-index: -1;
-  inset: 0;
-  background: repeating-radial-gradient(
-    circle at center,
-    transparent 0 29px,
-    #dfc4ff45 30px,
-    transparent 31px 48px
-  );
-  mask-image: linear-gradient(90deg, transparent, black 25% 75%, transparent);
+  inset: 0 0 0 -12%;
+  background:
+    radial-gradient(#48251d45 1px, transparent 1.5px) 0 0 / 6px 6px,
+    #ffce49;
+  clip-path: polygon(28% 0, 100% 0, 100% 100%, 0 100%, 19% 63%, 9% 67%, 30% 31%, 17% 36%);
+}
+.mascot-number {
+  position: absolute;
+  right: 2%;
+  color: transparent;
+  -webkit-text-stroke: 2px #39231b75;
+  font: 900 clamp(4.6rem, 14vw, 12rem) / 1 var(--font-display);
+  transform: skewX(-10deg);
 }
 .catalog-mascot img {
   position: absolute;
-  width: 90%;
-  height: 94%;
+  width: 96%;
+  height: 96%;
   object-fit: contain;
-  filter: drop-shadow(0 5px 4px #27192e55);
-  transform: rotate(7deg);
+  filter: drop-shadow(2px 2px 0 white) drop-shadow(4px 3px 0 #181419);
+  transform: rotate(-6deg);
 }
 .type-shelves {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin: 16px 0;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px;
+  margin: 14px -4px 8px;
 }
 .type-shelf {
+  flex: none;
   display: inline-flex;
   align-items: center;
   gap: 7px;
   min-height: 44px;
-  padding: 8px 14px;
-  border-radius: 24px;
-  border: 1px solid color-mix(in srgb, var(--pokemon-tint) 65%, var(--line));
-  background: color-mix(in srgb, var(--pokemon-tint) 19%, var(--surface));
+  padding: 6px 16px;
+  border: 2px solid transparent;
+  border-bottom-color: var(--pokemon-tint);
+  background: var(--surface);
   color: var(--ink);
-  font-size: 0.84rem;
-  font-weight: 700;
+  font: 900 1.15rem/1 var(--font-display);
+  text-transform: uppercase;
+  transform: skewX(-5deg);
 }
 .type-shelf:hover,
 .type-shelf[aria-pressed='true'] {
-  border-color: var(--ink);
-  box-shadow: inset 0 0 0 1px var(--ink);
+  border-color: var(--catalog-ink);
+  background: var(--pokemon-tint);
+  color: var(--catalog-ink);
 }
-.shop-heading .eyebrow,
-.shop-intro {
-  color: var(--sign-label);
-}
-
-.shop-heading h1 {
-  font: 900 clamp(3.5rem, 6vw, 5.5rem) / 1 var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: -0.015em;
-  line-height: 0.94;
-}
-
-.shop-intro {
-  margin-top: 12px;
-  max-width: 52ch;
-  line-height: 1.5;
-}
-
 .shop-checkout-bar {
   grid-column: 1 / -1;
   display: flex;
@@ -309,16 +314,16 @@ request<typeof metadata.value>('/metadata')
   gap: 8px 16px;
   padding: 6px clamp(14px, 3.5vw, 44px);
   border-top: 1px solid #ffffff35;
-  background: #281b3e;
+  background: var(--catalog-ink);
 }
 
 .shop-checkout-bar a,
 .shop-checkout-bar a:hover {
-  color: var(--sign-ink);
+  color: var(--catalog-paper);
 }
 
 .shop-checkout-bar :focus-visible {
-  outline-color: var(--sign-ink);
+  outline-color: var(--catalog-paper);
 }
 
 .catalog-trainer,
@@ -378,7 +383,15 @@ request<typeof metadata.value>('/metadata')
 .catalog-section .search-field {
   grid-column: 1;
   padding-inline: 12px;
-  border-color: var(--control-border);
+  border-radius: 2px;
+  border: 2px solid var(--control-border);
+}
+
+.shop-scene .filter-control > button {
+  border-radius: 2px;
+  background: var(--catalog-ink);
+  color: var(--catalog-paper);
+  border-color: var(--catalog-ink);
 }
 
 .catalog-section .search-field input {
@@ -391,18 +404,18 @@ request<typeof metadata.value>('/metadata')
   border-bottom: 1px solid var(--line);
 }
 
-.catalog-grid {
+.shop-scene .catalog-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 @media (max-width: 880px) {
-  .catalog-grid {
+  .shop-scene .catalog-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 640px) {
-  .catalog-grid {
+  .shop-scene .catalog-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -411,8 +424,16 @@ request<typeof metadata.value>('/metadata')
     gap: 5px;
   }
 
+  .shop-front {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+
+  .shop-front .shop-heading {
+    padding: 16px 5px 16px 12px;
+  }
+
   .shop-heading h1 {
-    font-size: clamp(2.6rem, 10vw, 3.5rem);
+    font-size: clamp(2.55rem, 10vw, 4rem);
   }
 
   .shop-intro {
