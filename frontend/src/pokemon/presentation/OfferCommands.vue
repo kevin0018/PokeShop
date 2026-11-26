@@ -223,43 +223,48 @@ function moveFocus(event: KeyboardEvent) {
   }
 }
 @media (max-width: 650px) {
-  .spoke-price,
-  .spoke-detail {
-    right: 54%;
-    --slide: 15px;
-  }
-  .spoke-buy,
-  .spoke-shop {
-    left: 54%;
-    --slide: -15px;
+  .offer-commands {
+    position: relative;
+    width: min(100%, 440px);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas: 'price buy' 'detail shop';
+    align-items: center;
+    gap: 12px 10px;
+    padding: 4px 5px 8px;
   }
   .command-spoke {
-    max-width: 45%;
+    position: relative;
+    inset: auto;
+    width: 100%;
+    max-width: none;
+    --tilt: -2deg;
+    --slide: 12px;
+  }
+  .command-spoke::before {
+    inset: 12% -2% -8%;
   }
   .spoke-price {
-    top: 57%;
-    --tilt: 8deg;
+    grid-area: price;
   }
   .spoke-buy {
-    top: 60%;
-    --tilt: -9deg;
+    grid-area: buy;
   }
   .spoke-detail {
-    top: 83%;
-    --tilt: -8deg;
+    grid-area: detail;
   }
   .spoke-shop {
-    top: 83%;
-    --tilt: 8deg;
+    grid-area: shop;
   }
   .command-key {
+    width: 100%;
     min-height: 46px;
-    gap: 4px;
-    padding: 8px 10px;
-    font-size: clamp(1.05rem, 4.6vw, 1.6rem);
+    gap: 5px;
+    padding: 9px 12px;
+    font-size: clamp(1.05rem, 4.6vw, 1.5rem);
   }
   .price-tag {
-    padding: 6px 14px;
+    padding: 7px 14px;
     gap: 1px;
   }
   .price-tag strong {
