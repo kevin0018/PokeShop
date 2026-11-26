@@ -14,7 +14,7 @@ export default {
     spotlight: 'En el escaparate',
     special: 'Especial Kanto',
     shop: 'Entrar en la tienda',
-    stand: 'El stand de iniciales',
+    stand: 'Elige tu inicial',
     viewKanto: 'Ver todo Kanto',
     onScreen: 'En pantalla',
     previous: 'Pokémon destacado anterior',

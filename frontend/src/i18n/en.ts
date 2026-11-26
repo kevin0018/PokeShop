@@ -12,7 +12,7 @@ export default {
     spotlight: 'In the spotlight',
     special: 'Kanto special',
     shop: 'Enter the shop',
-    stand: 'The starter stand',
+    stand: 'Pick your starter',
     viewKanto: 'Shop all Kanto',
     onScreen: 'On screen',
     previous: 'Previous featured Pokémon',

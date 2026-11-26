@@ -17,7 +17,6 @@ import {
   Play,
   Radio,
   RotateCcw,
-  Tv,
   Zap,
   Ghost,
 } from 'lucide-vue-next'
@@ -243,12 +242,15 @@ onUnmounted(() => {
   <section class="starter-stand" aria-labelledby="stand-title">
     <header class="stand-heading">
       <div>
-        <p class="station-kicker"><Tv :size="16" />{{ t('kantoStarters') }}</p>
+        <p class="station-kicker">KANTO</p>
         <h2 id="stand-title">{{ t('studio.stand') }}</h2>
       </div>
       <RouterLink class="stand-link" to="/catalogo?region=kanto"
         >{{ t('studio.viewKanto') }}<ArrowRight :size="17"
       /></RouterLink>
+      <RouterLink class="battle-extra" to="/aventura"
+        ><Gamepad2 :size="16" />{{ t('adventure.nav') }}</RouterLink
+      >
     </header>
     <div class="stand-shelf">
       <RouterLink
@@ -262,7 +264,7 @@ onUnmounted(() => {
           ><component :is="starter.icon" :size="14" />{{ typeName(starter.type) }}</span
         >
         <span class="stand-dex">{{ number(starter.id) }}</span>
-        <img :src="`/studio/${starter.id}.webp`" alt="" width="475" height="475" />
+        <img :src="`/studio/starter-${starter.id}.png`" alt="" width="58" height="58" />
         <span class="stand-info"
           ><strong>{{ starter.name }}</strong
           ><small v-if="priceFor(starter.id)">{{ priceFor(starter.id) }}</small></span
@@ -271,10 +273,6 @@ onUnmounted(() => {
       </RouterLink>
     </div>
   </section>
-  <RouterLink class="battle-extra" to="/aventura">
-    <Gamepad2 :size="24" /><span>{{ t('studio.battle') }}</span
-    ><ArrowRight :size="18" />
-  </RouterLink>
 </template>
 
 <style src="./studio.css"></style>
