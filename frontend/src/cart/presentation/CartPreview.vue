@@ -121,7 +121,11 @@ onUnmounted(() => clearTimeout(timer))
         @focusout="schedule"
       >
         <div class="cart-preview-heading">
-          <h2>{{ t('cartPreview') }}</h2>
+          <h2>
+            <ShoppingBag :size="18" aria-hidden="true" />{{
+              t(cart.count ? 'cartPreview' : 'cart')
+            }}
+          </h2>
           <button
             ref="closeButton"
             type="button"
@@ -152,8 +156,16 @@ onUnmounted(() => clearTimeout(timer))
               </RouterLink>
             </li>
           </ul>
-          <p v-else>{{ t('emptyCart') }}</p>
-          <div class="cart-preview-total">
+          <div v-else class="cart-preview-empty">
+            <img src="/studio/113.webp" width="56" height="56" alt="" />
+            <div>
+              <strong>{{ t('emptyCart') }}</strong>
+              <RouterLink to="/catalogo" @click="close()"
+                >{{ t('exploreCatalog') }} <ArrowRight :size="14"
+              /></RouterLink>
+            </div>
+          </div>
+          <div class="cart-preview-total" :class="{ compact: !cart.count }">
             <span>{{ t('total') }} · {{ t('units', cart.count) }}</span
             ><strong>{{ price(cart.total) }}</strong>
           </div>
@@ -184,14 +196,12 @@ onUnmounted(() => clearTimeout(timer))
   width: min(390px, calc(100vw - 24px));
   max-height: min(calc(100dvh - 24px), var(--reka-popover-content-available-height, 100dvh));
   overflow-y: auto;
-  --receipt-ink: #171419;
-  --receipt-paper: #fff5e7;
-  padding: 0 16px 16px;
-  border: 2px solid var(--receipt-ink);
-  border-radius: 2px;
-  background: var(--receipt-paper);
-  color: var(--receipt-ink);
-  box-shadow: 0 18px 60px #0003;
+  padding: 0 16px 14px;
+  border: 1px solid var(--control-border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 12px 38px var(--shop-shadow);
 }
 .cart-preview-heading,
 .cart-preview-total {
@@ -201,44 +211,75 @@ onUnmounted(() => clearTimeout(timer))
   gap: 12px;
 }
 .cart-preview-heading {
-  margin: 0 -16px;
-  padding: 4px 10px 6px 16px;
-  background: var(--receipt-ink);
-  color: var(--receipt-paper);
-  border-bottom: 4px solid #e83250;
-}
-.cart-preview-heading .icon-button {
-  color: inherit;
-  background: transparent;
-  min-height: 44px;
-  min-width: 44px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line);
 }
 .cart-preview-heading h2 {
-  font: 900 clamp(1.45rem, 5vw, 1.9rem) / 1 var(--font-display);
-  text-transform: uppercase;
-  transform: skewX(-5deg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
+  font: inherit;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+.cart-preview-heading h2 svg {
+  color: var(--purple);
+}
+.cart-preview-heading .icon-button {
+  min-height: 44px;
+  min-width: 44px;
+  color: var(--muted-strong);
+  background: transparent;
+}
+.cart-preview-empty {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 0 12px;
+}
+.cart-preview-empty img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  flex: none;
+}
+.cart-preview-empty strong {
+  font-size: 0.95rem;
+}
+.cart-preview-empty a {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  min-height: 44px;
+  color: var(--purple);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.cart-preview-empty a:hover {
+  text-decoration: underline;
 }
 .cart-preview-lines {
   list-style: none;
   padding: 0;
-  margin: 12px 0;
+  margin: 0;
 }
 .cart-preview-lines li + li {
-  border-top: 1px solid #d8cabe;
+  border-top: 1px solid var(--line);
 }
 .cart-preview-lines a {
   display: grid;
-  grid-template-columns: 58px minmax(0, 1fr) auto;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  padding: 12px 0;
-  font-size: 0.8rem;
+  padding: 9px 0;
+  font-size: 0.85rem;
 }
 .cart-preview-art.pokemon-palette {
-  height: 58px;
-  background:
-    repeating-linear-gradient(-35deg, transparent 0 20px, #fff4 20px 24px), var(--pokemon-tint);
+  height: 52px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--pokemon-tint) 26%, var(--surface));
 }
 .cart-preview-art img {
   width: 100%;
@@ -247,34 +288,43 @@ onUnmounted(() => clearTimeout(timer))
 }
 .cart-preview-copy {
   display: grid;
-  gap: 5px;
+  gap: 3px;
   overflow-wrap: anywhere;
 }
 .cart-preview-copy span {
-  color: #5b4e51;
-  font-size: 0.75rem;
+  color: var(--muted-strong);
+  font-size: 0.76rem;
 }
 .cart-preview-total {
-  border-top: 1px dashed #877970;
-  padding: 16px 0;
-  font-size: 0.85rem;
+  border-top: 1px solid var(--line);
+  padding: 12px 0;
+  font-size: 0.83rem;
+  color: var(--muted-strong);
 }
 .cart-preview-total strong {
-  font: 900 1.65rem/1 var(--font-display);
+  font-size: 1.12rem;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
 }
-.cart-preview-copy strong {
-  font: 900 1.18rem/1.12 var(--font-display);
-  text-transform: uppercase;
+.cart-preview-total.compact {
+  padding: 8px 0;
+}
+.cart-preview-total.compact strong {
+  font-size: 0.85rem;
+  color: inherit;
 }
 .cart-preview .cart-preview-link {
   width: 100%;
-  background: #bc1933;
-  color: white;
-  border: 0;
-  border-radius: 0;
-  transform: skewX(-4deg);
-  font: 900 1.15rem/1.1 var(--font-display);
-  text-transform: uppercase;
+  background: var(--feature);
+  color: var(--purple);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-height: 44px;
+  font-weight: 700;
+  justify-content: space-between;
+}
+.cart-preview .cart-preview-link:hover {
+  background: var(--control-hover);
 }
 @media (max-width: 400px) {
   .cart-preview-lines a {
