@@ -95,6 +95,7 @@ export const adventureEn = {
   confirmSurrender: 'Leave this battle?',
   surrenderHelp:
     'You keep your Pokémon and credits. You can try again with a fully recovered team.',
+  backToCommands: 'Back to commands',
   cancel: 'Keep battling',
   won: 'Badge secured!',
   lost: 'A new plan, another try.',
@@ -269,6 +270,7 @@ export const adventureEs = {
   confirmSurrender: '¿Abandonar este combate?',
   surrenderHelp:
     'Conservas tus Pokémon y créditos. Puedes volver a intentarlo con el equipo recuperado.',
+  backToCommands: 'Volver al menú',
   cancel: 'Seguir luchando',
   won: '¡Medalla conseguida!',
   lost: 'Otro plan, otro intento.',

@@ -776,11 +776,11 @@ function health(pokemon: Fighter) {
             </div>
             <button
               v-if="command !== 'menu'"
-              class="text-button battle-leave"
+              class="battle-leave"
               :disabled="blocked"
               @click="command = 'menu'"
             >
-              {{ t('adventure.cancel') }}
+              <ChevronLeft :size="16" />{{ t('adventure.backToCommands') }}
             </button>
           </template>
           <div v-else class="battle-result" role="status">

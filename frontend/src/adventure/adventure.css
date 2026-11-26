@@ -2532,8 +2532,19 @@
   top: 8px;
 }
 .is-battling .battle-leave {
-  color: #6c3f37;
+  margin-top: 8px;
+  background: #fffbe9;
+  border: 2px solid #586768;
+  border-radius: 4px;
+  color: #293c3e;
+  font: 700 0.84rem/1.2 var(--font-mono);
 }
+.is-battling .battle-leave:is(:hover, :focus-visible):enabled {
+  background: #f8e5ad;
+  border-color: #334b50;
+  color: #233536;
+}
+
 @media (max-width: 520px) {
   .battle-focused .battle-arena {
     aspect-ratio: 1.6;
