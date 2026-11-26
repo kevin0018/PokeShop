@@ -18,62 +18,103 @@
   max-width: 720px;
 }
 .trainer-access {
+  --pass-ink: #171419;
+  --pass-paper: #fff5e7;
+  --pass-red: #bc1933;
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  border: 1px solid var(--line);
-  border-radius: var(--shop-radius);
-  overflow: hidden;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+  border: 2px solid var(--pass-ink);
 }
 .trainer-pass {
-  background:
-    radial-gradient(color-mix(in srgb, var(--purple) 14%, transparent) 1px, transparent 1.2px) 0 0 /
-      9px 9px,
-    var(--feature);
-  padding: 38px;
-  border-right: 1px dashed var(--border-strong);
+  display: flex;
+  flex-direction: column;
+  padding: clamp(16px, 3.5vw, 44px);
+  color: var(--pass-paper);
+  background: var(--pass-ink);
 }
 .pass-stamp {
-  display: flex;
+  display: inline-flex;
+  align-self: start;
   align-items: center;
-  gap: 12px;
-  color: var(--purple);
-  font-weight: 800;
-  letter-spacing: 6px;
-  margin-bottom: 28px;
+  gap: 8px;
+  padding-bottom: 4px;
+  border-bottom: 3px solid #ff3a58;
+  font: 700 0.85rem/1.2 var(--font-mono);
+  letter-spacing: 0.14em;
+  transform: rotate(-2deg);
+}
+.pass-stamp svg {
+  width: 20px;
+  height: 20px;
 }
 .trainer-pass h2 {
-  font: 900 clamp(2rem, 4vw, 3rem) / 1.05 var(--font-display);
-  margin-bottom: 12px;
+  font: 900 clamp(2.4rem, 4.5vw, 4.6rem) / 0.96 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: -0.035em;
+  transform: skewX(-5deg);
+  text-shadow: 3px 3px var(--pass-red);
+  margin: 16px 0;
+}
+.trainer-pass > p {
+  color: #eee3df;
+  line-height: 1.45;
 }
 .pass-companions {
   display: flex;
-  justify-content: center;
-  padding: 22px 0;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 8px 16px;
+  margin: 18px 0;
+  background:
+    radial-gradient(#39151c55 1px, transparent 1.5px) 0 0/5px 5px,
+    linear-gradient(115deg, #a6ce9d 33%, #ffb07e 33% 65%, #91cbe5 65%);
+  clip-path: polygon(3% 5%, 100% 0, 97% 95%, 0 100%);
 }
 .pass-companions img {
-  width: 30%;
-  max-width: 130px;
+  width: 24%;
+  max-width: 84px;
   image-rendering: pixelated;
+  filter: drop-shadow(2px 3px 0 #18141966);
 }
 .pass-badges {
-  display: flex;
-  justify-content: space-between;
-  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  margin: auto 0 0;
+  padding: 10px 0 0;
+  border-top: 1px dashed #77696b;
   list-style: none;
-  gap: 8px;
 }
 .pass-badges li {
   display: grid;
   justify-items: center;
-  gap: 5px;
-  color: var(--pokemon-ink);
-  font-size: 11px;
+  gap: 4px;
+  font: 700 0.65rem/1.2 var(--font-mono);
+  color: #eee3df;
+}
+.pass-badges img {
+  width: min(90%, 44px);
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
 }
 .trainer-form {
-  padding: 38px;
+  min-width: 0;
+  padding: clamp(16px, 3.5vw, 44px);
   background: var(--surface);
   display: flex;
   flex-direction: column;
+  justify-content: center;
+}
+.trainer-form .adventure-tabs button {
+  border-radius: 0;
+  transform: skewX(-5deg);
+  font: 900 1.12rem/1.1 var(--font-display);
+  text-transform: uppercase;
+}
+.trainer-form .adventure-tabs button[aria-pressed='true'] {
+  background: var(--pass-ink);
+  color: var(--pass-paper);
+  border-bottom: 3px solid #ff3955;
 }
 .trainer-form label {
   font-size: 13px;
@@ -83,7 +124,7 @@
 .trainer-form input {
   width: 100%;
   min-height: 48px;
-  border-radius: 10px;
+  border-radius: 2px;
   border: 1px solid var(--control-border);
   background: var(--control-surface);
   color: var(--ink);
@@ -96,6 +137,13 @@
   margin-top: 6px;
 }
 .trainer-form > .button {
+  border: 0;
+  border-radius: 0;
+  background: var(--pass-red);
+  color: white;
+  transform: skewX(-4deg);
+  font: 900 1.25rem/1.2 var(--font-display);
+  text-transform: uppercase;
   margin-top: 26px;
   justify-content: space-between;
 }
@@ -1381,11 +1429,9 @@
     padding: 8px 0;
   }
   .pass-companions img {
-    width: 80px;
+    width: min(24%, 58px);
   }
-  .pass-stamp {
-    margin-bottom: 16px;
-  }
+
   .trainer-strip {
     gap: 12px;
   }

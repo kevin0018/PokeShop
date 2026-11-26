@@ -393,12 +393,7 @@ function health(pokemon: Fighter) {
         <h2>{{ t('adventure.privateAccess') }}</h2>
         <p>{{ t('adventure.accessText') }}</p>
         <div class="pass-companions" aria-hidden="true">
-          <img
-            v-for="id in [1, 4, 7]"
-            :key="id"
-            :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`"
-            alt=""
-          />
+          <img v-for="id in [1, 4, 7]" :key="id" :src="`/studio/starter-${id}.png`" alt="" />
         </div>
         <ol class="pass-badges" aria-label="Kanto">
           <li
@@ -408,7 +403,12 @@ function health(pokemon: Fighter) {
             class="pokemon-palette"
             :data-type="g.type"
           >
-            <Award :size="24" /><span>{{ g.id }}</span>
+            <img
+              :src="`/studio/badges/${g.id}.png`"
+              :alt="g.leader"
+              width="44"
+              height="44"
+            /><span>{{ g.id.toString().padStart(2, '0') }}</span>
           </li>
         </ol>
       </div>
@@ -486,7 +486,7 @@ function health(pokemon: Fighter) {
           class="gym-intro pokemon-palette"
           :data-type="gym?.type"
         >
-          <Award :size="28" />
+          <img v-if="gym" :src="`/studio/badges/${gym.id}.png`" alt="" width="36" height="36" />
           <div>
             <p>{{ gym?.names[locale] }}</p>
             <h1>{{ gym?.leader }}</h1>
@@ -605,7 +605,13 @@ function health(pokemon: Fighter) {
             </button>
           </template>
           <div v-else class="battle-result" role="status">
-            <Award v-if="displayed.status === 'won'" :size="36" />
+            <img
+              v-if="displayed.status === 'won'"
+              :src="`/studio/badges/${displayed.gym_id}.png`"
+              alt=""
+              width="52"
+              height="52"
+            />
             <h2>{{ t(`adventure.${displayed.status}`) }}</h2>
             <p v-if="displayed.status === 'won'">
               {{
@@ -766,10 +772,15 @@ function health(pokemon: Fighter) {
                 <div class="gym-medal">
                   <TrainerPortrait :gym-id="g.id" :leader="g.leader" />
                   <span class="gym-status"
-                    ><Award v-if="game.trainer.medals.includes(g.id)" :size="14" /><LockKeyhole
-                      v-else-if="g.id > game.trainer.medals.length + 1"
-                      :size="14"
-                    />{{ g.id }}</span
+                    ><img
+                      v-if="game.trainer.medals.includes(g.id)"
+                      :src="`/studio/badges/${g.id}.png`"
+                      alt=""
+                      width="20"
+                      height="20"
+                    /><LockKeyhole v-else-if="g.id > game.trainer.medals.length + 1" :size="14" />{{
+                      g.id
+                    }}</span
                   >
                 </div>
                 <span class="gym-info">
