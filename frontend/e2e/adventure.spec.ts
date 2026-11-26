@@ -206,6 +206,8 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   await expect(page.locator('.gym-door-map.interior')).toBeVisible()
   await expect(page.locator('.gym-door-shot strong')).toHaveText('Brock')
   await expect(page.locator('.battle-arena')).toBeHidden()
+  await expect(page.locator('.leader-line')).toContainText('Onix')
+  await expect(page.locator('.pitched-ball')).toBeVisible()
   await expect(page.locator('.battle-entry')).toBeHidden()
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await expect(page.locator('.gym-world')).toHaveAttribute('data-type', 'roca')
@@ -227,6 +229,7 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   await checkBattleWidths(page)
   await page.evaluate(() => localStorage.setItem('pokeshop.locale', 'en'))
   await page.reload()
+  await page.getByRole('button', { name: 'Fight', exact: true }).click()
   await expect(page.getByRole('button', { name: 'Use Vine whip', exact: true })).toBeVisible()
   await checkBattleWidths(page)
   await page.evaluate(() => localStorage.setItem('pokeshop.locale', 'es'))
@@ -249,6 +252,7 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
     },
     { times: 1 },
   )
+  await page.getByRole('button', { name: 'Luchar', exact: true }).click()
   await page.getByRole('button', { name: 'Usar Látigo cepa', exact: true }).click()
   await expect(page.getByRole('alert')).toContainText('recuperado tu progreso')
   await expect(page.locator('.gym-intro')).toContainText('Turno 2')
@@ -272,6 +276,7 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
     page.getByRole('button', { name: 'Ver historial: turno 2', exact: true }),
   ).toBeFocused()
   const move = page.getByRole('button', { name: 'Usar Látigo cepa', exact: true })
+  await page.getByRole('button', { name: 'Luchar', exact: true }).click()
   await expect(move).toBeEnabled()
   await move.click()
   await expect(page.locator('.battle-arena')).toHaveAttribute('aria-busy', 'false')

@@ -8,7 +8,6 @@ import {
   Plus,
   X,
   ArrowRight,
-  Flag,
   Coins,
   History,
   ChevronLeft,
@@ -38,6 +37,14 @@ const cityMarkers: Record<number, [number, number]> = {
   5: [108, 116],
   6: [124, 68],
 }
+// Each leg ends at the next badge city, including the return north to Saffron.
+const badgeRoads = [
+  { path: 'M44 52 H70 L78 44 H124', arrow: 'translate(92 44)' },
+  { path: 'M124 44 L114 54 V75 L124 85 V92', arrow: 'translate(114 64) rotate(90)' },
+  { path: 'M124 92 H106 L100 86 V68', arrow: 'translate(100 78) rotate(-90)' },
+  { path: 'M100 68 H77 L69 76 V103 L82 116 H108', arrow: 'translate(69 90) rotate(90)' },
+  { path: 'M108 116 H126 L148 94 V79 L137 68 H124', arrow: 'translate(141 101) rotate(-45)' },
+]
 const selectedGym = computed(
   () =>
     game.gyms.find((g) => g.id === openedGym.value) ??
@@ -45,6 +52,7 @@ const selectedGym = computed(
 )
 const arrivalGym = ref<typeof selectedGym.value>()
 const insideGym = ref(false)
+const throwing = ref(false)
 const entranceActor = ref<HTMLElement>()
 async function finishEntranceShot() {
   await nextTick()
@@ -159,6 +167,7 @@ function eventActor(event: BattleEvent) {
 }
 const playing = ref(false)
 const motion = ref('')
+const command = ref<'menu' | 'moves' | 'team'>('menu')
 const leaving = ref(false)
 const log = ref<BattleEvent[]>([])
 let mounted = true
@@ -343,6 +352,7 @@ async function saveTeam() {
 async function challenge(gymId: number) {
   if (!canChallenge(gymId)) return
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  throwing.value = false
   insideGym.value = false
   entering.value = !reduced
   revealing.value = false
@@ -355,10 +365,14 @@ async function challenge(gymId: number) {
       insideGym.value = true
       await finishEntranceShot()
       if (!mounted) return
+      throwing.value = true
+      await finishEntranceShot()
+      if (!mounted) return
     }
     displayed.value = game.battle ? structuredClone(toRaw(game.battle)) : result
     log.value = []
     arenaOpen.value = true
+    command.value = 'menu'
     leaving.value = false
     await nextTick()
     window.scrollTo({ top: 0 })
@@ -467,9 +481,14 @@ function health(pokemon: Fighter) {
     >
       <GymBackdrop :type="gym?.type" />
     </div>
-    <div v-if="entering" class="battle-entry" :class="{ revealing }" aria-hidden="true">
+    <div v-if="entering" class="battle-entry" :class="{ revealing }" role="status">
       <div v-if="arrivalGym" class="gym-door-shot">
+        <div v-if="throwing" class="leader-pitch">
+          <img :src="`/studio/gyms/leader-${arrivalGym.id}.png`" alt="" width="64" height="64" />
+          <i ref="entranceActor" class="pitched-ball" aria-hidden="true"></i>
+        </div>
         <div
+          v-else
           :key="insideGym ? 'inside' : 'outside'"
           class="gym-door-map"
           :class="{ interior: insideGym }"
@@ -479,6 +498,9 @@ function health(pokemon: Fighter) {
           <span ref="entranceActor" class="gym-visitor"><i></i></span>
         </div>
         <strong>{{ insideGym ? arrivalGym.leader : arrivalGym.names[locale] }}</strong>
+        <p v-if="insideGym" class="leader-line">
+          {{ t(`adventure.leaderLines.g${arrivalGym.id}`) }}
+        </p>
       </div>
     </div>
   </Teleport>
@@ -643,20 +665,17 @@ function health(pokemon: Fighter) {
           :data-type="gym?.type"
           :aria-busy="blocked"
         >
-          <GymBackdrop :type="gym?.type" />
           <div class="fighter-hud enemy-hud">
             <strong>{{ name(opponent) }}</strong
             ><span>{{ t('adventure.level', { level: opponent.level }) }}</span>
             <progress :value="opponent.hp" :max="opponent.max_hp" :aria-label="health(opponent)" />
             <small>{{ opponent.hp }} / {{ opponent.max_hp }}</small>
           </div>
-          <div class="battle-platform enemy-platform" aria-hidden="true" />
           <BattleSprite
             class="battle-sprite enemy-sprite"
             :src="opponent.front"
             :name="name(opponent)"
           />
-          <div class="battle-platform player-platform" aria-hidden="true" />
           <BattleSprite
             class="battle-sprite player-sprite"
             :src="player.back"
@@ -677,11 +696,23 @@ function health(pokemon: Fighter) {
             aria-live="polite"
             :aria-label="t('adventure.battleLog')"
           >
+            <p v-if="!log.length && displayed.status === 'active'">
+              {{ t('adventure.commandPrompt', { name: name(player) }) }}
+            </p>
             <p v-for="(event, i) in log" :key="i">{{ eventText(event) }}</p>
             <p v-if="blocked" role="status">{{ t('adventure.processing') }}</p>
           </div>
           <template v-if="displayed.status === 'active'">
-            <div class="battle-moves">
+            <div v-if="command === 'menu' && !leaving" class="fight-commands">
+              <button :disabled="blocked" @click="command = 'moves'">
+                {{ t('adventure.fight') }}
+              </button>
+              <button :disabled="blocked" @click="command = 'team'">Pokémon</button>
+              <button :disabled="blocked" @click="leaving = true">
+                {{ t('adventure.surrender') }}
+              </button>
+            </div>
+            <div v-if="command === 'moves'" class="battle-moves">
               <button
                 v-for="move in player.moves"
                 :key="move.id"
@@ -703,7 +734,11 @@ function health(pokemon: Fighter) {
                 {{ locale === 'es' ? 'Forcejeo' : 'Struggle' }}
               </button>
             </div>
-            <div class="battle-bench" :aria-label="t('adventure.yourTeam')">
+            <div
+              v-if="command === 'team'"
+              class="battle-bench"
+              :aria-label="t('adventure.yourTeam')"
+            >
               <button
                 v-for="(member, slot) in displayed.player"
                 :key="member.id"
@@ -730,12 +765,12 @@ function health(pokemon: Fighter) {
               </button>
             </div>
             <button
-              v-else
+              v-if="command !== 'menu'"
               class="text-button battle-leave"
               :disabled="blocked"
-              @click="leaving = true"
+              @click="command = 'menu'"
             >
-              <Flag :size="16" />{{ t('adventure.surrender') }}
+              {{ t('adventure.cancel') }}
             </button>
           </template>
           <div v-else class="battle-result" role="status">
@@ -907,6 +942,13 @@ function health(pokemon: Fighter) {
               </header>
               <div class="kanto-terrain">
                 <img src="/studio/kanto-atlas.png" width="192" height="144" alt="" />
+                <svg class="badge-roads" viewBox="0 0 192 144" aria-hidden="true">
+                  <g v-for="leg in badgeRoads" :key="leg.path">
+                    <path :d="leg.path" class="road-edge" />
+                    <path :d="leg.path" class="road-fill" />
+                    <path d="M-2.2 -2.2 L1 0 L-2.2 2.2" :transform="leg.arrow" class="road-arrow" />
+                  </g>
+                </svg>
                 <button
                   v-for="g in game.gyms"
                   :key="g.id"

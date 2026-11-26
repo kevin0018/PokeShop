@@ -2327,3 +2327,244 @@
     height: 44px;
   }
 }
+
+.badge-roads {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.road-edge {
+  stroke: #604e39;
+  stroke-width: 4.6;
+}
+.road-fill {
+  stroke: #ffe08a;
+  stroke-width: 3.1;
+}
+.road-arrow {
+  stroke: #493b2b;
+  stroke-width: 1.4;
+}
+.leader-line {
+  margin: 0;
+  border-top: 3px solid #d7ad6c;
+  background: #fff5da;
+  color: #233a42;
+  padding: 12px 15px;
+  font: 650 0.96rem/1.5 var(--font-mono);
+}
+.leader-pitch {
+  position: relative;
+  aspect-ratio: 144/112;
+  overflow: hidden;
+  isolation: isolate;
+  background: repeating-linear-gradient(-12deg, #628085 0 7%, #658a8d 7% 10%, #719497 10% 13%);
+}
+.leader-pitch img {
+  position: absolute;
+  height: 85%;
+  width: auto;
+  right: 16%;
+  bottom: 0;
+  image-rendering: pixelated;
+  animation: leader-pitch 0.85s ease-out both;
+}
+.pitched-ball {
+  position: absolute;
+  top: 43%;
+  left: 57%;
+  width: 7%;
+  aspect-ratio: 1;
+  border: 3px solid #23232e;
+  border-radius: 50%;
+  background: linear-gradient(#e54a44 0 43%, #23232e 43% 56%, #fff9d9 56%);
+  animation: pitch-ball 1.25s linear both;
+}
+.pitched-ball::after {
+  content: '';
+  position: absolute;
+  inset: 32%;
+  border-radius: 50%;
+  background: #fff9d9;
+  border: 2px solid #23232e;
+}
+@keyframes leader-pitch {
+  0%,
+  20% {
+    transform: translateX(5%) rotate(3deg);
+  }
+  48% {
+    transform: translateX(-5%) rotate(-4deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes pitch-ball {
+  0%,
+  25% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  32% {
+    opacity: 1;
+  }
+  64% {
+    transform: translate(-180%, -170%) rotate(180deg) scale(1.5);
+  }
+  100% {
+    transform: translate(-220%, 110%) rotate(370deg) scale(13);
+  }
+}
+.battle-focused .main-content {
+  max-width: 980px;
+}
+.battle-focused .battle-arena {
+  height: auto;
+  aspect-ratio: 240/112;
+  border: 4px solid #37474a;
+  border-bottom: 0;
+  border-radius: 0;
+  background: #f4f3df url('/studio/gyms/arena.png') center/100% 100%;
+  image-rendering: pixelated;
+}
+.battle-arena .battle-sprite {
+  width: 37%;
+  height: 79%;
+}
+.battle-arena .enemy-sprite {
+  top: -10%;
+  right: 8%;
+}
+.battle-arena .player-sprite {
+  bottom: -7%;
+  left: 6%;
+}
+.battle-arena .fighter-hud {
+  width: 40%;
+  padding: clamp(5px, 1vw, 12px);
+  gap: 3px;
+  color: #29393b;
+  background: #f7f5dc;
+  border: 3px solid #414d49;
+  border-radius: 12px 3px;
+  box-shadow: 3px 3px #889484;
+  font: 700 clamp(0.72rem, 1.6vw, 1.1rem) / 1.15 var(--font-mono);
+}
+.battle-arena .fighter-hud span,
+.battle-arena .fighter-hud small {
+  color: #394846;
+  grid-column: auto;
+}
+.battle-arena .fighter-hud small {
+  grid-column: 1/-1;
+}
+.battle-arena .enemy-hud {
+  top: 7%;
+  left: 3%;
+}
+.battle-arena .player-hud {
+  bottom: 8%;
+  right: 3%;
+}
+.is-battling .battle-console {
+  background: #eeebd6;
+  color: #28383a;
+  border: 4px solid #37474a;
+  border-radius: 0 0 8px 8px;
+  padding: 8px;
+  font-family: var(--font-mono);
+}
+.is-battling .battle-log {
+  color: #fff9e8;
+  background: #305768;
+  border: 3px solid #ba675a;
+  box-shadow: inset 0 0 0 2px #e3b987;
+  border-radius: 5px;
+  padding: 10px 14px;
+  margin: 0 0 8px;
+  font-size: clamp(0.85rem, 1.5vw, 1.05rem);
+}
+.is-battling .battle-moves {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  background: #fffbea;
+  border: 3px double #586768;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.is-battling .battle-moves button {
+  position: relative;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #27383c;
+  padding: 8px 10px 8px 20px;
+  min-height: 52px;
+  gap: 2px;
+}
+.is-battling .battle-moves button span,
+.is-battling .battle-moves button small {
+  color: #475653;
+}
+.is-battling .battle-moves button:is(:hover, :focus-visible):enabled {
+  background: #f8e5ad;
+  outline-offset: -3px;
+}
+.is-battling .battle-moves button:is(:hover, :focus-visible):enabled::before {
+  content: '▸';
+  position: absolute;
+  left: 5px;
+  top: 8px;
+}
+.is-battling .battle-leave {
+  color: #6c3f37;
+}
+@media (max-width: 520px) {
+  .battle-focused .battle-arena {
+    aspect-ratio: 1.6;
+  }
+  .battle-arena .fighter-hud {
+    width: 45%;
+    font-size: 0.7rem;
+  }
+  .battle-arena .fighter-hud span {
+    grid-column: 1/-1;
+  }
+}
+.fight-commands {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  background: #fffce9;
+  border: 4px double #4d5e5d;
+  border-radius: 6px;
+}
+.fight-commands button {
+  color: #303e3e;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  min-height: 48px;
+  padding: 6px 10px 6px 22px;
+  font: 800 clamp(0.85rem, 1.6vw, 1.1rem) / 1.2 var(--font-mono);
+  position: relative;
+}
+.fight-commands button:is(:focus-visible, :hover):enabled::before {
+  content: '▸';
+  position: absolute;
+  left: 6px;
+}
+.fight-commands button:is(:focus-visible, :hover):enabled {
+  background: #f8e5ad;
+  outline-offset: -3px;
+}
+.is-battling .leave-confirm p,
+.is-battling .battle-result p,
+.is-battling .battle-result {
+  color: #344747;
+}

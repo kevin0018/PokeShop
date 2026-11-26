@@ -3,19 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { UserRound } from 'lucide-vue-next'
 
 const props = defineProps<{ gymId: number; leader: string }>()
-const sprites: Record<number, string> = {
-  1: 'brock',
-  2: 'misty',
-  3: 'ltsurge',
-  4: 'erika',
-  5: 'koga',
-  6: 'sabrina',
-}
-const source = computed(() =>
-  sprites[props.gymId]
-    ? `https://play.pokemonshowdown.com/sprites/trainers/${sprites[props.gymId]}-gen3.png`
-    : null,
-)
+const source = computed(() => `/studio/gyms/leader-${props.gymId}.png`)
 const failed = ref(false)
 watch(source, () => {
   failed.value = false
