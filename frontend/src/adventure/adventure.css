@@ -1770,3 +1770,230 @@
   border-color: var(--purple);
   background: var(--surface-hover);
 }
+
+/* Storage uses the six-column, five-row layout of the Kanto PC. */
+.sale-dialog.pc-dialog {
+  padding: 6px;
+  background: #465766;
+  border: 3px solid #26374e;
+  border-radius: 10px;
+  width: min(850px, calc(100vw - 12px));
+}
+.pc-dialog .pc-screen {
+  background: #f1f1dc;
+  color: #263444;
+  border: 3px solid #a4afac;
+  border-radius: 4px;
+  padding: clamp(8px, 2vw, 22px);
+  font-family: var(--font-mono);
+}
+.pc-dialog .pc-screen-header {
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-color: #a2adaa;
+}
+.pc-dialog .pc-screen-header span,
+.pc-dialog .team-note,
+.pc-dialog .pc-selection-count {
+  color: #394957;
+}
+.pc-dialog .pc-screen-header .history-close {
+  background: #354b60;
+  color: white;
+}
+.pc-box-tabs {
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.pc-box-tabs button {
+  border-radius: 4px;
+  background: #e0e5db;
+  color: #28384a;
+  border: 1px solid #9ca6a3;
+}
+.pc-box-tabs button[aria-pressed='true'] {
+  background: #354b60;
+  color: white;
+  border-color: #354b60;
+}
+.storage-workspace {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(0, 3.2fr);
+  gap: 8px;
+}
+.pc-dialog .pc-screen > .team-note,
+.pc-dialog .pc-selection-count {
+  padding: 0;
+  margin: 9px 0;
+  line-height: 1.4;
+}
+.storage-party {
+  padding: 8px;
+  background: #365774;
+  color: #fff4d4;
+  border: 3px solid #23394d;
+  border-radius: 5px;
+}
+.storage-party h3,
+.storage-box h3 {
+  margin: 0;
+  text-align: center;
+  font: 750 0.9rem/1.5 var(--font-mono);
+}
+.storage-party-slots {
+  display: grid;
+  gap: 5px;
+  margin-top: 8px;
+}
+.storage-party-slot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 47px;
+  background: #446984;
+  border: 1px solid #8ba5ad;
+  border-radius: 5px;
+}
+.storage-party-slot small {
+  position: absolute;
+  left: 4px;
+  top: 2px;
+  font: 700 0.65rem/1 var(--font-mono);
+  pointer-events: none;
+}
+.storage-party-slot button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  width: 100%;
+  min-height: 44px;
+  padding: 2px 4px;
+  background: transparent;
+  color: inherit;
+  border: 0;
+  font: 700 0.73rem/1.1 var(--font-mono);
+  overflow-wrap: anywhere;
+}
+.storage-party-slot img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.storage-box {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: 17% 1fr;
+  min-width: 0;
+  padding: 0 5px 5px;
+}
+.storage-box::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: url('/studio/box-forest.png') center/100% 100% no-repeat;
+  image-rendering: pixelated;
+}
+.storage-box.city-box::before {
+  background-image: url('/studio/box-city.png');
+}
+.storage-box h3 {
+  align-self: center;
+  justify-self: center;
+  color: #23394d;
+  background: #fff4cfeb;
+  padding: 0 8px;
+  border-radius: 2px;
+}
+.pc-dialog .storage-box .pc-box-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-rows: repeat(5, minmax(46px, 1fr));
+  gap: 0;
+  margin: 6px 4px 4px;
+}
+.storage-box .collection-member {
+  position: relative;
+  min-width: 0;
+  align-self: center;
+}
+.storage-box .pc-box-grid .collection-member > button:first-child {
+  padding: 0;
+  width: 100%;
+  min-height: 44px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+}
+.storage-box .pc-box-grid .collection-member > button[aria-pressed='true'] {
+  border: 1px solid #1b584f;
+  background: #fff8;
+}
+.storage-box .pc-box-grid .collection-member > button[aria-pressed='true']::after {
+  background: #22584b;
+  right: 2px;
+  top: 2px;
+}
+.storage-box .pc-box-grid .collection-member img {
+  width: 100%;
+  max-width: 68px;
+  height: clamp(44px, 6vw, 62px);
+  object-fit: contain;
+}
+.storage-box .collection-member .collection-sell {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  min-height: 24px;
+  margin: 0 auto;
+  padding: 0;
+  border-radius: 8px;
+  background: #f8f2da;
+  color: #344539;
+  border: 1px solid #677d57;
+}
+.storage-box .pc-empty-slot {
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: #2f602f;
+}
+@media (max-width: 620px) {
+  .storage-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .storage-party {
+    padding: 5px;
+  }
+  .storage-party h3 {
+    text-align: left;
+  }
+  .storage-party-slots {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 2px;
+    margin-top: 3px;
+  }
+  .storage-party-slot button span {
+    position: absolute;
+    clip-path: inset(50%);
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .pc-dialog .pc-screen {
+    padding: 6px;
+  }
+  .storage-box {
+    padding-top: 0;
+    grid-template-rows: auto 1fr;
+  }
+  .storage-box h3 {
+    margin: 8px 0;
+  }
+  .pc-dialog .storage-box .pc-box-grid {
+    margin-top: 12px;
+  }
+}

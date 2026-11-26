@@ -9,6 +9,7 @@ import {
   X,
   ArrowRight,
   Flag,
+  Coins,
   History,
   ChevronLeft,
   ChevronRight,
@@ -235,6 +236,34 @@ function toggle(id: number) {
   else if (draft.value.length < 6) draft.value.push(id)
 }
 
+const pcDrag = ref<{ id: number; fromParty: boolean } | null>(null)
+function startPcDrag(event: DragEvent, id: number, fromParty: boolean) {
+  if (game.active || blocked.value || !event.dataTransfer) {
+    event.preventDefault()
+    return
+  }
+  pcDrag.value = { id, fromParty }
+  event.dataTransfer.effectAllowed = 'move'
+  event.dataTransfer.setData('text/plain', String(id))
+}
+function dropInParty(index: number) {
+  const item = pcDrag.value
+  pcDrag.value = null
+  if (!item || game.active || blocked.value) return
+  const current = draft.value.indexOf(item.id)
+  if (current >= 0) {
+    void moveSlot(current, index)
+  } else if (draft.value.length < 6 && game.trainer?.collection.some((p) => p.id === item.id)) {
+    draft.value.splice(Math.min(index, draft.value.length), 0, item.id)
+    saved.value = false
+  }
+}
+function dropInBox() {
+  const item = pcDrag.value
+  pcDrag.value = null
+  if (item?.fromParty && !game.active && !blocked.value && draft.value.includes(item.id))
+    toggle(item.id)
+}
 function setMode(value: 'login' | 'register') {
   mode.value = value
   game.error = ''
@@ -918,7 +947,12 @@ function health(pokemon: Fighter) {
       </li>
     </ol>
   </dialog>
-  <dialog ref="pcDialog" class="sale-dialog pc-dialog" aria-labelledby="pc-title">
+  <dialog
+    ref="pcDialog"
+    @close="pcDrag = null"
+    class="sale-dialog pc-dialog"
+    aria-labelledby="pc-title"
+  >
     <template v-if="game.trainer">
       <div class="pc-screen">
         <header class="pc-screen-header">
@@ -943,42 +977,100 @@ function health(pokemon: Fighter) {
           {{ t('adventure.emptyCollection') }}
           <RouterLink to="/catalogo">{{ t('catalog') }}</RouterLink>
         </p>
-        <div class="collection-picker pc-box-grid">
+        <div class="storage-workspace">
+          <section class="storage-party" :aria-label="t('adventure.teamTab')">
+            <h3>{{ t('adventure.teamTab') }}</h3>
+            <div class="storage-party-slots">
+              <div
+                v-for="(member, index) in slots"
+                :key="index"
+                class="storage-party-slot"
+                @dragover.prevent
+                @drop.prevent="dropInParty(index)"
+              >
+                <small>{{ index + 1 }}</small>
+                <button
+                  v-if="member"
+                  :aria-label="t('adventure.removeFromTeam', { name: name(member) })"
+                  :title="name(member)"
+                  :disabled="game.active || blocked"
+                  draggable="true"
+                  @dragstart="startPcDrag($event, member.id, true)"
+                  @dragend="pcDrag = null"
+                  @click="toggle(member.id)"
+                >
+                  <img
+                    :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
+                    draggable="false"
+                    alt=""
+                  /><span>{{ name(member) }}</span>
+                </button>
+                <span v-else aria-hidden="true">—</span>
+              </div>
+            </div>
+          </section>
           <div
-            v-for="(member, i) in boxSlots"
-            :key="member?.id ?? `empty-${i}`"
-            :class="member ? 'collection-member' : 'pc-empty-slot'"
+            class="storage-box"
+            :class="{ 'city-box': box % 2 }"
+            @dragover.prevent
+            @drop.prevent="dropInBox"
           >
-            <template v-if="member">
-              <button
-                :aria-pressed="draft.includes(member.id)"
-                :aria-label="t('adventure.select', { name: name(member) })"
-                :disabled="
-                  game.active || blocked || (!draft.includes(member.id) && draft.length === 6)
-                "
-                @click="toggle(member.id)"
+            <h3>{{ t('adventure.box', { number: box + 1 }) }}</h3>
+            <div class="collection-picker pc-box-grid">
+              <div
+                v-for="(member, i) in boxSlots"
+                :key="member?.id ?? `empty-${i}`"
+                :class="member ? 'collection-member' : 'pc-empty-slot'"
               >
-                <img
-                  :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
-                  alt=""
-                /><strong>{{ name(member) }}</strong>
-              </button>
-              <button
-                class="collection-sell"
-                :aria-label="t('adventure.sell', { name: name(member) })"
-                :disabled="game.active || blocked"
-                @click="askSale(member)"
-              >
-                {{ t('adventure.sellButton') }}
-              </button>
-            </template>
-            <span v-else aria-hidden="true">{{ i + 1 }}</span>
+                <template v-if="member">
+                  <button
+                    :aria-pressed="draft.includes(member.id)"
+                    :title="name(member)"
+                    draggable="true"
+                    @dragstart="startPcDrag($event, member.id, false)"
+                    @dragend="pcDrag = null"
+                    :aria-label="t('adventure.select', { name: name(member) })"
+                    :disabled="
+                      game.active || blocked || (!draft.includes(member.id) && draft.length === 6)
+                    "
+                    @click="toggle(member.id)"
+                  >
+                    <img
+                      :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
+                      draggable="false"
+                      alt=""
+                    />
+                  </button>
+                  <button
+                    class="collection-sell"
+                    :aria-label="t('adventure.sell', { name: name(member) })"
+                    :disabled="game.active || blocked"
+                    @click="askSale(member)"
+                  >
+                    <Coins :size="14" aria-hidden="true" />
+                  </button>
+                </template>
+                <span v-else aria-hidden="true">·</span>
+              </div>
+            </div>
           </div>
         </div>
-        <p class="pc-selection-count">{{ t('adventure.selectedTeam', { count: draft.length }) }}</p>
+        <p class="team-note">{{ t('adventure.pcHelp') }}</p>
+        <p class="pc-selection-count" role="status">
+          {{ t('adventure.selectedTeam', { count: draft.length }) }}
+        </p>
         <p v-if="draft.length === 6" class="team-note">{{ t('adventure.teamFull') }}</p>
         <p class="team-note">{{ t('adventure.salePolicy') }}</p>
-        <button class="button primary" @click="pcDialog?.close()">
+        <p v-if="game.error" role="alert">{{ errorText }}</p>
+        <button
+          class="button primary"
+          :disabled="!dirty || game.active || blocked"
+          @click="saveTeam"
+        >
+          {{ t('adventure.saveTeam') }}
+        </button>
+        <span v-if="saved" role="status">{{ t('adventure.teamSaved') }}</span>
+        <button class="button secondary" @click="pcDialog?.close()">
           {{ t('adventure.backToTeam') }}
         </button>
       </div>

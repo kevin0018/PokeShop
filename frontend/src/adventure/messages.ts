@@ -45,6 +45,8 @@ export const adventureEn = {
   openPc: 'Open PC',
   closePc: 'Close PC',
   boxes: 'Pokémon boxes',
+  pcHelp:
+    'Tap a Pokémon to add or remove it. Drag to place it in a team slot or return it to the box.',
   box: 'Box {number}',
   selectedTeam: '{count} / 6 in your team',
   backToTeam: 'Back to team',
@@ -205,6 +207,8 @@ export const adventureEs = {
   openPc: 'Abrir PC',
   closePc: 'Cerrar PC',
   boxes: 'Cajas de Pokémon',
+  pcHelp:
+    'Toca un Pokémon para añadirlo o retirarlo. Arrástralo a una plaza del equipo o de vuelta a la caja.',
   box: 'Caja {number}',
   selectedTeam: '{count} / 6 en tu equipo',
   backToTeam: 'Volver al equipo',
