@@ -2,6 +2,13 @@ export const adventureEn = {
   nav: 'Adventure',
   title: 'Your team',
   privateAccess: 'Trainer access',
+  viridianCity: 'Viridian City',
+  reception: 'Pokémon Center · Reception',
+  passwordGreeting:
+    'All right, {name}. Enter your password at the terminal to open your trainer pass.',
+  loginGreeting: 'Welcome back! What name did you register your team under?',
+  registerGreeting:
+    'Your first visit? Have your invitation ready. Let’s get your trainer pass issued.',
   accessText:
     'Have an invitation? Create your trainer account and start with 1,000 credits. To request a code, contact me through my portfolio.',
   register: 'Create trainer',
@@ -154,6 +161,13 @@ export const adventureEs = {
   nav: 'Aventura',
   title: 'Tu equipo',
   privateAccess: 'Acceso de entrenadores',
+  viridianCity: 'Ciudad Verde',
+  reception: 'Centro Pokémon · Recepción',
+  passwordGreeting:
+    'De acuerdo, {name}. Introduce tu contraseña en el terminal para abrir tu ficha.',
+  loginGreeting: '¡Qué alegría verte! ¿Con qué nombre registraste a tu equipo?',
+  registerGreeting:
+    '¿Es tu primera visita? Ten a mano tu invitación. Vamos a darte de alta como entrenador.',
   accessText:
     '¿Tienes una invitación? Crea tu cuenta y empieza con 1.000 créditos. Para solicitar un código, contacta conmigo a través de mi portfolio.',
   register: 'Crear entrenador',

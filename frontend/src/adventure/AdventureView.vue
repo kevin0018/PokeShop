@@ -69,6 +69,12 @@ const mode = ref<'login' | 'register'>('login')
 const username = ref(''),
   password = ref(''),
   invitation = ref('')
+const receptionText = computed(() => {
+  if (mode.value === 'register') return t('adventure.registerGreeting')
+  return /^[a-zA-Z0-9_]{3,24}$/.test(username.value)
+    ? t('adventure.passwordGreeting', { name: username.value })
+    : t('adventure.loginGreeting')
+})
 const tab = ref<'team' | 'gyms'>('team')
 const route = useRoute()
 watch(
@@ -375,7 +381,7 @@ function health(pokemon: Fighter) {
     :data-type="arenaOpen && displayed ? gym?.type : undefined"
     :class="{ 'is-battling': arenaOpen && displayed }"
   >
-    <header v-if="!arenaOpen || !displayed" class="adventure-heading">
+    <header v-if="game.trainer && (!arenaOpen || !displayed)" class="adventure-heading">
       <h1>{{ t('adventure.title') }}</h1>
     </header>
 
@@ -389,11 +395,23 @@ function health(pokemon: Fighter) {
 
     <div v-else-if="!game.trainer" class="trainer-access">
       <div class="trainer-pass">
-        <div class="pass-stamp"><Award :size="40" /><span>KANTO</span></div>
-        <h2>{{ t('adventure.privateAccess') }}</h2>
-        <p>{{ t('adventure.accessText') }}</p>
-        <div class="pass-companions" aria-hidden="true">
-          <img v-for="id in [1, 4, 7]" :key="id" :src="`/studio/starter-${id}.png`" alt="" />
+        <div class="arrival-scene" aria-hidden="true">
+          <img
+            src="/studio/viridian-night.png"
+            class="arrival-map"
+            alt=""
+            width="272"
+            height="160"
+          />
+          <span class="arrival-player"><i></i></span>
+          <span class="night-motes"></span>
+        </div>
+        <p class="arrival-location"><span>Kanto</span>{{ t('adventure.viridianCity') }}</p>
+        <div class="reception-dialogue">
+          <strong>{{ t('adventure.reception') }}</strong>
+          <p :key="mode">
+            {{ receptionText }}
+          </p>
         </div>
         <ol class="pass-badges" aria-label="Kanto">
           <li
@@ -413,6 +431,7 @@ function health(pokemon: Fighter) {
         </ol>
       </div>
       <form class="trainer-form" @submit.prevent="authenticate">
+        <h1>{{ t('adventure.privateAccess') }}</h1>
         <div class="adventure-tabs">
           <button type="button" :aria-pressed="mode === 'login'" @click="setMode('login')">
             {{ t('adventure.login') }}
@@ -450,6 +469,7 @@ function health(pokemon: Fighter) {
         />
         <small id="trainer-password-help">{{ t('adventure.passwordHelp') }}</small>
         <template v-if="mode === 'register'">
+          <p class="invitation-help">{{ t('adventure.accessText') }}</p>
           <label for="trainer-invitation">{{ t('adventure.invitation') }}</label>
           <input
             id="trainer-invitation"

@@ -11,144 +11,252 @@
   line-height: 1.1;
   margin-bottom: 16px;
 }
-.adventure-panel > p,
-.trainer-pass > p {
+.adventure-panel > p {
   color: var(--muted-strong);
   line-height: 1.6;
   max-width: 720px;
 }
 .trainer-access {
-  --pass-ink: #213e39;
-  --pass-paper: #eff3df;
-  --pass-green: #246653;
+  margin-block: clamp(12px, 3vw, 44px);
   display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
-  border: 1px solid #829a91;
-  border-radius: 20px;
+  grid-template-columns: minmax(0, 1.28fr) minmax(0, 1fr);
+  background: #181b30;
+  color: #f8f1db;
+  border: 2px solid #28283d;
+  border-radius: 6px;
+  box-shadow: 0 5px 0 #292535;
   overflow: hidden;
 }
 .trainer-pass {
+  position: relative;
   display: flex;
   flex-direction: column;
-  padding: clamp(16px, 3.5vw, 44px);
-  color: var(--pass-paper);
-  background: repeating-linear-gradient(0deg, transparent 0 3px, #ffffff05 3px 4px), #254c44;
-  box-shadow:
-    inset 0 0 0 8px #254c44,
-    inset 0 0 0 9px #a2bc9170;
+  justify-content: flex-end;
+  min-width: 0;
+  background: #282b4a;
 }
-.pass-stamp {
-  display: inline-flex;
-  align-self: start;
-  align-items: center;
-  gap: 8px;
-  padding-bottom: 4px;
-  border: 1px solid #bbd5b2;
-  border-radius: 30px;
-  padding: 5px 12px;
-  font: 700 0.85rem/1.2 var(--font-mono);
-  letter-spacing: 0.14em;
+.arrival-scene {
+  position: relative;
+  isolation: isolate;
+  aspect-ratio: 272/160;
+  overflow: hidden;
+  margin-block: auto;
 }
-.pass-stamp svg {
-  width: 20px;
-  height: 20px;
-}
-.trainer-pass h2 {
-  font:
-    600 clamp(2.1rem, 4.2vw, 3.9rem) / 1.04 Georgia,
-    serif;
-  letter-spacing: -0.035em;
-
-  margin: 16px 0;
-}
-.trainer-pass > p {
-  color: #eee3df;
-  line-height: 1.45;
-}
-.pass-companions {
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
-  padding: 8px 16px;
-  margin: 18px 0;
-  background: repeating-linear-gradient(0deg, transparent 0 3px, #677a6330 3px 4px), #ccd8aa;
-  border: 5px solid #19342d;
-  border-radius: 8px;
-  box-shadow: inset 0 3px 5px #39453055;
-}
-.pass-companions img {
-  width: 24%;
-  max-width: 84px;
+.arrival-map {
+  display: block;
+  width: 100%;
+  height: 100%;
   image-rendering: pixelated;
-  filter: grayscale(1) sepia(0.7) hue-rotate(35deg);
-  mix-blend-mode: multiply;
+}
+.arrival-scene::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 54%, transparent 30%, #16182d80);
+}
+.arrival-player {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 64%;
+  width: 5.89%;
+  aspect-ratio: 1/2;
+  transform: translate(-50%, -80%);
+}
+.arrival-player i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  background: url('/studio/trainer-walk.png') 50% 0/300% 100%;
+}
+.night-motes {
+  position: absolute;
+  left: 24%;
+  top: 70%;
+  width: 3px;
+  height: 3px;
+  background: #ffdc9b;
+  box-shadow:
+    9vw -2vw #ffd898,
+    19vw 1vw #ffe8bf,
+    -6vw -4vw #ffe4ab;
+}
+.arrival-location {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  display: grid;
+  gap: 2px;
+  color: #fff6df;
+  border-left: 3px solid #ffc587;
+  padding: 7px 13px;
+  background: #17182be8;
+  font: 700 1.18rem/1.2 var(--font-mono);
+}
+.arrival-location span,
+.reception-dialogue strong {
+  text-transform: uppercase;
+  font: 750 0.7rem/1.45 var(--font-mono);
+  letter-spacing: 0.1em;
+}
+.arrival-location span {
+  color: #efc68e;
+}
+.reception-dialogue {
+  position: relative;
+  z-index: 1;
+  background: #fff2d8;
+  color: #30263a;
+  border: 3px solid #38324c;
+  border-radius: 7px;
+  outline: 2px solid #dbbfd1;
+  padding: 12px 18px;
+  margin: 0 16px;
+}
+.reception-dialogue strong {
+  color: #75405c;
+}
+.reception-dialogue p {
+  overflow-wrap: anywhere;
+  margin: 4px 0 0;
+  line-height: 1.4;
+  font-weight: 600;
 }
 .pass-badges {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  margin: auto 0 0;
-  padding: 10px 0 0;
-  border-top: 1px solid #86a691;
   list-style: none;
+  margin: 0;
+  padding: 12px 18px;
 }
 .pass-badges li {
-  display: grid;
-  justify-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 4px;
-  font: 700 0.65rem/1.2 var(--font-mono);
-  color: #eee3df;
+  color: #c3bad2;
+  font: 650 0.64rem/1 var(--font-mono);
 }
 .pass-badges img {
-  width: min(90%, 44px);
+  width: clamp(22px, 2.4vw, 34px);
   height: auto;
   aspect-ratio: 1;
   object-fit: contain;
 }
 .trainer-form {
   min-width: 0;
-  padding: clamp(16px, 3.5vw, 44px);
-  background: var(--surface);
   display: flex;
   flex-direction: column;
   justify-content: center;
+  padding: clamp(20px, 3.4vw, 48px);
+  background: linear-gradient(160deg, #26283f, #191b2e 85%);
+  border-top: 4px solid #eca780;
+}
+.trainer-form h1 {
+  font: 700 clamp(1.7rem, 2.9vw, 2.8rem) / 1.04 var(--font-mono);
+  letter-spacing: -0.06em;
+  margin: 0 0 18px;
+}
+.trainer-form .adventure-tabs {
+  gap: 0;
+  border-bottom: 1px solid #58536c;
 }
 .trainer-form .adventure-tabs button {
-  border-radius: 20px;
+  background: transparent;
+  color: #c2b9d0;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
   font: 700 0.85rem/1.2 var(--font-mono);
 }
 .trainer-form .adventure-tabs button[aria-pressed='true'] {
-  background: var(--pass-ink);
-  color: var(--pass-paper);
-  border-color: #528776;
+  background: #383246;
+  color: #ffe1b5;
+  border-bottom-color: #f4b58e;
 }
 .trainer-form label {
-  font-size: 13px;
-  font-weight: 600;
-  margin: 20px 0 8px;
+  font-size: 0.85rem;
+  font-weight: 650;
+  margin: 16px 0 6px;
 }
 .trainer-form input {
   width: 100%;
-  min-height: 48px;
-  border-radius: 2px;
-  border: 1px solid var(--control-border);
-  background: var(--control-surface);
-  color: var(--ink);
-  padding: 10px 12px;
-  font-size: 16px;
+  min-height: 46px;
+  background: #131522;
+  color: #fff2df;
+  border: 1px solid #736e85;
+  border-radius: 4px;
+  padding: 9px 12px;
+  font-size: 1rem;
+}
+.trainer-form input:focus-visible {
+  outline: 2px solid #ffcb95;
+  outline-offset: 2px;
 }
 .trainer-form small {
-  color: var(--muted-strong);
-  font-size: 11px;
-  margin-top: 6px;
+  color: #c5bed0;
+  font-size: 0.74rem;
+  margin-top: 5px;
+}
+.trainer-form .invitation-help {
+  margin-top: 16px;
+  color: #e0cbba;
+  font-size: 0.83rem;
+  line-height: 1.4;
 }
 .trainer-form > .button {
+  margin-top: 22px;
   border: 0;
-  background: var(--pass-green);
-  color: white;
-  border-radius: 8px;
-  font: 700 1rem/1.3 var(--font-mono);
-  margin-top: 26px;
+  border-radius: 4px;
   justify-content: space-between;
+  color: #2a1d2a;
+  background: #ffcc98;
+  font: 750 1rem/1.3 var(--font-mono);
+  box-shadow: 0 3px 0 #986d68;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .arrival-player {
+    animation: walk-to-center 1.7s linear both;
+  }
+  .arrival-player i {
+    animation: arrival-steps 0.38s steps(3) 4;
+  }
+  .night-motes {
+    animation: night-glow 4s ease-in-out infinite alternate;
+  }
+  .reception-dialogue p {
+    animation: dialogue-in 220ms ease-out;
+  }
+  @keyframes walk-to-center {
+    from {
+      top: 91%;
+    }
+    to {
+      top: 64%;
+    }
+  }
+  @keyframes arrival-steps {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 150% 0;
+    }
+  }
+  @keyframes night-glow {
+    to {
+      opacity: 0.22;
+      translate: 0 -4px;
+    }
+  }
+  @keyframes dialogue-in {
+    from {
+      opacity: 0.1;
+      transform: translateY(3px);
+    }
+  }
 }
 .adventure-tabs {
   display: flex;
@@ -1385,7 +1493,6 @@
   .trainer-access {
     grid-template-columns: 1fr 1fr;
   }
-  .trainer-pass,
   .trainer-form {
     padding: 24px;
   }
@@ -1424,17 +1531,31 @@
   .trainer-access {
     grid-template-columns: 1fr;
   }
-  .trainer-pass {
-    border-right: 0;
-    border-bottom: 1px dashed var(--border-strong);
+  .arrival-scene {
+    width: min(100%, 440px);
+    align-self: center;
   }
-  .pass-companions {
-    padding: 8px 0;
+  .arrival-location {
+    top: 8px;
+    left: 10px;
+    padding: 4px 8px;
+    font-size: 0.95rem;
   }
-  .pass-companions img {
-    width: min(24%, 58px);
+  .reception-dialogue {
+    margin: 0 10px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
   }
-
+  .pass-badges {
+    padding: 8px 10px;
+  }
+  .pass-badges li {
+    flex-direction: column;
+    gap: 2px;
+  }
+  .trainer-form {
+    padding: 18px;
+  }
   .trainer-strip {
     gap: 12px;
   }
