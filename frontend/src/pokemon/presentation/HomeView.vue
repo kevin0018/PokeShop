@@ -16,7 +16,6 @@ import {
   Pause,
   Play,
   Radio,
-  ShoppingBag,
   RotateCcw,
   Tv,
   Zap,
@@ -25,6 +24,7 @@ import {
 import { useAdventureStore } from '@/adventure/store'
 import CaptureIntro from './CaptureIntro.vue'
 import StudioSprite from './StudioSprite.vue'
+import OfferCommands from './OfferCommands.vue'
 import { useCartStore } from '@/cart/application/cartStore'
 import { useCatalogStore } from '../application/catalogStore'
 import { readPreference, savePreference } from '@/shared/infrastructure/preferences'
@@ -183,6 +183,7 @@ onUnmounted(() => {
             <span>·</span> {{ number(star.id) }}
           </p>
         </div>
+        <p :key="'pitch' + star.id" class="sales-pitch">{{ t(`studio.pitch${star.id}`) }}</p>
         <div class="fighter-field">
           <span class="back-number" aria-hidden="true">{{ number(star.id).slice(1) }}</span>
           <div class="ink-strikes" aria-hidden="true"></div>
@@ -192,24 +193,17 @@ onUnmounted(() => {
               <StudioSprite :id="star.id" :tick="tick" />
             </div>
           </div>
-        </div>
-        <div :key="'offer' + star.id" class="feature-offer">
-          <p class="sales-pitch">{{ t(`studio.pitch${star.id}`) }}</p>
-          <div class="offer-tape" v-if="priceFor(star.id)">
-            <div class="price-cut">
-              <small>{{ t('studio.price') }}</small
-              ><strong>{{ priceFor(star.id) }}</strong>
-            </div>
-            <button class="buy-cut" :disabled="!canAdd" @click="cart.add(star.id)">
-              <ShoppingBag :size="17" />{{ buyLabel }}
-            </button>
-          </div>
-          <div class="stage-caption">
-            <RouterLink :to="`/pokemon/${star.id}`"
-              >{{ t('studio.details') }}<ArrowUpRight :size="17"
-            /></RouterLink>
-            <RouterLink to="/catalogo">{{ t('studio.shop') }}<ArrowRight :size="17" /></RouterLink>
-          </div>
+          <OfferCommands
+            :key="star.id"
+            :id="star.id"
+            :name="star.name"
+            :price="priceFor(star.id)"
+            :stock="game.trainer ? undefined : product?.stock"
+            :can-add="Boolean(canAdd)"
+            :buy-label="buyLabel"
+            :open="!intro"
+            @add="cart.add(star.id)"
+          />
         </div>
       </div>
     </div>

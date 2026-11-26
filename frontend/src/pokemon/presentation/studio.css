@@ -108,28 +108,21 @@
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  grid-template-rows: auto auto;
-  align-content: center;
-  min-height: clamp(475px, 40vw, 640px);
-  padding-block: clamp(45px, 5vw, 84px);
-  gap: 18px 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.74fr);
+  align-items: center;
+  padding: 30px 0 22px;
+  gap: 2px 6%;
 }
 .feature-head,
-.feature-offer {
-  grid-column: 1;
+.sales-pitch {
   position: relative;
   z-index: 1;
   min-width: 0;
-}
-.feature-head {
-  align-self: end;
 }
 .program-slug,
 .feature-types,
 .on-screen,
 .control-inner b,
-.price-cut small,
 .station-kicker,
 .stand-type,
 .stand-dex {
@@ -148,7 +141,7 @@
 }
 .feature-head h1 {
   color: var(--sheet);
-  font: 900 clamp(5.5rem, 10.7vw, 10rem) / 0.91 var(--font-display);
+  font: 900 clamp(4.6rem, 7.8vw, 7.8rem) / 0.91 var(--font-display);
   letter-spacing: -0.035em;
   text-transform: uppercase;
   transform: skewX(-9deg) rotate(-3deg);
@@ -170,65 +163,29 @@
   color: #a09b99;
 }
 .sales-pitch {
-  margin: 0 0 20px;
-  max-width: 39ch;
-  color: #e1dad3;
-  font-size: clamp(0.96rem, 1.35vw, 1.13rem);
-  line-height: 1.48;
+  isolation: isolate;
+  justify-self: end;
+  max-width: 35ch;
+  padding: 14px 22px 24px;
+  font-weight: 650;
+  font-size: clamp(0.88rem, 1.15vw, 1.05rem);
+  line-height: 1.35;
+  color: var(--sheet);
+  transform: rotate(2deg);
 }
-.offer-tape {
-  display: flex;
-  align-items: stretch;
-  width: fit-content;
-  max-width: 100%;
-  filter: drop-shadow(4px 5px 0 #0006);
-  transform: rotate(-2deg);
-  transform-origin: left center;
-}
-.price-cut,
-.buy-cut {
-  transform: skewX(-8deg);
-}
-.price-cut {
-  display: grid;
-  align-content: center;
+.sales-pitch::before,
+.sales-pitch::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
   background: var(--sheet);
-  color: var(--ink);
-  padding: 8px 21px 9px 16px;
-  min-height: 63px;
-  line-height: 0.94;
+  clip-path: polygon(2% 9%, 100% 0, 98% 81%, 23% 84%, 11% 100%, 15% 83%, 0 88%);
 }
-.price-cut small {
-  font-size: 0.57rem;
-  letter-spacing: 0.15em;
+.sales-pitch::after {
+  inset: 3px;
+  background: var(--ink);
 }
-.price-cut strong {
-  font: 900 clamp(1.65rem, 3.1vw, 2.75rem) / 1 var(--font-display);
-  white-space: nowrap;
-}
-.buy-cut {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 10px 17px;
-  border: 0;
-  border-left: 3px solid var(--ink);
-  background: var(--hot);
-  color: var(--ink);
-  font: 900 clamp(1.03rem, 1.55vw, 1.45rem) / 1.08 var(--font-display);
-  text-transform: uppercase;
-}
-.buy-cut:hover:enabled {
-  background: white;
-}
-.stage-caption {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-}
-.stage-caption a,
 .stand-link {
   display: inline-flex;
   align-items: center;
@@ -239,25 +196,18 @@
   text-decoration: underline;
   text-underline-offset: 4px;
 }
-.stage-caption a {
-  color: var(--sheet);
-}
-.stage-caption a:hover {
-  color: var(--hot);
-}
 .fighter-field {
-  grid-column: 2;
-  grid-row: 1/3;
+  grid-column: 1/-1;
   position: relative;
-  min-width: 0;
+  isolation: isolate;
   display: grid;
   place-items: center;
-  align-self: stretch;
-  isolation: isolate;
+  min-width: 0;
+  height: clamp(295px, 28vw, 400px);
 }
 .feature-actor {
   position: relative;
-  width: min(100%, clamp(292px, 33vw, 480px));
+  height: 98%;
   aspect-ratio: 1;
   z-index: 1;
 }
@@ -273,8 +223,8 @@
 .floor-ink {
   position: absolute;
   bottom: 0;
-  left: 25%;
-  width: 54%;
+  left: 39%;
+  width: 24%;
   height: 8%;
   background: #0f0d11b3;
   clip-path: polygon(0 69%, 55% 8%, 100% 28%, 82% 45%, 94% 47%, 31% 95%, 40% 70%);
@@ -294,7 +244,7 @@
 .ink-strikes {
   position: absolute;
   z-index: -1;
-  inset: -12% -12% -6% -16%;
+  inset: -12% -4% -6% 16%;
   background: var(--sheet);
   clip-path: polygon(
     0 82%,
@@ -381,13 +331,13 @@
   outline: 3px solid var(--hot);
   outline-offset: 3px;
 }
-.cut-scene[data-ready='false'] :is(.feature-head, .feature-offer) {
+.cut-scene[data-ready='false'] :is(.feature-head, .sales-pitch) {
   visibility: hidden;
 }
 .cut-scene[data-ready='true'] .feature-head {
   animation: cut-title 340ms cubic-bezier(0.16, 0.83, 0.2, 1) both;
 }
-.cut-scene[data-ready='true'] .feature-offer {
+.cut-scene[data-ready='true'] .sales-pitch {
   animation: cut-offer 420ms 140ms cubic-bezier(0.16, 0.83, 0.2, 1) both;
 }
 .cut-scene[data-ready='true'] .sprite-cutout {
@@ -405,11 +355,11 @@
 }
 @keyframes cut-offer {
   from {
-    transform: translateX(-15%);
+    translate: 12% 0;
     opacity: 0;
   }
   to {
-    transform: none;
+    translate: 0 0;
     opacity: 1;
   }
 }
@@ -598,14 +548,20 @@
   .fighter-field {
     grid-row: 2;
     grid-column: 1;
-    min-height: 195px;
-    height: clamp(195px, 47vw, 280px);
-    margin-top: -8px;
+    height: clamp(270px, 68vw, 360px);
+    margin: 4px 0 9px;
   }
   .feature-actor {
-    height: 100%;
-    width: auto;
-    max-width: 100%;
+    align-self: start;
+    height: 72%;
+  }
+  .sales-pitch {
+    grid-row: 3;
+    justify-self: start;
+    max-width: 42ch;
+    margin: 4px 0 0;
+    padding: 12px 16px 22px;
+    font-size: 0.84rem;
   }
   .back-number {
     font-size: clamp(12rem, 45vw, 18rem);
@@ -641,32 +597,6 @@
       74% 23%,
       63% 27%
     );
-  }
-  .feature-offer {
-    grid-row: 3;
-    margin-top: 8px;
-  }
-  .sales-pitch {
-    font-size: 0.91rem;
-    margin-bottom: 13px;
-    max-width: 38ch;
-  }
-  .price-cut {
-    min-height: 51px;
-    padding: 5px 12px;
-  }
-  .buy-cut {
-    padding: 6px 12px;
-  }
-  .offer-tape {
-    margin-left: 4px;
-  }
-  .stage-caption {
-    margin-top: 3px;
-    gap: 15px;
-  }
-  .stage-caption a {
-    font-size: 0.78rem;
   }
   .control-inner {
     gap: 5px;
