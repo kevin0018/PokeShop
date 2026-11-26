@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-vue-next'
+import MoveEffect from './MoveEffect.vue'
 import BattleSprite from './BattleSprite.vue'
 import TrainerPortrait from './TrainerPortrait.vue'
 import GymBackdrop from './GymBackdrop.vue'
@@ -46,6 +47,7 @@ const badgeTrails: Record<number, string> = {
   5: '100,68 68,68 68,116 108,116',
   6: '108,116 124,116 156,92 156,68 124,68',
 }
+const moveEffect = ref<InstanceType<typeof MoveEffect>>()
 const selectedGym = computed(
   () =>
     game.gyms.find((g) => g.id === openedGym.value) ??
@@ -439,13 +441,13 @@ async function play(action: {
   })
   if (result && mounted) {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    for (const event of result.events) {
+    for (const [index, event] of result.events.entries()) {
       if (!mounted) break
       log.value.push(event)
       motion.value =
         event.kind === 'attack'
           ? `${event.side}-attack`
-          : event.kind === 'damage'
+          : event.kind === 'damage' && (event.amount ?? 0) > 0
             ? `${event.side}-hit`
             : ''
       if (event.side && displayed.value) {
@@ -456,7 +458,13 @@ async function play(action: {
             (p) => p.id === event.pokemon,
           )
       }
-      if (!reduced) await new Promise((resolve) => window.setTimeout(resolve, 300))
+      if (!reduced && event.kind === 'attack' && event.move) {
+        await moveEffect.value?.play(
+          event.move,
+          event.side === 'opponent',
+          result.events[index + 1]?.kind !== 'miss',
+        )
+      } else if (!reduced) await new Promise((resolve) => window.setTimeout(resolve, 300))
     }
   }
   if (mounted) {
@@ -666,6 +674,7 @@ function health(pokemon: Fighter) {
           :data-type="gym?.type"
           :aria-busy="blocked"
         >
+          <MoveEffect ref="moveEffect" />
           <div class="fighter-hud enemy-hud">
             <strong>{{ name(opponent) }}</strong
             ><span>{{ t('adventure.level', { level: opponent.level }) }}</span>

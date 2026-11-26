@@ -278,7 +278,10 @@ test('invited trainer buys a team, resumes a battle and earns the first badge', 
   const move = page.getByRole('button', { name: 'Usar Látigo cepa', exact: true })
   await page.getByRole('button', { name: 'Luchar', exact: true }).click()
   await expect(move).toBeEnabled()
+  const previousHp = await page.locator('.enemy-hud progress').getAttribute('value')
   await move.click()
+  await expect(page.locator('.move-effect[data-move="vine-whip"]')).toBeVisible()
+  await expect(page.locator('.enemy-hud progress')).toHaveAttribute('value', previousHp!)
   await expect(page.locator('.battle-arena')).toHaveAttribute('aria-busy', 'false')
   await expect(
     page.getByRole('heading', { name: '¡Medalla conseguida!', exact: true }),
