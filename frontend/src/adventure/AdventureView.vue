@@ -44,7 +44,13 @@ const selectedGym = computed(
     game.gyms[Math.min(game.trainer?.medals.length ?? 0, game.gyms.length - 1)],
 )
 const arrivalGym = ref<typeof selectedGym.value>()
+const insideGym = ref(false)
 const entranceActor = ref<HTMLElement>()
+async function finishEntranceShot() {
+  await nextTick()
+  const motion = entranceActor.value?.getAnimations() ?? []
+  await Promise.allSettled(motion.map((animation) => animation.finished))
+}
 function canChallenge(id: number) {
   return (
     !!game.trainer?.team.length &&
@@ -337,18 +343,19 @@ async function saveTeam() {
 async function challenge(gymId: number) {
   if (!canChallenge(gymId)) return
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  insideGym.value = false
   entering.value = !reduced
   revealing.value = false
   arrivalGym.value = game.gyms.find((g) => g.id === gymId)
   const resultPromise = game.mutate<Battle>('/battles', 'POST', { gym_id: gymId })
-  await nextTick()
-  const walk = entranceActor.value?.getAnimations() ?? []
-  const [result] = await Promise.all([
-    resultPromise,
-    Promise.allSettled(walk.map((a) => a.finished)),
-  ])
+  const [result] = await Promise.all([resultPromise, finishEntranceShot()])
   if (!mounted) return
   if (result) {
+    if (!reduced) {
+      insideGym.value = true
+      await finishEntranceShot()
+      if (!mounted) return
+    }
     displayed.value = game.battle ? structuredClone(toRaw(game.battle)) : result
     log.value = []
     arenaOpen.value = true
@@ -462,11 +469,16 @@ function health(pokemon: Fighter) {
     </div>
     <div v-if="entering" class="battle-entry" :class="{ revealing }" aria-hidden="true">
       <div v-if="arrivalGym" class="gym-door-shot">
-        <div class="gym-door-map">
-          <span class="gym-threshold"></span
-          ><span ref="entranceActor" class="gym-visitor"><i></i></span>
+        <div
+          :key="insideGym ? 'inside' : 'outside'"
+          class="gym-door-map"
+          :class="{ interior: insideGym }"
+          :style="{ backgroundImage: `url(/studio/gyms/${arrivalGym.id}.png)` }"
+        >
+          <span v-if="!insideGym" class="gym-threshold"></span>
+          <span ref="entranceActor" class="gym-visitor"><i></i></span>
         </div>
-        <strong>{{ arrivalGym.names[locale] }} · {{ arrivalGym.leader }}</strong>
+        <strong>{{ insideGym ? arrivalGym.leader : arrivalGym.names[locale] }}</strong>
       </div>
     </div>
   </Teleport>
@@ -899,6 +911,7 @@ function health(pokemon: Fighter) {
                   v-for="g in game.gyms"
                   :key="g.id"
                   class="city-marker"
+                  :title="`#${g.id} · ${g.names[locale]} · ${g.leader}`"
                   :style="{
                     left: (cityMarkers[g.id]![0] / 192) * 100 + '%',
                     top: (cityMarkers[g.id]![1] / 144) * 100 + '%',
@@ -932,7 +945,10 @@ function health(pokemon: Fighter) {
                   height="50"
                 />
               </div>
-              <small>{{ selectedGym.names[locale] }} · {{ t('types.' + selectedGym.type) }}</small>
+              <small
+                >#{{ selectedGym.id }} · {{ selectedGym.names[locale] }} ·
+                {{ t('types.' + selectedGym.type) }}</small
+              >
               <h3>{{ selectedGym.leader }}</h3>
               <p>
                 {{ t('adventure.level', { level: selectedGym.level }) }} ·

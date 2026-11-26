@@ -1686,23 +1686,25 @@
 }
 .gym-door-map {
   position: relative;
-  aspect-ratio: 112/96;
-  background: url('/studio/gym-door.png') center 65%/100% auto;
+  aspect-ratio: 144/112;
+  background-position: center top;
+  background-size: 100% 200%;
+  overflow: hidden;
   image-rendering: pixelated;
 }
 .gym-threshold {
   position: absolute;
-  left: 43.5%;
-  top: 54%;
-  width: 13%;
-  height: 16%;
+  left: 45.15%;
+  top: 58.9%;
+  width: 9.7%;
+  height: 11.6%;
   background: #1b202a;
   animation: open-gym 0.25s 1s ease-out both;
 }
 .gym-visitor {
   position: absolute;
   left: 50%;
-  width: 14.3%;
+  width: 11.111%;
   aspect-ratio: 1/2;
   translate: -50% -92%;
   animation: enter-gym 1.65s linear both;
@@ -1713,6 +1715,28 @@
   height: 100%;
   background: url('/studio/trainer-walk.png') 50% 0/300% 100%;
   animation: arrival-steps 0.36s steps(3) infinite;
+}
+.gym-door-map.interior {
+  background-position: center bottom;
+}
+.interior .gym-visitor {
+  animation: meet-gym-leader 1.9s linear both;
+}
+.interior .gym-visitor i {
+  animation-iteration-count: 2;
+}
+@keyframes meet-gym-leader {
+  0% {
+    top: 83%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  40%,
+  100% {
+    top: 59%;
+  }
 }
 @keyframes open-gym {
   from {
@@ -2084,14 +2108,24 @@
 .city-marker span {
   display: grid;
   place-items: center;
-  width: 72%;
-  height: 72%;
+  position: absolute;
+  bottom: calc(50% + 4px);
+  width: 64%;
+  aspect-ratio: 1;
+  line-height: 1;
   border: 2px solid #fff8cf;
   border-radius: 50%;
   background: #a53732;
   color: #fffced;
   font: 800 1rem/1 var(--font-mono);
   box-shadow: 0 2px 0 2px #33424a;
+}
+.city-marker::after {
+  content: '';
+  position: absolute;
+  bottom: 50%;
+  border-inline: 4px solid transparent;
+  border-top: 5px solid #33424a;
 }
 .city-marker[data-locked='true'] span {
   background: #475b64;
