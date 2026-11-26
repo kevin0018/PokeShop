@@ -108,6 +108,8 @@ export default {
   catalog: 'Catalog',
   clearCart: 'Empty cart',
   cartCleared: 'Cart emptied.',
+  martLocation: 'Poké Mart · Viridian City',
+  martRegister: 'Cash register',
   cartPreview: 'Recently added',
   viewFullCart: 'View full cart',
   cart: 'My cart',

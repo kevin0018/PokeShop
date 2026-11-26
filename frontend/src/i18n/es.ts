@@ -109,6 +109,8 @@ export default {
   catalog: 'Catálogo',
   clearCart: 'Vaciar carrito',
   cartCleared: 'Carrito vaciado.',
+  martLocation: 'Tienda Pokémon · Ciudad Verde',
+  martRegister: 'Caja registradora',
   cartPreview: 'Últimos añadidos',
   viewFullCart: 'Ver carrito completo',
   cart: 'Mi carrito',
