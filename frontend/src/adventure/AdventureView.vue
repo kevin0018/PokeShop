@@ -99,6 +99,7 @@ watch(
   { immediate: true },
 )
 const pcDialog = ref<HTMLDialogElement>()
+const reception = ref<InstanceType<typeof CenterReception>>()
 const box = ref(0)
 const boxCount = computed(() => Math.max(2, Math.ceil((game.trainer?.collection.length ?? 0) / 30)))
 const boxSlots = computed(() =>
@@ -702,6 +703,7 @@ function health(pokemon: Fighter) {
         <section v-if="tab === 'team'" class="adventure-panel pokemon-center">
           <div class="center-station">
             <CenterReception
+              ref="reception"
               :arriving="justEntered"
               @arrived="justEntered = false"
               @open-pc="pcDialog?.showModal()"
@@ -780,7 +782,7 @@ function health(pokemon: Fighter) {
                       t('adventure.slot', { number: i + 1 }) + ' · ' + t('adventure.openPc')
                     "
                     aria-haspopup="dialog"
-                    @click="pcDialog?.showModal()"
+                    @click="reception?.openPc()"
                   >
                     {{ t('adventure.emptySlot') }}
                   </button>

@@ -1,9 +1,40 @@
 <script setup lang="ts">
-import { Monitor } from 'lucide-vue-next'
+import { nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-defineProps<{ arriving: boolean }>()
+const props = defineProps<{ arriving: boolean }>()
 const emit = defineEmits<{ openPc: []; arrived: [] }>()
 const { t } = useI18n()
+const player = ref<HTMLElement>()
+const position = ref<'counter' | 'walking' | 'pc'>('counter')
+const pending = ref(false)
+
+async function openPc() {
+  const actor = player.value
+  if (!actor || pending.value) return
+  if (position.value === 'pc') {
+    emit('openPc')
+    return
+  }
+  pending.value = true
+  try {
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      actor.closest('.lobby-map')?.scrollIntoView({ block: 'nearest', behavior: 'instant' })
+      // Finish entering from the lobby door before turning towards the PC.
+      await Promise.allSettled(actor.getAnimations().map((animation) => animation.finished))
+      if (!actor.isConnected) return
+      position.value = 'walking'
+      await nextTick()
+      await Promise.allSettled(actor.getAnimations().map((animation) => animation.finished))
+    }
+    if (!actor.isConnected) return
+    if (props.arriving) emit('arrived')
+    position.value = 'pc'
+    emit('openPc')
+  } finally {
+    pending.value = false
+  }
+}
+defineExpose({ openPc })
 </script>
 <template>
   <div class="lobby">
@@ -14,14 +45,22 @@ const { t } = useI18n()
     <div class="lobby-map">
       <img src="/studio/viridian-lobby.png" width="240" height="160" alt="" />
       <span
+        ref="player"
         aria-hidden="true"
         class="lobby-player"
-        :class="{ arriving }"
-        @animationend.self="emit('arrived')"
+        :class="{ arriving: arriving && position === 'counter' }"
+        :data-position="position"
+        @animationend.self="arriving && emit('arrived')"
         ><i></i
       ></span>
-      <button type="button" class="pc-access" aria-haspopup="dialog" @click="emit('openPc')">
-        <Monitor :size="16" />{{ t('adventure.openPc') }}
+      <button
+        type="button"
+        class="pc-access"
+        aria-haspopup="dialog"
+        :aria-disabled="pending"
+        @click="openPc"
+      >
+        <span>{{ t('adventure.openPc') }}</span>
       </button>
     </div>
   </div>
@@ -77,26 +116,87 @@ const { t } = useI18n()
   background: url('/studio/trainer-walk.png') 50% 0/300% 100%;
   image-rendering: pixelated;
 }
-.lobby .pc-access {
-  right: 4%;
-  top: 33%;
-  bottom: auto;
-  min-height: 44px;
-  height: auto;
-  width: auto;
-  padding: 5px 9px;
-  gap: 6px;
-  color: #fcf3dc;
-  background: #27283e;
-  border: 2px solid #ffe0a4;
-  border-radius: 4px;
-  font: 700 0.78rem/1.25 var(--font-mono);
-  box-shadow: 2px 2px 0 #292234;
+.lobby-player[data-position='pc'],
+.lobby-player[data-position='walking'] {
+  left: 76.67%;
+  top: 32%;
 }
-.lobby .pc-access:hover {
-  background: #443752;
+.lobby .pc-access {
+  /* The terminal is the tile immediately to the right of the reception desk. */
+  left: 76.67%;
+  top: 18%;
+  right: auto;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  width: 9%;
+  height: 21%;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 2px solid #fff2a9;
+  border-radius: 4px;
+  background: transparent;
+  box-shadow: 0 0 0 1px #503c45;
+  touch-action: manipulation;
+}
+.lobby .pc-access span {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 3px 7px;
+  white-space: nowrap;
+  background: #302d40;
+  color: #ffefc3;
+  font: 700 0.7rem/1.4 var(--font-mono);
+  border-radius: 3px;
+}
+.lobby .pc-access:hover,
+.lobby .pc-access:focus-visible {
+  background: #fff2a929;
 }
 @media (prefers-reduced-motion: no-preference) {
+  .lobby-player[data-position='walking'] {
+    animation: walk-to-pc 1.24s linear both;
+  }
+  .lobby-player[data-position='walking'] i {
+    background-image: url('/studio/trainer-pc-walk.png');
+    background-size: 300% 200%;
+    animation:
+      pc-stride 0.32s steps(3) infinite,
+      pc-turn 1.24s step-end both;
+  }
+  @keyframes walk-to-pc {
+    0% {
+      left: 50%;
+      top: 57%;
+    }
+    62% {
+      left: 76.67%;
+      top: 57%;
+    }
+    100% {
+      left: 76.67%;
+      top: 32%;
+    }
+  }
+  @keyframes pc-stride {
+    from {
+      background-position-x: 0%;
+    }
+    to {
+      background-position-x: 150%;
+    }
+  }
+  @keyframes pc-turn {
+    0% {
+      background-position-y: 0%;
+    }
+    62%,
+    100% {
+      background-position-y: 100%;
+    }
+  }
   .lobby-player.arriving {
     animation: lobby-arrive 1s linear both;
   }
