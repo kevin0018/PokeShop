@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
-import { ArrowDown, ArrowLeft, ArrowRight, Minus, Plus, Radio, Trash2 } from 'lucide-vue-next'
+import { ArrowDown, ArrowLeft, ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from 'lucide-vue-next'
 import { useCartStore } from '../application/cartStore'
 import { useAdventureStore } from '@/adventure/store'
 
@@ -45,7 +45,7 @@ onMounted(() => {
   >
   <header class="bag-heading">
     <div>
-      <p class="eyebrow"><Radio :size="16" />{{ t('selection') }}</p>
+      <p class="eyebrow"><ShoppingBag :size="16" />{{ t('selection') }}</p>
       <h1>{{ t('cart') }}</h1>
     </div>
     <div class="bag-host" aria-hidden="true">
@@ -159,8 +159,6 @@ onMounted(() => {
         class="cart-summary pokemon-palette"
         :data-type="cart.recentLines[0]?.pokemon.types[0]"
       >
-        <p class="ticket-label">{{ t('ticketLabel') }}</p>
-
         <h2>{{ t('summary') }}</h2>
         <div>
           <span>{{ t('subtotal', { units: t('units', cart.count) }) }}</span
@@ -172,7 +170,10 @@ onMounted(() => {
         </div>
         <p>{{ t('cartSaved') }}</p>
         <template v-if="game.trainer">
-          <p>{{ t('adventure.credits', { amount: game.trainer.credits }) }}</p>
+          <div class="cart-balance">
+            <span>{{ t('shopBalance') }}</span
+            ><strong>{{ t('adventure.credits', { amount: game.trainer.credits }) }}</strong>
+          </div>
           <p v-if="cart.total > game.trainer.credits && !alreadyPurchased">
             {{ t('adventure.insufficient') }}
           </p>
@@ -191,65 +192,43 @@ onMounted(() => {
         <p v-else class="demo-note">{{ t('demoCart') }}</p>
         <RouterLink class="button secondary" to="/catalogo">{{ t('keepExploring') }}</RouterLink>
       </aside>
-      <p class="host-note">{{ t('chanseyCopy') }}</p>
     </div>
   </div>
   <RecommendationsPanel :ids="cart.entries.map((entry) => entry.id)" />
 </template>
 
 <style scoped>
-.bag-heading,
-.cart-layout,
-.empty-cart {
-  --bag-black: #171419;
-  --bag-paper: #fff5e7;
-  --bag-red: #bd1833;
-}
 .bag-heading {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(100px, 34%);
-  color: var(--bag-paper);
-  background: var(--bag-black);
-  margin-bottom: clamp(16px, 2vw, 26px);
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0 14px;
+  padding: 0 clamp(14px, 2vw, 26px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 14px;
+  margin-bottom: 20px;
 }
 .bag-heading > div:first-child {
-  padding: clamp(16px, 3vw, 38px);
-  align-self: center;
+  padding: 18px 0;
 }
 .bag-heading .eyebrow {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  border-bottom: 3px solid #ff3856;
-  color: inherit;
-  font: 700 0.73rem/1.8 var(--font-mono);
-  transform: rotate(-2deg);
+  gap: 6px;
+  font: 700 0.72rem/1.4 var(--font-mono);
+  color: var(--purple);
 }
 .bag-heading h1 {
-  margin: 8px 0 4px;
-  font: 900 clamp(2.5rem, 7.6vw, 6.6rem) / 0.98 var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: -0.035em;
-  transform: skewX(-7deg) rotate(-2deg);
-  text-shadow: 3px 4px var(--bag-red);
-}
-.bag-host {
-  position: relative;
-  isolation: isolate;
-  display: grid;
-  place-items: center;
-  background:
-    radial-gradient(#69364550 1px, transparent 1.5px) 0 0/6px 6px,
-    #ffaac2;
-  clip-path: polygon(27% 0, 100% 0, 100% 100%, 0 100%, 16% 65%, 7% 69%, 28% 26%, 17% 32%);
+  margin: 4px 0 0;
+  font: 750 clamp(1.8rem, 4vw, 3rem) / 1.05 var(--font-body, sans-serif);
+  letter-spacing: -0.045em;
 }
 .bag-host img {
-  position: absolute;
-  right: 3%;
-  width: 82%;
-  height: 94%;
-  object-fit: contain;
-  filter: drop-shadow(2px 2px 0 white) drop-shadow(3px 3px 0 var(--bag-black));
+  display: block;
+  width: clamp(56px, 8vw, 96px);
+  height: auto;
 }
 .cart-heading-actions {
   grid-column: 1/-1;
@@ -257,7 +236,7 @@ onMounted(() => {
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 14px;
-  border-top: 1px solid #544a50;
+  border-top: 1px solid var(--line);
   padding: 4px clamp(12px, 2vw, 26px);
   min-height: 44px;
   font: 700 0.78rem/1.4 var(--font-mono);
@@ -266,7 +245,7 @@ onMounted(() => {
   margin-left: auto;
   background: transparent;
   border: 0;
-  color: var(--bag-paper);
+  color: var(--ink);
   min-height: 44px;
   padding: 4px;
 }
@@ -284,11 +263,12 @@ onMounted(() => {
 .cart-line,
 .cart-line:first-child {
   display: grid;
-  grid-template-columns: minmax(96px, 24%) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(76px, 18%) minmax(0, 1fr) auto;
   gap: 14px;
   padding: 0;
   border: 1px solid var(--line);
-  border-radius: 0;
+  border-radius: 12px;
+  overflow: hidden;
   background: var(--surface);
 }
 .cart-art.pokemon-palette {
@@ -296,17 +276,7 @@ onMounted(() => {
   place-items: center;
   align-self: stretch;
   border-radius: 0;
-  background:
-    linear-gradient(
-      151deg,
-      transparent 62%,
-      #fff8 62% 67%,
-      transparent 67% 70%,
-      #fff8 70% 72%,
-      transparent 72%
-    ),
-    radial-gradient(#20142045 1px, transparent 1.5px) 0 0/5px 5px,
-    var(--pokemon-tint);
+  background: color-mix(in srgb, var(--pokemon-tint) 22%, var(--surface));
 }
 .cart-art img {
   width: 100%;
@@ -319,8 +289,7 @@ onMounted(() => {
   padding-block: 10px;
 }
 .cart-item-copy h2 {
-  font: 900 clamp(1.45rem, 2.6vw, 2.5rem) / 1 var(--font-display);
-  text-transform: uppercase;
+  font: 750 clamp(1.1rem, 2vw, 1.6rem) / 1.2 var(--font-body, sans-serif);
   overflow-wrap: anywhere;
 }
 .quantity-control {
@@ -337,7 +306,7 @@ onMounted(() => {
   gap: 2px;
 }
 .cart-line-total strong {
-  font: 900 clamp(1.35rem, 2.4vw, 2rem) / 1.1 var(--font-display);
+  font: 700 clamp(1rem, 1.6vw, 1.3rem) / 1.2 var(--font-body, sans-serif);
 }
 .cart-line-total button {
   min-height: 44px;
@@ -351,80 +320,47 @@ onMounted(() => {
   position: relative;
   margin: 0;
   scroll-margin-top: 14px;
-  border: 0;
-  border-top: 6px solid var(--bag-red);
-  border-radius: 0;
-  padding: clamp(18px, 2vw, 28px);
-  color: var(--bag-black);
-  background: var(--bag-paper);
-  box-shadow: inset 0 0 0 1px #63555144;
-}
-.cart-summary::after {
-  content: '';
-  position: absolute;
-  inset: 100% 0 auto;
-  height: 7px;
-  background:
-    linear-gradient(135deg, var(--bag-paper) 25%, transparent 25%) -7px 0/14px 14px,
-    linear-gradient(225deg, var(--bag-paper) 25%, transparent 25%) -7px 0/14px 14px;
-}
-.cart-summary > .ticket-label {
-  margin: 0 0 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px dashed #887a72;
-  font: 700 0.7rem/1.45 var(--font-mono);
-  letter-spacing: 0.12em;
+  padding: clamp(16px, 2vw, 26px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--ink);
+  background: var(--surface);
 }
 .cart-summary h2,
 .empty-cart h2 {
-  font: 900 clamp(2rem, 3vw, 2.8rem) / 1 var(--font-display);
-  text-transform: uppercase;
+  font: 750 clamp(1.25rem, 2vw, 1.6rem) / 1.2 var(--font-body, sans-serif);
+  letter-spacing: -0.035em;
 }
 .cart-summary > p {
   margin-top: 12px;
-  color: #54494c;
+  color: var(--muted-strong);
 }
 .cart-summary .summary-total {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  margin-top: 12px;
   align-items: baseline;
-  border-top: 1px dashed #887a72;
-  padding-top: 12px;
-  margin-top: 14px;
 }
 .summary-total strong {
-  font: 900 clamp(1.8rem, 3vw, 2.8rem) / 1 var(--font-display);
+  font: 750 clamp(1.4rem, 2vw, 1.75rem) / 1.1 var(--font-body, sans-serif);
   overflow-wrap: anywhere;
+}
+.cart-balance {
+  margin-top: 12px;
+  color: var(--muted-strong);
 }
 .cart-summary .button,
 .empty-cart .button {
   margin-top: 12px;
-  border-radius: 0;
-  font: 900 1.15rem/1.15 var(--font-display);
-  text-transform: uppercase;
   min-height: 44px;
-}
-.cart-summary .button.secondary {
-  background: var(--bag-black);
-  color: var(--bag-paper);
-}
-.cart-summary .button.primary,
-.empty-cart .button {
-  background: var(--bag-red);
-  color: white;
-  transform: skewX(-4deg);
-}
-.host-note {
-  margin: 18px 8px;
-  font-size: 0.82rem;
-  line-height: 1.5;
-  color: var(--muted-strong);
+  border-radius: 8px;
 }
 .empty-cart {
   border: 1px solid var(--line);
-  border-left: 6px solid var(--bag-red);
-  border-radius: 0;
+  border-radius: 12px;
   background: var(--surface);
   text-align: left;
-  padding: clamp(20px, 4vw, 52px);
+  padding: clamp(20px, 3vw, 40px);
 }
 .empty-cart p {
   margin-block: 10px;
@@ -456,7 +392,7 @@ onMounted(() => {
   .cart-summary-link {
     display: inline-flex;
     min-height: 44px;
-    color: var(--bag-paper);
+    color: var(--ink);
   }
 }
 @media (max-width: 520px) {
