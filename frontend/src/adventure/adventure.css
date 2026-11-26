@@ -18,19 +18,24 @@
   max-width: 720px;
 }
 .trainer-access {
-  --pass-ink: #171419;
-  --pass-paper: #fff5e7;
-  --pass-red: #bc1933;
+  --pass-ink: #213e39;
+  --pass-paper: #eff3df;
+  --pass-green: #246653;
   display: grid;
   grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
-  border: 2px solid var(--pass-ink);
+  border: 1px solid #829a91;
+  border-radius: 20px;
+  overflow: hidden;
 }
 .trainer-pass {
   display: flex;
   flex-direction: column;
   padding: clamp(16px, 3.5vw, 44px);
   color: var(--pass-paper);
-  background: var(--pass-ink);
+  background: repeating-linear-gradient(0deg, transparent 0 3px, #ffffff05 3px 4px), #254c44;
+  box-shadow:
+    inset 0 0 0 8px #254c44,
+    inset 0 0 0 9px #a2bc9170;
 }
 .pass-stamp {
   display: inline-flex;
@@ -38,21 +43,22 @@
   align-items: center;
   gap: 8px;
   padding-bottom: 4px;
-  border-bottom: 3px solid #ff3a58;
+  border: 1px solid #bbd5b2;
+  border-radius: 30px;
+  padding: 5px 12px;
   font: 700 0.85rem/1.2 var(--font-mono);
   letter-spacing: 0.14em;
-  transform: rotate(-2deg);
 }
 .pass-stamp svg {
   width: 20px;
   height: 20px;
 }
 .trainer-pass h2 {
-  font: 900 clamp(2.4rem, 4.5vw, 4.6rem) / 0.96 var(--font-display);
-  text-transform: uppercase;
+  font:
+    600 clamp(2.1rem, 4.2vw, 3.9rem) / 1.04 Georgia,
+    serif;
   letter-spacing: -0.035em;
-  transform: skewX(-5deg);
-  text-shadow: 3px 3px var(--pass-red);
+
   margin: 16px 0;
 }
 .trainer-pass > p {
@@ -65,23 +71,24 @@
   justify-content: space-evenly;
   padding: 8px 16px;
   margin: 18px 0;
-  background:
-    radial-gradient(#39151c55 1px, transparent 1.5px) 0 0/5px 5px,
-    linear-gradient(115deg, #a6ce9d 33%, #ffb07e 33% 65%, #91cbe5 65%);
-  clip-path: polygon(3% 5%, 100% 0, 97% 95%, 0 100%);
+  background: repeating-linear-gradient(0deg, transparent 0 3px, #677a6330 3px 4px), #ccd8aa;
+  border: 5px solid #19342d;
+  border-radius: 8px;
+  box-shadow: inset 0 3px 5px #39453055;
 }
 .pass-companions img {
   width: 24%;
   max-width: 84px;
   image-rendering: pixelated;
-  filter: drop-shadow(2px 3px 0 #18141966);
+  filter: grayscale(1) sepia(0.7) hue-rotate(35deg);
+  mix-blend-mode: multiply;
 }
 .pass-badges {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   margin: auto 0 0;
   padding: 10px 0 0;
-  border-top: 1px dashed #77696b;
+  border-top: 1px solid #86a691;
   list-style: none;
 }
 .pass-badges li {
@@ -106,15 +113,13 @@
   justify-content: center;
 }
 .trainer-form .adventure-tabs button {
-  border-radius: 0;
-  transform: skewX(-5deg);
-  font: 900 1.12rem/1.1 var(--font-display);
-  text-transform: uppercase;
+  border-radius: 20px;
+  font: 700 0.85rem/1.2 var(--font-mono);
 }
 .trainer-form .adventure-tabs button[aria-pressed='true'] {
   background: var(--pass-ink);
   color: var(--pass-paper);
-  border-bottom: 3px solid #ff3955;
+  border-color: #528776;
 }
 .trainer-form label {
   font-size: 13px;
@@ -138,12 +143,10 @@
 }
 .trainer-form > .button {
   border: 0;
-  border-radius: 0;
-  background: var(--pass-red);
+  background: var(--pass-green);
   color: white;
-  transform: skewX(-4deg);
-  font: 900 1.25rem/1.2 var(--font-display);
-  text-transform: uppercase;
+  border-radius: 8px;
+  font: 700 1rem/1.3 var(--font-mono);
   margin-top: 26px;
   justify-content: space-between;
 }
