@@ -5,6 +5,16 @@
 .station-header .header-inner {
   gap: 20px;
 }
+@media (min-width: 901px) {
+  .station-header {
+    border-bottom: 0;
+    box-shadow: inset 0 -1px var(--line);
+  }
+  .station-header .header-inner {
+    width: min(1470px, 90%);
+    height: 80px;
+  }
+}
 .station-brand {
   display: inline-flex;
   align-items: center;

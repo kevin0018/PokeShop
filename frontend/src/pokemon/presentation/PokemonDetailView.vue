@@ -636,10 +636,6 @@ const inCart = computed(
     border: 0;
     box-shadow: none;
   }
-  .app-shell:has(.pokemon-profile) .header-inner {
-    width: min(1470px, 90%);
-    height: 80px;
-  }
   .app-shell:has(.pokemon-profile) .station-brand,
   .app-shell:has(.pokemon-profile) .channel-logo,
   .app-shell:has(.pokemon-profile) .catalog-link {
