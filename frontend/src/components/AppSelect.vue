@@ -30,7 +30,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
       ><slot /><SelectValue /><SelectIcon><ChevronDown :size="14" /></SelectIcon
     ></SelectTrigger>
     <SelectPortal
-      ><SelectContent class="select-menu" position="popper" :side-offset="8"
+      ><SelectContent class="select-menu" :body-lock="false" position="popper" :side-offset="8"
         ><SelectViewport>
           <SelectItem
             v-for="option in options"
