@@ -120,6 +120,17 @@ async def login(
     return {"ok": True}
 
 
+@router.get("/session")
+async def current_session(request: Request, response: Response, db=Depends(get_engine)):
+    response.headers["Cache-Control"] = "no-store"
+    token = token_from(request)
+    if not token:
+        return None
+    async with db.begin() as conn:
+        trainer = await service.find_session(conn, token, lock=True)
+        return await service.profile(conn, trainer, token) if trainer else None
+
+
 @router.get("/me")
 async def me(request: Request, response: Response, db=Depends(get_engine)):
     response.headers["Cache-Control"] = "no-store"

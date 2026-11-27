@@ -43,16 +43,18 @@ beforeEach(() => {
   vi.stubGlobal(
     'fetch',
     vi.fn(async (url: string) => ({
-      ok: !url.endsWith('/adventure/me'),
-      status: url.endsWith('/adventure/me') ? 401 : 200,
+      ok: true,
+      status: 200,
       json: async () =>
-        url.includes('/adventure/')
-          ? { items: [] }
-          : url.includes('/metadata')
-            ? { types: ['planta', 'veneno'], generations: [1] }
-            : /pokemon\/1$/.test(url)
-              ? pokemon
-              : { items: [pokemon], total: 1 },
+        url.endsWith('/adventure/session')
+          ? null
+          : url.includes('/adventure/')
+            ? { items: [] }
+            : url.includes('/metadata')
+              ? { types: ['planta', 'veneno'], generations: [1] }
+              : /pokemon\/1$/.test(url)
+                ? pokemon
+                : { items: [pokemon], total: 1 },
     })),
   )
 })

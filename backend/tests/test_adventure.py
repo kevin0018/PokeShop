@@ -286,6 +286,18 @@ class AdventureAPITests(unittest.TestCase):
             self.client.get("/api/v1/adventure/me").json()["credits"], 1000
         )
 
+    def test_optional_session_returns_profile_only_for_a_valid_cookie(self):
+        path = "/api/v1/adventure/session"
+        for headers in ({}, {"Cookie": f"{COOKIE}=stale-session"}):
+            response = self.client.get(path, headers=headers)
+            self.assertEqual(response.status_code, 200)
+            self.assertIsNone(response.json())
+            self.assertEqual(response.headers["cache-control"], "no-store")
+        self.sign_in()
+        self.assertEqual(self.client.get(path).json(), self.me)
+        self.assertEqual(self.post("logout", {}).status_code, 200)
+        self.assertIsNone(self.client.get(path).json())
+
     def test_auth_csrf_origin_logout_and_account_ownership(self):
         self.assertEqual(self.client.get("/api/v1/adventure/me").status_code, 401)
         self.sign_in()

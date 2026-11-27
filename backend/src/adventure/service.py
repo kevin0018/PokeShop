@@ -23,9 +23,9 @@ def fail(code, status=409):
     raise HTTPException(status, code)
 
 
-async def session(conn, token, lock=False):
+async def find_session(conn, token, lock=False):
     if not token:
-        fail("signInRequired", 401)
+        return None
     trainer = (
         (
             await conn.execute(
@@ -42,9 +42,14 @@ async def session(conn, token, lock=False):
         .mappings()
         .first()
     )
+    return dict(trainer) if trainer else None
+
+
+async def session(conn, token, lock=False):
+    trainer = await find_session(conn, token, lock)
     if not trainer:
         fail("signInRequired", 401)
-    return dict(trainer)
+    return trainer
 
 
 async def throttle(engine, key):

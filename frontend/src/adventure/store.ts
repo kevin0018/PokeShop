@@ -124,8 +124,8 @@ export const useAdventureStore = defineStore('adventure', () => {
 
   async function refresh() {
     try {
-      trainer.value = await request<Trainer>('/me')
-      battle.value = trainer.value.battle_id
+      trainer.value = await request<Trainer | null>('/session')
+      battle.value = trainer.value?.battle_id
         ? await request<Battle>(`/battles/${trainer.value.battle_id}`)
         : null
     } catch (cause) {
@@ -136,7 +136,16 @@ export const useAdventureStore = defineStore('adventure', () => {
     }
   }
 
-  async function load() {
+  let pendingLoad: Promise<void> | undefined
+
+  function load() {
+    pendingLoad ??= loadAdventure().finally(() => {
+      pendingLoad = undefined
+    })
+    return pendingLoad
+  }
+
+  async function loadAdventure() {
     loading.value = true
     error.value = ''
     try {
