@@ -177,9 +177,9 @@ La verificación local del 03/10/2026 incluye 25 pruebas de aventura, 22 regresi
 
 La cobertura de navegador incluye español/inglés y claro/oscuro a 320/375/414/768/1280 px, comprobando carga y desbordamientos horizontales. Las capturas de `frontend/test-results/` están ignoradas; las imágenes seleccionadas de `docs/` muestran la interfaz local, no acreditan la versión desplegada actualmente.
 
-Las pruebas de aventura vacían y cargan las tablas del juego: ejecútalas únicamente en una base separada llamada `adventure_test_<sufijo>`. El recorrido de navegador requiere una base desechable de preview y una invitación nueva de un solo uso; sin `PLAYWRIGHT_ADVENTURE_CODE` se omite. Consulta la [configuración aislada](docs/adventure.es.md#verificación). Las integraciones anteriores requieren migración y sincronización del catálogo. Configura `PLAYWRIGHT_BASE_URL` para otro frontend encendido y, opcionalmente, `PLAYWRIGHT_CHANNEL=chrome` para usar Chrome instalado. No se han verificado otros motores.
+Las pruebas de aventura vacían y cargan las tablas del juego: ejecútalas únicamente en una base separada llamada `adventure_test_<sufijo>`. La prueba de registro de entrenador en el navegador requiere una base desechable de preview y una invitación nueva de un solo uso; sin `PLAYWRIGHT_ADVENTURE_CODE` se omite. Consulta la [configuración aislada](docs/adventure.es.md#verificación). Las integraciones anteriores requieren migración y sincronización del catálogo. Configura `PLAYWRIGHT_BASE_URL` para otro frontend encendido y, opcionalmente, `PLAYWRIGHT_CHANNEL=chrome` para usar Chrome instalado. No se han verificado otros motores.
 
-La última verificación completa de la VPS pública fue el 07/09/2026, con 33 pruebas de navegador. Esa comprobación histórica no confirma que la aventura y el diseño más recientes estén desplegados. Las verificaciones son manuales; no hay CI/CD alojada.
+La última verificación completa de la VPS pública fue el 07/09/2026, con 33 pruebas de navegador. El 28/11/2026 se verificó el acceso sin sesión en producción con la versión `751a493`. Al abrir `/aventura` en tres sesiones nuevas del navegador, en cada una apareció el formulario de acceso y se hizo una sola petición `GET /api/v1/adventure/session`, que devolvió HTTP 200 con el valor JSON `null`. Las verificaciones son manuales; no hay CI/CD alojada.
 
 ## Despliegue
 

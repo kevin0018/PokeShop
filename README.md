@@ -177,9 +177,9 @@ Local verification on 2026-10-03 includes 25 adventure tests, 22 existing backen
 
 Browser coverage includes Spanish/English and light/dark at 320/375/414/768/1280 px, checking loading and horizontal overflow. Captures under `frontend/test-results/` are ignored; the curated images in `docs/` show the local interface, not proof of the currently deployed release.
 
-Adventure tests clear and seed game tables: run them only against a separate database named `adventure_test_<suffix>`. The adventure browser test needs a disposable preview database and a fresh single-use invitation; without `PLAYWRIGHT_ADVENTURE_CODE` it is skipped. See [isolated test setup](docs/adventure.md#verification). Existing integration tests require the migration and catalog sync above. Set `PLAYWRIGHT_BASE_URL` to target another running frontend, and optionally `PLAYWRIGHT_CHANNEL=chrome` to use installed Chrome. Other browser engines are not verified.
+Adventure tests clear and seed game tables: run them only against a separate database named `adventure_test_<suffix>`. The trainer registration browser test needs a disposable preview database and a fresh single-use invitation; without `PLAYWRIGHT_ADVENTURE_CODE` it is skipped. See [isolated test setup](docs/adventure.md#verification). Existing integration tests require the migration and catalog sync above. Set `PLAYWRIGHT_BASE_URL` to target another running frontend, and optionally `PLAYWRIGHT_CHANNEL=chrome` to use installed Chrome. Other browser engines are not verified.
 
-The public VPS was last fully verified on 2026-09-07 with 33 browser tests. That historical check does not establish that the latest adventure and design changes are deployed. Checks are manual; there is no hosted CI/CD.
+The public VPS was last fully verified on 2026-09-07 with 33 browser tests. On 2026-11-28, release `751a493` passed a guest access check in production. Opening `/aventura` in each of three fresh browser sessions displayed the login form and sent exactly one `GET /api/v1/adventure/session`, which returned HTTP 200 with a JSON `null` body. Checks are manual; there is no hosted CI/CD.
 
 ## Deployment
 
