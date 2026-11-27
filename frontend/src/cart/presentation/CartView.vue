@@ -245,11 +245,11 @@ onMounted(() => {
           <RouterLink class="button primary" to="/catalogo">{{ t('explore') }}</RouterLink>
         </div>
       </div>
-      <div v-else class="order-ledger">
+      <div v-else class="order-ledger pokemon-palette" :data-type="atCounter?.pokemon.types[0]">
         <div class="cart-list-panel" :inert="animating">
           <div class="register-heading">
             <ReceiptText :size="17" />{{ t('martRegister')
-            }}<span aria-hidden="true" class="power-led"></span>
+            }}
           </div>
           <div class="cart-lines">
             <article
@@ -321,14 +321,6 @@ onMounted(() => {
         </div>
         <footer id="cart-summary" class="order-foot" tabindex="-1">
           <div class="order-tally">
-            <div class="register-lamps" aria-hidden="true">
-              <i
-                v-for="line in visibleLines"
-                :key="line.pokemon.id"
-                class="pokemon-palette"
-                :data-type="line.pokemon.types[0]"
-              ></i>
-            </div>
             <div>
               <p>{{ t('subtotal', { units: t('units', unitCount) }) }}</p>
               <div class="summary-total">
@@ -390,7 +382,8 @@ onMounted(() => {
 }
 .bag-heading h1 {
   margin: 0;
-  font: 750 clamp(1.9rem, 4vw, 3rem) / 1.05 var(--font-mono);
+  font: 900 clamp(2.4rem, 5vw, 4rem) / 1 var(--font-display);
+  text-transform: uppercase;
   letter-spacing: -0.055em;
 }
 .cart-heading-actions {
@@ -539,19 +532,14 @@ onMounted(() => {
   overflow: hidden;
 }
 .register-heading {
-  background: linear-gradient(105deg, #28465c, #27364d);
-  color: #ffebc2;
-  border-bottom: 4px solid #df935d;
+  background: var(--surface);
+  color: var(--ink);
+  border-bottom: 1px solid var(--line);
+  letter-spacing: .07em;
+  text-transform: uppercase;
 }
-.power-led {
-  margin-left: auto;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #a3eb9e;
-  box-shadow:
-    0 0 0 3px #132c34,
-    0 0 9px #81de97;
+.register-heading svg {
+  color: var(--muted-strong);
 }
 .cart-line,
 .cart-line:first-child {
@@ -564,7 +552,7 @@ onMounted(() => {
   border-bottom: 1px dashed var(--line);
 }
 .cart-line[data-selected='true'] {
-  box-shadow: inset 3px 0 var(--purple);
+  box-shadow: inset 3px 0 var(--pokemon-tint);
 }
 .cart-art.pokemon-palette {
   display: grid;
@@ -612,46 +600,24 @@ onMounted(() => {
   scroll-margin-top: 16px;
 }
 .order-tally {
-  position: relative;
-  isolation: isolate;
-  padding: 14px 18px;
-  background:
-    repeating-linear-gradient(0deg, transparent 0 3px, #122d3726 3px 4px),
-    linear-gradient(110deg, #284750, #18343b);
-  color: #e0ffc4;
-  border: 3px solid #475965;
-  border-radius: 6px;
-  box-shadow: inset 0 2px 6px #081d22;
-}
-.register-lamps {
-  display: flex;
-  gap: 4px;
-  position: absolute;
-  right: 14px;
-  top: 14px;
-}
-.register-lamps i {
-  width: 7px;
-  height: 7px;
-  background: var(--pokemon-tint);
-  border-radius: 2px;
-}
-.order-tally p:first-child {
-  padding-right: 65px;
+  padding: clamp(16px, 3vw, 26px);
+  border-radius: 8px;
+  background: linear-gradient(115deg, color-mix(in srgb, var(--pokemon-tint) 26%, #171419), #171419 85%);
+  color: #fff8f2;
 }
 .order-tally .cart-balance {
   display: flex;
   align-items: center;
   gap: 6px;
-  border-top: 1px solid #739a8b66;
-  margin-top: 6px;
-  padding-top: 7px;
-}
-.order-tally .summary-total {
-  text-align: right;
+  border-top: 1px solid #ffffff38;
+  margin-top: 12px;
+  padding-top: 10px;
 }
 .order-foot .order-tally p {
-  color: #d6e7c9;
+  color: #f1e9e2;
+}
+.summary-total {
+  margin-top: 4px;
 }
 .order-tally p,
 .order-actions p {
@@ -676,16 +642,15 @@ onMounted(() => {
 }
 .order-actions .primary,
 .mart-receipt .primary {
-  color: #402b26;
-  background: #ffbd78;
-  border: 1px solid #ca8150;
-  box-shadow: 0 3px 0 #935c40;
-  border-radius: 6px;
+  color: #171419;
+  background: var(--pokemon-tint, #eab06d);
+  border: 0;
+  border-radius: 999px;
   font-weight: 750;
 }
 .order-actions .primary:not(:disabled):hover,
 .mart-receipt .primary:hover {
-  background: #ffd396;
+  background: color-mix(in srgb, var(--pokemon-tint, #eab06d) 80%, white);
 }
 .mart-trainer {
   position: absolute;

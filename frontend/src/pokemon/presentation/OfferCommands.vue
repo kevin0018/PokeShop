@@ -90,13 +90,13 @@ function moveFocus(event: KeyboardEvent) {
 }
 .spoke-price,
 .spoke-detail {
-  right: 62%;
+  right: calc(62% + 6px);
   --pivot: 100%;
   --slide: 38px;
 }
 .spoke-buy,
 .spoke-shop {
-  left: 62%;
+  left: calc(62% + 6px);
   --pivot: 0%;
   --slide: -38px;
 }
