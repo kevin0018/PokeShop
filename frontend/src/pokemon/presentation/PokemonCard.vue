@@ -195,53 +195,75 @@ const game = useAdventureStore()
 }
 
 .catalog-grid .illustrated-card {
-  border: 1px solid var(--line);
-  border-radius: 16px;
   container-type: inline-size;
-  background: color-mix(in srgb, var(--pokemon-tint) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--pokemon-tint) 36%, #27242b);
+  border-radius: 12px;
+  background: #19171c;
+  color: #fff8f1;
 }
 .catalog-grid .card-art {
   background:
-    radial-gradient(ellipse at center, #fff7, transparent 72%),
-    repeating-linear-gradient(0deg, transparent 0 19px, #53624916 19px 20px),
-    repeating-linear-gradient(90deg, transparent 0 19px, #53624916 19px 20px),
-    color-mix(in srgb, var(--pokemon-tint) 68%, #fbf2dc);
-  border-bottom: 1px solid var(--line);
-  box-shadow: inset 0 0 0 5px #fff5;
+    radial-gradient(
+      ellipse at 50% -35%,
+      oklch(from var(--pokemon-tint) 67% 0.17 h),
+      transparent 82%
+    ),
+    linear-gradient(160deg, color-mix(in srgb, var(--pokemon-tint) 50%, #201923), #19171c 90%);
 }
 .catalog-grid .card-art img {
-  filter: drop-shadow(1px 1px 0 white) drop-shadow(2px 3px 0 #181419aa);
+  z-index: 1;
+  filter: drop-shadow(0 8px 7px #120d165c);
 }
 .catalog-grid .card-art .dex-number {
-  left: 0;
-  top: 7px;
-  border-radius: 0;
-  padding: 1px 12px 2px 8px;
-  clip-path: polygon(0 0, 100% 0, 87% 100%, 0 100%);
-  background: var(--catalog-ink);
-  color: var(--catalog-paper);
-  font-weight: 700;
+  top: auto;
+  bottom: 0;
+  left: 6px;
+  font: 900 clamp(2.6rem, 17cqi, 7.4rem) / 0.9 var(--font-body);
+  letter-spacing: -0.075em;
+  padding: 0;
+  background: transparent;
+  color: #ffffff32;
+  z-index: 0;
 }
 .catalog-grid .card-open {
-  border-radius: 0;
-  bottom: 0;
-  right: 0;
-  background: var(--catalog-ink);
-  color: var(--catalog-paper);
+  top: 9px;
+  right: 9px;
+  bottom: auto;
+  color: white;
+  background: #1c161d70;
+  border: 1px solid #ffffff4a;
+}
+.catalog-grid .sold-out {
+  z-index: 2;
 }
 .catalog-grid h3 {
-  font-family: Georgia, serif;
-  font-weight: 700;
-  letter-spacing: -0.04em;
+  color: inherit;
+  font-family: var(--font-body);
+  font-weight: 800;
+  letter-spacing: -0.045em;
   margin-block: 5px;
 }
-.catalog-grid .add-button {
-  background: var(--album-accent);
-  color: white;
-  border-radius: 0;
+.catalog-grid .card-measures,
+.catalog-grid .purchase-unavailable {
+  color: #d4cbd1;
+}
+.catalog-grid .card-bottom {
+  border-color: #ffffff29;
 }
 .catalog-grid .card-bottom strong {
-  font: 700 clamp(0.96rem, 1.5vw, 1.22rem) / 1 var(--font-mono);
+  color: #fff8f1;
+  font: 750 clamp(0.96rem, 1.5vw, 1.22rem) / 1.2 var(--font-body);
+}
+.catalog-grid .add-button {
+  border-radius: 99px;
+  background: var(--pokemon-tint);
+  color: #18141b;
+}
+.catalog-grid .add-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--pokemon-tint) 78%, white);
+}
+.catalog-grid .image-fallback {
+  color: white;
 }
 /* Wide tiles keep the artwork beside the offer, even when labels wrap. */
 @container (min-width: 270px) {

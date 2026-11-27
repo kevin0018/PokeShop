@@ -9,7 +9,7 @@ import {
   Coins,
   ShoppingBag,
   UsersRound,
-  BookOpen,
+  ArrowUpRight,
   Zap,
   Flame,
   Droplets,
@@ -99,19 +99,21 @@ request<typeof metadata.value>('/metadata')
     <header class="shop-front">
       <div class="section-heading shop-heading">
         <div>
-          <p class="eyebrow"><BookOpen :size="16" />PokéShop</p>
           <h1>{{ t('catalog') }}</h1>
           <p class="shop-intro">
             {{ game.trainer ? t('adventure.catalogHelp') : t('catalogIntro') }}
           </p>
         </div>
       </div>
-      <div class="album-cards" aria-hidden="true">
-        <div v-for="id in [4, 7, 1]" :key="id" class="album-print">
-          <span>#{{ String(id).padStart(3, '0') }}</span>
-          <img :src="`/studio/${id}.webp`" alt="" width="475" height="475" />
-        </div>
-      </div>
+      <RouterLink
+        class="catalog-spotlight"
+        to="/pokemon/5"
+        :aria-label="t('viewPokemon', { name: 'Charmeleon' })"
+      >
+        <span class="spotlight-number" aria-hidden="true">#005</span>
+        <img src="/artwork/charmeleon.png" alt="" width="497" height="512" />
+        <span class="spotlight-link">Charmeleon <ArrowUpRight :size="15" /></span>
+      </RouterLink>
       <div class="shop-checkout-bar">
         <div v-if="game.trainer" class="catalog-trainer">
           <Coins :size="22" aria-hidden="true" />
@@ -223,99 +225,74 @@ request<typeof metadata.value>('/metadata')
 
 <style>
 .catalog-section.shop-scene {
-  --catalog-ink: #41304a;
-  --catalog-paper: #fff5e7;
-  --album-accent: #644570;
-  padding-top: clamp(12px, 2vw, 28px);
+  --catalog-ink: #171419;
+  --catalog-paper: #fff8f2;
+  padding-top: 0;
 }
-
 .shop-front {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-  position: relative;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   isolation: isolate;
-  overflow: clip;
+  overflow: hidden;
+  border-radius: 14px;
   color: var(--catalog-paper);
   background:
-    repeating-linear-gradient(0deg, transparent 0 2px, #ffffff08 2px 3px),
-    repeating-linear-gradient(90deg, transparent 0 2px, #ffffff08 2px 3px), #46354d;
-  border-radius: 8px 22px 22px 8px;
-  border-left: 10px solid #322638;
-  box-shadow:
-    inset 3px 0 0 #927f8d,
-    0 3px 0 #c5b7a5;
+    radial-gradient(ellipse at 73% -50%, #ff982a 5%, transparent 70%),
+    linear-gradient(155deg, #a43811, #542820 50%, #141217 90%);
 }
 .shop-front .shop-heading {
+  align-items: center;
+  container-type: inline-size;
+  padding: clamp(18px, 3.5vw, 48px);
   margin: 0;
-  padding: clamp(18px, 3vw, 42px);
-  align-items: center;
-}
-.shop-heading .eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #e9d3a5;
-  font: 700 0.78rem/1.4 var(--font-mono);
-  letter-spacing: 0.12em;
 }
 .shop-heading h1 {
-  text-transform: none;
-  margin: 4px 0;
-  color: #fff0cb;
-  font:
-    500 clamp(3rem, 7vw, 6rem) / 1.04 Georgia,
-    serif;
-  letter-spacing: -0.055em;
+  color: inherit;
+  font: 900 clamp(1.55rem, 16cqi, 5rem) / 0.96 var(--font-body);
+  letter-spacing: -0.06em;
+  text-transform: uppercase;
+  margin: 0;
 }
 .shop-intro {
-  max-width: 44ch;
-  margin-top: 8px;
+  max-width: 45ch;
+  margin: 0.85em 0 0;
   line-height: 1.45;
 }
-.album-cards {
-  overflow: clip;
-  min-width: 0;
+.catalog-spotlight {
   position: relative;
-  align-self: stretch;
   isolation: isolate;
-}
-.album-print {
-  position: absolute;
-  top: 8%;
-  height: 106%;
-  aspect-ratio: 0.72;
-  left: 40%;
-  background: #c9dac1;
-  color: #294232;
-  border: 5px solid #fff7dc;
-  border-radius: 7px;
-  box-shadow: 0 3px 9px #23152565;
   display: grid;
   place-items: center;
-  transform: rotate(8deg);
+  min-height: clamp(166px, 21vw, 255px);
+  color: var(--catalog-paper);
 }
-.album-print:first-child {
-  left: 8%;
-  top: 23%;
-  background: #f1c4aa;
-  transform: rotate(-17deg);
+.catalog-spotlight:focus-visible {
+  outline-offset: -5px;
 }
-.album-print:nth-child(2) {
-  left: 24%;
-  top: 14%;
-  background: #bdd4de;
-  transform: rotate(-6deg);
-}
-.album-print span {
+.spotlight-number {
   position: absolute;
-  top: 4%;
-  left: 6%;
-  font: 700 clamp(0.55rem, 1vw, 0.8rem) / 1.2 var(--font-mono);
+  color: #ffffff25;
+  font: 900 clamp(3.4rem, 12vw, 11rem) / 1 var(--font-body);
+  letter-spacing: -0.08em;
 }
-.album-print img {
-  width: 94%;
-  height: 78%;
+.catalog-spotlight img {
+  position: absolute;
+  width: 84%;
+  height: 94%;
   object-fit: contain;
+  filter: drop-shadow(0 9px 8px #180b104d);
+}
+.spotlight-link {
+  position: absolute;
+  bottom: 10px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font: 650 0.75rem/1.4 var(--font-body);
+  background: #211317c9;
+  padding: 4px 9px;
+  border-radius: 99px;
 }
 .type-shelves {
   display: flex;
@@ -331,12 +308,11 @@ request<typeof metadata.value>('/metadata')
   gap: 7px;
   min-height: 44px;
   padding: 6px 16px;
-  border: 2px solid transparent;
-  border-bottom-color: var(--pokemon-tint);
+  border: 1px solid color-mix(in srgb, var(--pokemon-tint) 68%, var(--line));
   background: var(--surface);
   color: var(--ink);
   font: 650 0.87rem/1.2 var(--font-body, sans-serif);
-  border-radius: 9px 9px 2px 2px;
+  border-radius: 99px;
 }
 .type-shelf:hover,
 .type-shelf[aria-pressed='true'] {
@@ -352,7 +328,7 @@ request<typeof metadata.value>('/metadata')
   gap: 8px 16px;
   padding: 6px clamp(14px, 3.5vw, 44px);
   border-top: 1px solid #ffffff35;
-  background: var(--catalog-ink);
+  background: #17141973;
 }
 
 .shop-checkout-bar a,
@@ -421,12 +397,12 @@ request<typeof metadata.value>('/metadata')
 .catalog-section .search-field {
   grid-column: 1;
   padding-inline: 12px;
-  border-radius: 2px;
-  border: 2px solid var(--control-border);
+  border-radius: 9px;
+  border: 1px solid var(--control-border);
 }
 
 .shop-scene .filter-control > button {
-  border-radius: 2px;
+  border-radius: 9px;
   background: var(--catalog-ink);
   color: var(--catalog-paper);
   border-color: var(--catalog-ink);
@@ -491,15 +467,6 @@ request<typeof metadata.value>('/metadata')
 
   .shop-front .shop-heading {
     padding: 16px 5px 16px 12px;
-  }
-
-  .album-print {
-    height: auto;
-    width: 55%;
-    top: 14%;
-  }
-  .shop-heading h1 {
-    font-size: clamp(1.85rem, 8vw, 4rem);
   }
 
   .shop-intro {
