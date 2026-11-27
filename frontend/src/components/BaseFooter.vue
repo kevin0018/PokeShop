@@ -5,8 +5,8 @@ const { t } = useI18n()
 <template>
   <footer class="site-footer">
     <div>
-      <strong>pokéshop.</strong>
-      <p>{{ t('footerTagline') }}</p>
+      <strong>PokéShop TV</strong>
+      <p>{{ t('studio.channel') }}</p>
     </div>
     <p>
       {{ t('footerDemo') }}<br />{{ t('attribution') }}&nbsp;<a

@@ -1,9 +1,32 @@
 import type en from './en'
 export default {
+  studio: {
+    skip: 'Saltar intro',
+    replay: 'Repetir captura',
+    price: 'Precio',
+    details: 'Ver ficha',
+    pitch6:
+      'Su cola prende la mecha. Sus alas hacen el resto. La última evolución de Charmander entra en escena.',
+    pitch25:
+      'Orejas en punta, mejillas cargadas. Seis kilos de electricidad listos para unirse a tu equipo.',
+    pitch94:
+      'Primero ves la sonrisa. Luego descubres quién se esconde en tu sombra. Hazle sitio a Gengar.',
+    spotlight: 'En el escaparate',
+    special: 'Especial Kanto',
+    shop: 'Entrar en la tienda',
+    stand: 'Elige tu inicial',
+    viewKanto: 'Ver todo Kanto',
+    onScreen: 'En pantalla',
+    previous: 'Pokémon destacado anterior',
+    next: 'Siguiente Pokémon destacado',
+    battle: '¿Ya tienes equipo? Entra en los gimnasios de Kanto.',
+    browseType: 'Explorar por tipo',
+    channel: 'Canal de coleccionistas',
+  },
   cartPage: 'Productos del carrito',
   shopLabel: 'Tienda Pokémon',
   shopBalance: 'Saldo disponible',
-  ticketLabel: 'PASE DE COMPAÑEROS',
+  ticketLabel: 'TICKET DE COLECCIÓN',
 
   filters: 'Filtros',
   region: 'Región de origen',
@@ -15,6 +38,10 @@ export default {
   heightHigh: 'Altura: mayor primero',
   heightBento: 'Pequeños, medianos y altos: las tarjetas siguen su altura real.',
   removeFilter: 'Quitar filtro',
+  kantoShop: 'Tienda Pokémon de Kanto',
+  kantoIntro: 'Elige a tu primer compañero o explora especies y formas de todas las regiones.',
+  kantoStarters: 'Iniciales de Kanto',
+  filterDescription: 'Afina la búsqueda por tipo, región, generación o forma y elige el orden.',
   starterHeadline: 'Aquí empieza tu historia.',
   adventure: 'Tu próxima aventura empieza con un compañero',
   heroCopy:
@@ -82,6 +109,12 @@ export default {
   catalog: 'Catálogo',
   clearCart: 'Vaciar carrito',
   cartCleared: 'Carrito vaciado.',
+  martLocation: 'Tienda Pokémon · Ciudad Verde',
+  martApproach: 'El dependiente te espera en caja.',
+  martGiving: 'Aquí tienes a {name}.',
+  martReceived: 'Poké Balls recibidas',
+  martInProgress: 'Recogiendo el pedido…',
+  martRegister: 'Caja registradora',
   cartPreview: 'Últimos añadidos',
   viewFullCart: 'Ver carrito completo',
   cart: 'Mi carrito',

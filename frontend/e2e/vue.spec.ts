@@ -36,6 +36,7 @@ test('select keyboard, Escape, theme and locale persistence', async ({ page }) =
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   await page.emulateMedia({ colorScheme: 'light' })
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+  await page.getByRole('button', { name: 'Saltar intro' }).press('Enter')
   const language = page.getByRole('combobox', { name: 'Idioma', exact: true })
   await language.press('ArrowDown')
   await expect(page.getByRole('listbox')).toBeVisible()
@@ -61,6 +62,7 @@ for (const locale of ['es', 'en'])
       test(`responsive ${locale} ${theme} ${width}`, async ({ page }, testInfo) => {
         await page.addInitScript(
           ({ locale, theme }) => {
+            localStorage.setItem('pokeshop.capture.v2', 'seen')
             localStorage.setItem('pokeshop.locale', locale)
             localStorage.setItem('pokeshop.theme', theme)
             localStorage.setItem(
@@ -85,6 +87,9 @@ for (const locale of ['es', 'en'])
           expect(
             await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
           ).toBe(true)
+          const themeToggle = await page.getByRole('switch').boundingBox()
+          expect(themeToggle).not.toBeNull()
+          expect(themeToggle!.x + themeToggle!.width).toBeLessThanOrEqual(width)
           // Scroll through real lazy images before capturing the full page.
           for (const image of await page.locator('main img').all()) {
             await image.scrollIntoViewIfNeeded()
@@ -119,9 +124,9 @@ test('draft cancel, region apply, height order and stats interactions', async ({
   await expect(page).not.toHaveURL(/page=2/)
   const response = await page.request.get('/api/v1/pokemon?region=alola&sort=height_desc&limit=24')
   const { items } = await response.json()
-  await expect(page.locator('.catalog-bento .pokemon-card')).toHaveCount(items.length)
+  await expect(page.locator('.catalog-grid .pokemon-card')).toHaveCount(items.length)
   const ids = await page
-    .locator('.catalog-bento .card-art')
+    .locator('.catalog-grid .card-art')
     .evaluateAll((links) => links.map((l) => Number(l.getAttribute('href')?.split('/').pop())))
   expect(ids).toEqual(items.map((p: { id: number }) => p.id))
   await page.goto('/pokemon/3')
@@ -196,7 +201,7 @@ test('touch statistics and timed cart notice', async ({ browser }) => {
   await context.close()
 })
 
-test('complete and partial bento blocks keep order without overlapping cards', async ({ page }) => {
+test('catalog grids of different sizes keep order without overlapping cards', async ({ page }) => {
   const response = await page.request.get('/api/v1/pokemon?limit=7')
   const { items } = await response.json()
   for (const width of [320, 768, 1280]) {
@@ -206,12 +211,12 @@ test('complete and partial bento blocks keep order without overlapping cards', a
         r.fulfill({ json: { items: items.slice(0, count), total: count } }),
       )
       await page.goto('/catalogo')
-      await expect(page.locator('.catalog-bento .pokemon-card')).toHaveCount(count)
+      await expect(page.locator('.catalog-grid .pokemon-card')).toHaveCount(count)
       const ids = await page
-        .locator('.catalog-bento .card-art')
+        .locator('.catalog-grid .card-art')
         .evaluateAll((links) => links.map((l) => Number(l.getAttribute('href')?.split('/').pop())))
       expect(ids).toEqual(items.slice(0, count).map((p: { id: number }) => p.id))
-      const rects = await page.locator('.catalog-bento .pokemon-card').evaluateAll((cards) =>
+      const rects = await page.locator('.catalog-grid .pokemon-card').evaluateAll((cards) =>
         cards.map((c) => {
           const r = c.getBoundingClientRect()
           return { x: r.x, y: r.y, right: r.right, bottom: r.bottom, height: r.height }
@@ -356,4 +361,60 @@ test('cart preview shows latest three and global total, opens by hover and click
   } finally {
     await touch.close()
   }
+})
+
+test('switches the studio feature and browses a type shelf', async ({ page }) => {
+  await page.goto('/')
+  const feature = page.getByRole('link', { name: 'Ver ficha', exact: true })
+  await expect(feature).toHaveAttribute('href', '/pokemon/6')
+  await page.getByRole('button', { name: 'Siguiente Pokémon destacado' }).click()
+  await expect(feature).toHaveAttribute('href', '/pokemon/25')
+  await page.getByRole('button', { name: 'Pokémon destacado anterior' }).click()
+  await page.getByRole('button', { name: 'Pokémon destacado anterior' }).click()
+  await feature.click()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Gengar')
+  await page.getByRole('link', { name: 'Volver al catálogo' }).click()
+  const fire = page.getByRole('button', { name: 'Fuego', exact: true })
+  await fire.click()
+  await expect(fire).toHaveAttribute('aria-pressed', 'true')
+  await expect(page).toHaveURL(/type=fuego/)
+  await expect(page.locator('.catalog-grid .pokemon-card').first()).toContainText('Fuego')
+  await fire.click()
+  await expect(page).not.toHaveURL(/type=fuego/)
+})
+
+test('plays the capture once and lets the visitor replay or skip it', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await page.goto('/')
+  const intro = page.getByRole('dialog', { name: 'Repetir captura' })
+  await expect(intro).toBeVisible()
+  await expect(intro).toBeHidden({ timeout: 7000 })
+  await expect(page.getByRole('heading', { name: 'Charizard' })).toBeVisible()
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'Repetir captura' })).toBeVisible()
+  await expect(intro).toHaveCount(0)
+  await page.getByRole('button', { name: 'Repetir captura' }).click()
+  await expect(intro).toBeVisible()
+  await page.getByRole('button', { name: 'Saltar intro' }).click()
+  await expect(intro).toHaveCount(0)
+  const commands = page.getByRole('group', { name: 'Charizard' })
+  const buy = commands.getByRole('button', { name: 'Añadir al carrito' })
+  await buy.press('ArrowDown')
+  await expect(commands.getByRole('link', { name: 'Catálogo' })).toBeFocused()
+  await page.keyboard.press('ArrowUp')
+  await expect(buy).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(page.locator('.cart-count')).toHaveText('1')
+})
+
+test('opens directly on a still Pokémon when reduced motion is requested', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: 'Charizard' })).toBeVisible()
+  await expect(page.locator('.capture-intro')).toHaveCount(0)
+  await expect(page.locator('.feature-actor .studio-sprite')).toHaveCSS(
+    'background-position',
+    '0% 0%',
+  )
+  await expect(page.getByRole('button', { name: 'Repetir captura' })).toHaveCount(0)
 })

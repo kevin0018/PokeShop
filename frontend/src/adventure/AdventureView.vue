@@ -8,16 +8,16 @@ import {
   Plus,
   X,
   ArrowRight,
-  Flag,
+  Coins,
   History,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-vue-next'
+import MoveEffect from './MoveEffect.vue'
 import BattleSprite from './BattleSprite.vue'
 import TrainerPortrait from './TrainerPortrait.vue'
 import GymBackdrop from './GymBackdrop.vue'
 import CenterReception from './CenterReception.vue'
-import CollectionPc from './CollectionPc.vue'
 import {
   type Battle,
   type BattleEvent,
@@ -29,18 +29,51 @@ import {
 const { t, te, locale } = useI18n()
 const game = useAdventureStore()
 const openedGym = ref<number | null>(null)
-function dismissGym(event: PointerEvent) {
-  if (!(event.target instanceof Element) || !event.target.closest('.gym-stop'))
-    openedGym.value = null
+// Coordinates correspond to city markers on the 192 × 144 Kanto map.
+const cityMarkers: Record<number, [number, number]> = {
+  1: [44, 52],
+  2: [124, 44],
+  3: [124, 92],
+  4: [100, 68],
+  5: [108, 116],
+  6: [124, 68],
 }
-onMounted(() => document.addEventListener('pointerdown', dismissGym))
-onUnmounted(() => document.removeEventListener('pointerdown', dismissGym))
-function leaveGym(event: MouseEvent) {
-  if (!(event.currentTarget as HTMLElement).contains(document.activeElement)) openedGym.value = null
+// Trace the existing eight-pixel road tiles. Show just the selected badge leg.
+const badgeTrails: Record<number, string> = {
+  1: '44,108 44,52',
+  2: '44,52 68,52 76,44 124,44',
+  3: '124,44 124,92',
+  4: '124,92 124,68 100,68',
+  5: '100,68 68,68 68,116 108,116',
+  6: '108,116 124,116 156,92 156,68 124,68',
 }
-function blurGym(event: FocusEvent) {
-  if (!(event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null))
-    openedGym.value = null
+const moveEffect = ref<InstanceType<typeof MoveEffect>>()
+const selectedGym = computed(
+  () =>
+    game.gyms.find((g) => g.id === openedGym.value) ??
+    game.gyms[Math.min(game.trainer?.medals.length ?? 0, game.gyms.length - 1)],
+)
+const arrivalGym = ref<typeof selectedGym.value>()
+const insideGym = ref(false)
+const throwing = ref(false)
+const entranceActor = ref<HTMLElement>()
+async function finishEntranceShot() {
+  await nextTick()
+  const motion = entranceActor.value?.getAnimations() ?? []
+  await Promise.allSettled(motion.map((animation) => animation.finished))
+}
+function canChallenge(id: number) {
+  return (
+    !!game.trainer?.team.length &&
+    !dirty.value &&
+    !game.active &&
+    !blocked.value &&
+    id <= game.trainer.medals.length + 1
+  )
+}
+function visitGym(id: number) {
+  openedGym.value = id
+  if (canChallenge(id)) void challenge(id)
 }
 const saleDialog = ref<HTMLDialogElement>()
 const pendingSale = ref<Companion | null>(null)
@@ -69,6 +102,12 @@ const mode = ref<'login' | 'register'>('login')
 const username = ref(''),
   password = ref(''),
   invitation = ref('')
+const receptionText = computed(() => {
+  if (mode.value === 'register') return t('adventure.registerGreeting')
+  return /^[a-zA-Z0-9_]{3,24}$/.test(username.value)
+    ? t('adventure.passwordGreeting', { name: username.value })
+    : t('adventure.loginGreeting')
+})
 const tab = ref<'team' | 'gyms'>('team')
 const route = useRoute()
 watch(
@@ -94,6 +133,7 @@ watch(
   { immediate: true },
 )
 const pcDialog = ref<HTMLDialogElement>()
+const reception = ref<InstanceType<typeof CenterReception>>()
 const box = ref(0)
 const boxCount = computed(() => Math.max(2, Math.ceil((game.trainer?.collection.length ?? 0) / 30)))
 const boxSlots = computed(() =>
@@ -130,6 +170,21 @@ function eventActor(event: BattleEvent) {
 }
 const playing = ref(false)
 const motion = ref('')
+const command = ref<'menu' | 'moves' | 'team'>('menu')
+type TransferPhase = 'ready' | 'opening' | 'recall' | 'send'
+const transfer = ref<{ side: 'player' | 'opponent'; phase: TransferPhase }>()
+const transferBall = ref<HTMLElement>()
+
+async function animateTransfer(
+  side: 'player' | 'opponent',
+  phase: Exclude<TransferPhase, 'ready'>,
+) {
+  transfer.value = { side, phase }
+  await nextTick()
+  await Promise.allSettled(
+    (transferBall.value?.getAnimations() ?? []).map((animation) => animation.finished),
+  )
+}
 const leaving = ref(false)
 const log = ref<BattleEvent[]>([])
 let mounted = true
@@ -141,7 +196,7 @@ const opponent = computed(() => displayed.value?.opponent[displayed.value.oppone
 const dirty = computed(
   () => JSON.stringify(draft.value) !== JSON.stringify(game.trainer?.team ?? []),
 )
-const blocked = computed(() => game.busy || playing.value || entering.value)
+const blocked = computed(() => game.busy || playing.value || entering.value || !!transfer.value)
 const errorText = computed(() =>
   te(`adventure.errors.${game.error}`)
     ? t(`adventure.errors.${game.error}`)
@@ -181,18 +236,46 @@ onUnmounted(() => {
   game.battleFocused = false
 })
 
+const accessPhase = ref<'idle' | 'checking' | 'crossing'>('idle')
+const exterior = ref<HTMLElement>()
+const teamHeading = ref<HTMLElement>()
+const justEntered = ref(false)
+
 async function authenticate() {
-  const result = await game.mutate(`/${mode.value}`, 'POST', {
-    username: username.value,
-    password: password.value,
-    ...(mode.value === 'register' ? { invitation: invitation.value.trim() } : {}),
-  })
-  if (result) {
+  if (accessPhase.value !== 'idle' || game.busy) return
+  accessPhase.value = 'checking'
+  try {
+    const result = await game.mutate(`/${mode.value}`, 'POST', {
+      username: username.value,
+      password: password.value,
+      ...(mode.value === 'register' ? { invitation: invitation.value.trim() } : {}),
+    })
+    if (!mounted || !result || !game.trainer) return
     password.value = ''
     invitation.value = ''
+    const scene = exterior.value
+    if (scene && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      scene.scrollIntoView({ block: 'nearest', behavior: 'instant' })
+      // A fast login can complete before the walk up to the door has finished.
+      await Promise.allSettled(
+        (scene.querySelector('.arrival-player')?.getAnimations() ?? []).map(
+          (animation) => animation.finished,
+        ),
+      )
+      if (!mounted) return
+      accessPhase.value = 'crossing'
+      await nextTick()
+      await Promise.allSettled(scene.getAnimations().map((animation) => animation.finished))
+    }
+    if (!mounted) return
     tab.value = 'team'
+    justEntered.value = true
     arenaOpen.value = game.active
+  } finally {
+    accessPhase.value = 'idle'
   }
+  await nextTick()
+  teamHeading.value?.focus({ preventScroll: true })
 }
 
 function toggle(id: number) {
@@ -201,6 +284,34 @@ function toggle(id: number) {
   else if (draft.value.length < 6) draft.value.push(id)
 }
 
+const pcDrag = ref<{ id: number; fromParty: boolean } | null>(null)
+function startPcDrag(event: DragEvent, id: number, fromParty: boolean) {
+  if (game.active || blocked.value || !event.dataTransfer) {
+    event.preventDefault()
+    return
+  }
+  pcDrag.value = { id, fromParty }
+  event.dataTransfer.effectAllowed = 'move'
+  event.dataTransfer.setData('text/plain', String(id))
+}
+function dropInParty(index: number) {
+  const item = pcDrag.value
+  pcDrag.value = null
+  if (!item || game.active || blocked.value) return
+  const current = draft.value.indexOf(item.id)
+  if (current >= 0) {
+    void moveSlot(current, index)
+  } else if (draft.value.length < 6 && game.trainer?.collection.some((p) => p.id === item.id)) {
+    draft.value.splice(Math.min(index, draft.value.length), 0, item.id)
+    saved.value = false
+  }
+}
+function dropInBox() {
+  const item = pcDrag.value
+  pcDrag.value = null
+  if (item?.fromParty && !game.active && !blocked.value && draft.value.includes(item.id))
+    toggle(item.id)
+}
 function setMode(value: 'login' | 'register') {
   mode.value = value
   game.error = ''
@@ -212,6 +323,7 @@ function backToGyms() {
 }
 
 const draggedSlot = ref<number | null>(null)
+const dropTarget = ref<number | null>(null)
 const teamSlots = ref<HTMLElement>()
 async function moveSlot(from: number, to: number, focus = false) {
   if (game.active || blocked.value || from < 0 || from >= draft.value.length) return
@@ -234,11 +346,20 @@ function startDrag(event: DragEvent, index: number) {
   }
   draggedSlot.value = index
   event.dataTransfer?.setData('text/plain', String(index))
-  if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move'
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move'
+    const artwork = (event.currentTarget as HTMLElement).querySelector<HTMLElement>('.slot-artwork')
+    if (artwork)
+      event.dataTransfer.setDragImage(artwork, artwork.offsetWidth / 2, artwork.offsetHeight / 2)
+  }
+}
+function endDrag() {
+  draggedSlot.value = null
+  dropTarget.value = null
 }
 function dropSlot(index: number) {
   if (draggedSlot.value !== null) void moveSlot(draggedSlot.value, index)
-  draggedSlot.value = null
+  endDrag()
 }
 
 async function saveTeam() {
@@ -246,18 +367,30 @@ async function saveTeam() {
 }
 
 async function challenge(gymId: number) {
-  if (blocked.value) return
+  if (!canChallenge(gymId)) return
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  throwing.value = false
+  insideGym.value = false
   entering.value = !reduced
   revealing.value = false
+  arrivalGym.value = game.gyms.find((g) => g.id === gymId)
   const resultPromise = game.mutate<Battle>('/battles', 'POST', { gym_id: gymId })
-  if (!reduced) await new Promise((resolve) => window.setTimeout(resolve, 600))
-  const result = await resultPromise
+  const [result] = await Promise.all([resultPromise, finishEntranceShot()])
   if (!mounted) return
   if (result) {
-    displayed.value = game.battle ? structuredClone(toRaw(game.battle)) : result
+    displayed.value = structuredClone(toRaw(game.battle ?? result))
+    if (!reduced) {
+      insideGym.value = true
+      await finishEntranceShot()
+      if (!mounted) return
+      throwing.value = true
+      await finishEntranceShot()
+      if (!mounted) return
+    }
     log.value = []
+    if (!reduced) transfer.value = { side: 'player', phase: 'ready' }
     arenaOpen.value = true
+    command.value = 'menu'
     leaving.value = false
     await nextTick()
     window.scrollTo({ top: 0 })
@@ -266,6 +399,9 @@ async function challenge(gymId: number) {
   revealing.value = true
   if (!reduced) await new Promise((resolve) => window.setTimeout(resolve, 450))
   entering.value = false
+  arrivalGym.value = undefined
+  if (result && !reduced && mounted) await animateTransfer('player', 'opening')
+  transfer.value = undefined
 }
 
 function eventText(event: BattleEvent) {
@@ -322,24 +458,41 @@ async function play(action: {
   })
   if (result && mounted) {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    for (const event of result.events) {
+    for (const [index, event] of result.events.entries()) {
       if (!mounted) break
+      if (event.kind === 'switch' && event.side && !reduced) {
+        motion.value = ''
+        await animateTransfer(event.side, 'recall')
+        if (!mounted) break
+      }
       log.value.push(event)
       motion.value =
         event.kind === 'attack'
           ? `${event.side}-attack`
-          : event.kind === 'damage'
+          : event.kind === 'damage' && (event.amount ?? 0) > 0
             ? `${event.side}-hit`
             : ''
       if (event.side && displayed.value) {
         const member = displayed.value[event.side].find((p) => p.id === event.pokemon)
         if (member && event.hp !== undefined) member.hp = event.hp
-        if (event.kind === 'switch')
+        if (event.kind === 'switch') {
           displayed.value[`${event.side}_active`] = displayed.value[event.side].findIndex(
             (p) => p.id === event.pokemon,
           )
+          if (!reduced) {
+            await animateTransfer(event.side, 'send')
+            transfer.value = undefined
+          }
+          continue
+        }
       }
-      if (!reduced) await new Promise((resolve) => window.setTimeout(resolve, 300))
+      if (!reduced && event.kind === 'attack' && event.move) {
+        await moveEffect.value?.play(
+          event.move,
+          event.side === 'opponent',
+          result.events[index + 1]?.kind !== 'miss',
+        )
+      } else if (!reduced) await new Promise((resolve) => window.setTimeout(resolve, 300))
     }
   }
   if (mounted) {
@@ -365,9 +518,35 @@ function health(pokemon: Fighter) {
     >
       <GymBackdrop :type="gym?.type" />
     </div>
-    <div v-if="entering" class="battle-entry" :class="{ revealing }" aria-hidden="true">
-      <div class="battle-entry-top" />
-      <div class="battle-entry-bottom" />
+    <div v-if="entering" class="battle-entry" :class="{ revealing }" role="status">
+      <div v-if="arrivalGym" class="gym-door-shot">
+        <div v-if="throwing" class="leader-pitch" :data-leader="arrivalGym.id">
+          <img :src="`/studio/gyms/leader-${arrivalGym.id}.png`" alt="" width="64" height="64" />
+          <i class="release-ring" aria-hidden="true"></i>
+          <BattleSprite
+            v-if="opponent"
+            class="released-fighter"
+            :id="opponent.id"
+            :name="name(opponent)"
+            :src="opponent.front"
+          />
+          <i ref="entranceActor" class="pitched-ball" aria-hidden="true"></i>
+        </div>
+        <div
+          v-else
+          :key="insideGym ? 'inside' : 'outside'"
+          class="gym-door-map"
+          :class="{ interior: insideGym }"
+          :style="{ backgroundImage: `url(/studio/gyms/${arrivalGym.id}.png)` }"
+        >
+          <span v-if="!insideGym" class="gym-threshold"></span>
+          <span ref="entranceActor" class="gym-visitor"><i></i></span>
+        </div>
+        <strong>{{ insideGym ? arrivalGym.leader : arrivalGym.names[locale] }}</strong>
+        <p v-if="insideGym" class="leader-line">
+          {{ t(`adventure.leaderLines.g${arrivalGym.id}`) }}
+        </p>
+      </div>
     </div>
   </Teleport>
   <section
@@ -375,8 +554,11 @@ function health(pokemon: Fighter) {
     :data-type="arenaOpen && displayed ? gym?.type : undefined"
     :class="{ 'is-battling': arenaOpen && displayed }"
   >
-    <header v-if="!arenaOpen || !displayed" class="adventure-heading">
-      <h1>{{ t('adventure.title') }}</h1>
+    <header
+      v-if="game.trainer && accessPhase === 'idle' && tab !== 'team' && (!arenaOpen || !displayed)"
+      class="adventure-heading"
+    >
+      <h1>{{ t('adventure.gymsTitle') }}</h1>
     </header>
 
     <div v-if="game.error" class="adventure-error" role="alert">
@@ -387,18 +569,30 @@ function health(pokemon: Fighter) {
     </div>
     <p v-if="game.loading" class="state-box" role="status">{{ t('adventure.loading') }}</p>
 
-    <div v-else-if="!game.trainer" class="trainer-access">
+    <div
+      v-else-if="!game.trainer || accessPhase !== 'idle'"
+      class="trainer-access"
+      :data-phase="accessPhase"
+    >
       <div class="trainer-pass">
-        <div class="pass-stamp"><Award :size="40" /><span>KANTO</span></div>
-        <h2>{{ t('adventure.privateAccess') }}</h2>
-        <p>{{ t('adventure.accessText') }}</p>
-        <div class="pass-companions" aria-hidden="true">
+        <div ref="exterior" class="arrival-scene" aria-hidden="true">
           <img
-            v-for="id in [1, 4, 7]"
-            :key="id"
-            :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`"
+            src="/studio/viridian-night.png"
+            class="arrival-map"
             alt=""
+            width="272"
+            height="160"
           />
+          <span class="arrival-door"></span>
+          <span class="arrival-player"><i></i></span>
+          <span class="night-motes"></span>
+        </div>
+        <p class="arrival-location"><span>Kanto</span>{{ t('adventure.viridianCity') }}</p>
+        <div class="reception-dialogue">
+          <strong>{{ t('adventure.reception') }}</strong>
+          <p :key="mode">
+            {{ accessPhase === 'crossing' ? t('adventure.enterCenter') : receptionText }}
+          </p>
         </div>
         <ol class="pass-badges" aria-label="Kanto">
           <li
@@ -408,11 +602,17 @@ function health(pokemon: Fighter) {
             class="pokemon-palette"
             :data-type="g.type"
           >
-            <Award :size="24" /><span>{{ g.id }}</span>
+            <img
+              :src="`/studio/badges/${g.id}.png`"
+              :alt="g.leader"
+              width="44"
+              height="44"
+            /><span>{{ g.id.toString().padStart(2, '0') }}</span>
           </li>
         </ol>
       </div>
-      <form class="trainer-form" @submit.prevent="authenticate">
+      <form :inert="accessPhase !== 'idle'" class="trainer-form" @submit.prevent="authenticate">
+        <h1>{{ t('adventure.privateAccess') }}</h1>
         <div class="adventure-tabs">
           <button type="button" :aria-pressed="mode === 'login'" @click="setMode('login')">
             {{ t('adventure.login') }}
@@ -450,6 +650,7 @@ function health(pokemon: Fighter) {
         />
         <small id="trainer-password-help">{{ t('adventure.passwordHelp') }}</small>
         <template v-if="mode === 'register'">
+          <p class="invitation-help">{{ t('adventure.accessText') }}</p>
           <label for="trainer-invitation">{{ t('adventure.invitation') }}</label>
           <input
             id="trainer-invitation"
@@ -486,7 +687,7 @@ function health(pokemon: Fighter) {
           class="gym-intro pokemon-palette"
           :data-type="gym?.type"
         >
-          <Award :size="28" />
+          <img v-if="gym" :src="`/studio/badges/${gym.id}.png`" alt="" width="36" height="36" />
           <div>
             <p>{{ gym?.names[locale] }}</p>
             <h1>{{ gym?.leader }}</h1>
@@ -506,25 +707,36 @@ function health(pokemon: Fighter) {
         <div
           class="battle-arena pokemon-palette"
           :class="motion"
+          :data-transfer="transfer?.phase"
+          :data-side="transfer?.side"
           :data-type="gym?.type"
           :aria-busy="blocked"
         >
-          <GymBackdrop :type="gym?.type" />
+          <MoveEffect ref="moveEffect" />
+          <i v-if="transfer?.phase === 'opening'" class="throwing-player" aria-hidden="true"></i>
+          <i
+            v-if="transfer && transfer.phase !== 'ready'"
+            :key="transfer.phase"
+            ref="transferBall"
+            class="party-ball"
+            aria-hidden="true"
+          ></i>
           <div class="fighter-hud enemy-hud">
             <strong>{{ name(opponent) }}</strong
             ><span>{{ t('adventure.level', { level: opponent.level }) }}</span>
             <progress :value="opponent.hp" :max="opponent.max_hp" :aria-label="health(opponent)" />
             <small>{{ opponent.hp }} / {{ opponent.max_hp }}</small>
           </div>
-          <div class="battle-platform enemy-platform" aria-hidden="true" />
           <BattleSprite
             class="battle-sprite enemy-sprite"
+            :id="opponent.id"
             :src="opponent.front"
             :name="name(opponent)"
           />
-          <div class="battle-platform player-platform" aria-hidden="true" />
           <BattleSprite
             class="battle-sprite player-sprite"
+            :id="player.id"
+            back
             :src="player.back"
             :name="name(player)"
             :fallback="player.front"
@@ -543,11 +755,33 @@ function health(pokemon: Fighter) {
             aria-live="polite"
             :aria-label="t('adventure.battleLog')"
           >
+            <p v-if="!blocked && !log.length && displayed.status === 'active'">
+              {{ t('adventure.commandPrompt', { name: name(player) }) }}
+            </p>
             <p v-for="(event, i) in log" :key="i">{{ eventText(event) }}</p>
-            <p v-if="blocked" role="status">{{ t('adventure.processing') }}</p>
+            <p v-if="transfer?.phase === 'opening'">
+              {{ t('adventure.sendFirst', { name: name(player) }) }}
+            </p>
+            <p v-else-if="transfer?.phase === 'recall'">
+              {{
+                t('adventure.recall', {
+                  name: name(transfer.side === 'player' ? player : opponent),
+                })
+              }}
+            </p>
+            <p v-else-if="blocked && !transfer" role="status">{{ t('adventure.processing') }}</p>
           </div>
           <template v-if="displayed.status === 'active'">
-            <div class="battle-moves">
+            <div v-if="command === 'menu' && !leaving" class="fight-commands">
+              <button :disabled="blocked" @click="command = 'moves'">
+                {{ t('adventure.fight') }}
+              </button>
+              <button :disabled="blocked" @click="command = 'team'">Pokémon</button>
+              <button :disabled="blocked" @click="leaving = true">
+                {{ t('adventure.surrender') }}
+              </button>
+            </div>
+            <div v-if="command === 'moves'" class="battle-moves">
               <button
                 v-for="move in player.moves"
                 :key="move.id"
@@ -569,7 +803,11 @@ function health(pokemon: Fighter) {
                 {{ locale === 'es' ? 'Forcejeo' : 'Struggle' }}
               </button>
             </div>
-            <div class="battle-bench" :aria-label="t('adventure.yourTeam')">
+            <div
+              v-if="command === 'team'"
+              class="battle-bench"
+              :aria-label="t('adventure.yourTeam')"
+            >
               <button
                 v-for="(member, slot) in displayed.player"
                 :key="member.id"
@@ -596,16 +834,22 @@ function health(pokemon: Fighter) {
               </button>
             </div>
             <button
-              v-else
-              class="text-button battle-leave"
+              v-if="command !== 'menu'"
+              class="battle-leave"
               :disabled="blocked"
-              @click="leaving = true"
+              @click="command = 'menu'"
             >
-              <Flag :size="16" />{{ t('adventure.surrender') }}
+              <ChevronLeft :size="16" />{{ t('adventure.backToCommands') }}
             </button>
           </template>
           <div v-else class="battle-result" role="status">
-            <Award v-if="displayed.status === 'won'" :size="36" />
+            <img
+              v-if="displayed.status === 'won'"
+              :src="`/studio/badges/${displayed.gym_id}.png`"
+              alt=""
+              width="52"
+              height="52"
+            />
             <h2>{{ t(`adventure.${displayed.status}`) }}</h2>
             <p v-if="displayed.status === 'won'">
               {{
@@ -640,33 +884,35 @@ function health(pokemon: Fighter) {
 
         <section v-if="tab === 'team'" class="adventure-panel pokemon-center">
           <div class="center-station">
-            <header class="center-canopy">
-              <span class="pokeball" aria-hidden="true"></span>
-              <h2>{{ t('adventure.pokemonCenter') }}</h2>
-            </header>
+            <CenterReception
+              ref="reception"
+              :arriving="justEntered"
+              @arrived="justEntered = false"
+              @open-pc="pcDialog?.showModal()"
+            />
             <div class="center-body">
-              <CenterReception :selected="draft.length">
-                <button
-                  class="pc-access"
-                  :aria-label="t('adventure.openPc')"
-                  :title="t('adventure.openPc')"
-                  aria-haspopup="dialog"
-                  @click="pcDialog?.showModal()"
-                >
-                  <CollectionPc />
-                  <span class="pc-access-label" aria-hidden="true">{{
-                    t('adventure.openPc')
-                  }}</span>
-                </button>
-              </CenterReception>
+              <h1 ref="teamHeading" tabindex="-1">{{ t('adventure.title') }}</h1>
               <p>{{ t('adventure.teamHelp') }}</p>
-              <p class="team-order-help">{{ t('adventure.reorderHelp') }}</p>
-              <div ref="teamSlots" class="team-slots">
+              <details v-if="draft.length > 1" class="team-order-help">
+                <summary>{{ t('adventure.orderHelpTitle') }}</summary>
+                {{ t('adventure.reorderHelp') }}
+              </details>
+              <div
+                ref="teamSlots"
+                class="team-slots"
+                @dragleave="
+                  !teamSlots?.contains($event.relatedTarget as Node | null) && (dropTarget = null)
+                "
+              >
                 <div
                   v-for="(member, i) in slots"
                   :key="i"
                   class="team-slot"
-                  :class="{ occupied: member, dragging: draggedSlot === i }"
+                  :class="{
+                    occupied: member,
+                    dragging: draggedSlot === i,
+                    'drop-target': draggedSlot !== null && dropTarget === i && draggedSlot !== i,
+                  }"
                   :draggable="Boolean(member) && !game.active && !blocked"
                   :tabindex="member ? 0 : undefined"
                   :aria-label="
@@ -675,8 +921,8 @@ function health(pokemon: Fighter) {
                       : undefined
                   "
                   @dragstart="startDrag($event, i)"
-                  @dragend="draggedSlot = null"
-                  @dragover.prevent
+                  @dragend="endDrag"
+                  @dragover.prevent="dropTarget = Math.min(i, draft.length - 1)"
                   @drop.prevent="dropSlot(i)"
                   @keydown.alt.left.prevent="moveSlot(i, i - 1, true)"
                   @keydown.alt.right.prevent="moveSlot(i, i + 1, true)"
@@ -697,7 +943,12 @@ function health(pokemon: Fighter) {
                     <span class="slot-pokeball" aria-hidden="true"></span>
                     <img
                       v-if="member"
-                      :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
+                      draggable="false"
+                      :src="
+                        [1, 4, 7].includes(member.id)
+                          ? `/studio/starter-${member.id}.png`
+                          : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`
+                      "
                       :alt="name(member)"
                     />
                     <Plus v-else :size="26" aria-hidden="true" />
@@ -709,20 +960,30 @@ function health(pokemon: Fighter) {
                       <button
                         :disabled="i === 0 || game.active || blocked"
                         :aria-label="t('adventure.moveEarlier', { name: name(member) })"
-                        @click="moveSlot(i, i - 1, true)"
+                        @click="moveSlot(i, i - 1, $event.detail === 0)"
                       >
                         <ChevronLeft :size="18" />
                       </button>
                       <button
                         :disabled="i === draft.length - 1 || game.active || blocked"
                         :aria-label="t('adventure.moveLater', { name: name(member) })"
-                        @click="moveSlot(i, i + 1, true)"
+                        @click="moveSlot(i, i + 1, $event.detail === 0)"
                       >
                         <ChevronRight :size="18" />
                       </button>
                     </div>
                   </template>
-                  <span v-else class="slot-empty-label">{{ t('adventure.emptySlot') }}</span>
+                  <button
+                    v-else
+                    class="slot-empty-label empty-slot-access"
+                    :aria-label="
+                      t('adventure.slot', { number: i + 1 }) + ' · ' + t('adventure.openPc')
+                    "
+                    aria-haspopup="dialog"
+                    @click="reception?.openPc()"
+                  >
+                    {{ t('adventure.emptySlot') }}
+                  </button>
                 </div>
               </div>
               <div class="team-save">
@@ -739,84 +1000,102 @@ function health(pokemon: Fighter) {
         </section>
 
         <section v-if="tab === 'gyms'" class="adventure-panel">
-          <h2>{{ t('adventure.gymsTitle') }}</h2>
           <p>{{ t('adventure.gymsHelp') }}</p>
           <p v-if="!game.trainer.team.length" class="team-note">{{ t('adventure.needsTeam') }}</p>
           <p v-else-if="dirty" class="team-note">{{ t('adventure.unsavedTeam') }}</p>
-          <ol class="gym-route">
-            <li
-              v-for="g in game.gyms"
-              :key="g.id"
-              class="gym-stop pokemon-palette"
-              :data-type="g.type"
-              :class="{ 'gym-locked': g.id > game.trainer.medals.length + 1 }"
-              @mouseenter="openedGym = g.id"
-              @mouseleave="leaveGym"
-              @focusin="openedGym = g.id"
-              @focusout="blurGym"
-              @keydown.esc.stop.prevent="openedGym = null"
-            >
-              <button
-                class="gym-card-trigger"
-                :aria-label="t('adventure.gymDetails', { name: g.leader })"
-                :aria-expanded="openedGym === g.id"
-                :aria-controls="`gym-actions-${g.id}`"
-                @click="openedGym = g.id"
-              >
-                <div class="gym-medal">
-                  <TrainerPortrait :gym-id="g.id" :leader="g.leader" />
-                  <span class="gym-status"
-                    ><Award v-if="game.trainer.medals.includes(g.id)" :size="14" /><LockKeyhole
-                      v-else-if="g.id > game.trainer.medals.length + 1"
-                      :size="14"
-                    />{{ g.id }}</span
-                  >
-                </div>
-                <span class="gym-info">
-                  <strong>{{ g.leader }}</strong>
-                  <small>{{ t(`types.${g.type}`, g.type) }}</small>
-                </span>
-              </button>
-              <div
-                v-if="openedGym === g.id"
-                :id="`gym-actions-${g.id}`"
-                class="gym-actions"
-                role="group"
-                :aria-label="g.leader"
-              >
-                <small>{{ g.names[locale] }}</small>
-                <p>
-                  {{ t('adventure.level', { level: g.level }) }} &middot;
-                  {{ t('adventure.firstReward', { amount: g.reward }) }}
-                </p>
-                <span v-if="game.trainer.medals.includes(g.id)" class="earned-badge">{{
-                  t('adventure.earned')
-                }}</span>
-                <button
-                  class="button secondary"
-                  :disabled="
-                    blocked ||
-                    game.active ||
-                    dirty ||
-                    !game.trainer.team.length ||
-                    g.id > game.trainer.medals.length + 1
-                  "
-                  @click="challenge(g.id)"
+          <div class="kanto-guide">
+            <div class="kanto-chart">
+              <header>
+                KANTO
+                <span>{{ t('adventure.medals', { count: game.trainer.medals.length }) }}</span>
+              </header>
+              <div class="kanto-terrain">
+                <img src="/studio/kanto-atlas.png" width="192" height="144" alt="" />
+                <svg
+                  v-if="selectedGym"
+                  class="badge-trail"
+                  viewBox="0 0 192 144"
+                  aria-hidden="true"
                 >
-                  {{
-                    g.id > game.trainer.medals.length + 1
-                      ? t('adventure.locked')
-                      : t(
-                          game.trainer.medals.includes(g.id)
-                            ? 'adventure.practice'
-                            : 'adventure.challenge',
-                          { name: g.leader },
-                        )
-                  }}
+                  <polyline :points="badgeTrails[selectedGym.id]" />
+                </svg>
+                <button
+                  v-for="g in game.gyms"
+                  :key="g.id"
+                  class="city-marker"
+                  :title="`#${g.id} · ${g.names[locale]} · ${g.leader}`"
+                  :style="{
+                    left: (cityMarkers[g.id]![0] / 192) * 100 + '%',
+                    top: (cityMarkers[g.id]![1] / 144) * 100 + '%',
+                  }"
+                  :aria-label="
+                    canChallenge(g.id)
+                      ? t('adventure.challenge', { name: g.leader })
+                      : t('adventure.gymDetails', { name: g.leader })
+                  "
+                  :data-locked="g.id > game.trainer.medals.length + 1"
+                  :data-selected="selectedGym?.id === g.id"
+                  @focus="openedGym = g.id"
+                  @mouseenter="openedGym = g.id"
+                  @click="visitGym(g.id)"
+                >
+                  <span>{{ g.id }}</span>
                 </button>
               </div>
-            </li>
-          </ol>
+              <div v-if="selectedGym" class="map-itinerary">
+                <span>{{
+                  selectedGym.id > 1
+                    ? `${selectedGym.id - 1} · ${game.gyms[selectedGym.id - 2]?.names[locale]}`
+                    : t('adventure.palletTown')
+                }}</span>
+                <span aria-hidden="true">→</span>
+                <strong>{{ selectedGym.id }} · {{ selectedGym.names[locale] }}</strong>
+              </div>
+            </div>
+            <section
+              v-if="selectedGym"
+              class="gym-dossier pokemon-palette"
+              :data-type="selectedGym.type"
+            >
+              <div class="gym-leader-art">
+                <TrainerPortrait :gym-id="selectedGym.id" :leader="selectedGym.leader" /><img
+                  class="leader-insignia"
+                  :src="`/studio/badges/${selectedGym.id}.png`"
+                  alt=""
+                  width="50"
+                  height="50"
+                />
+              </div>
+              <small
+                >#{{ selectedGym.id }} · {{ selectedGym.names[locale] }} ·
+                {{ t('types.' + selectedGym.type) }}</small
+              >
+              <h3>{{ selectedGym.leader }}</h3>
+              <p>
+                {{ t('adventure.level', { level: selectedGym.level }) }} ·
+                {{ t('adventure.firstReward', { amount: selectedGym.reward }) }}
+              </p>
+              <span v-if="game.trainer.medals.includes(selectedGym.id)">{{
+                t('adventure.earned')
+              }}</span>
+              <button
+                class="button primary"
+                :disabled="!canChallenge(selectedGym.id)"
+                @click="challenge(selectedGym.id)"
+              >
+                <LockKeyhole v-if="selectedGym.id > game.trainer.medals.length + 1" :size="16" />{{
+                  selectedGym.id > game.trainer.medals.length + 1
+                    ? t('adventure.locked')
+                    : t(
+                        game.trainer.medals.includes(selectedGym.id)
+                          ? 'adventure.practice'
+                          : 'adventure.challenge',
+                        { name: selectedGym.leader },
+                      )
+                }}
+              </button>
+            </section>
+          </div>
         </section>
       </template>
     </template>
@@ -850,7 +1129,12 @@ function health(pokemon: Fighter) {
       </li>
     </ol>
   </dialog>
-  <dialog ref="pcDialog" class="sale-dialog pc-dialog" aria-labelledby="pc-title">
+  <dialog
+    ref="pcDialog"
+    @close="pcDrag = null"
+    class="sale-dialog pc-dialog"
+    aria-labelledby="pc-title"
+  >
     <template v-if="game.trainer">
       <div class="pc-screen">
         <header class="pc-screen-header">
@@ -875,42 +1159,100 @@ function health(pokemon: Fighter) {
           {{ t('adventure.emptyCollection') }}
           <RouterLink to="/catalogo">{{ t('catalog') }}</RouterLink>
         </p>
-        <div class="collection-picker pc-box-grid">
+        <div class="storage-workspace">
+          <section class="storage-party" :aria-label="t('adventure.teamTab')">
+            <h3>{{ t('adventure.teamTab') }}</h3>
+            <div class="storage-party-slots">
+              <div
+                v-for="(member, index) in slots"
+                :key="index"
+                class="storage-party-slot"
+                @dragover.prevent
+                @drop.prevent="dropInParty(index)"
+              >
+                <small>{{ index + 1 }}</small>
+                <button
+                  v-if="member"
+                  :aria-label="t('adventure.removeFromTeam', { name: name(member) })"
+                  :title="name(member)"
+                  :disabled="game.active || blocked"
+                  draggable="true"
+                  @dragstart="startPcDrag($event, member.id, true)"
+                  @dragend="pcDrag = null"
+                  @click="toggle(member.id)"
+                >
+                  <img
+                    :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
+                    draggable="false"
+                    alt=""
+                  /><span>{{ name(member) }}</span>
+                </button>
+                <span v-else aria-hidden="true">—</span>
+              </div>
+            </div>
+          </section>
           <div
-            v-for="(member, i) in boxSlots"
-            :key="member?.id ?? `empty-${i}`"
-            :class="member ? 'collection-member' : 'pc-empty-slot'"
+            class="storage-box"
+            :class="{ 'city-box': box % 2 }"
+            @dragover.prevent
+            @drop.prevent="dropInBox"
           >
-            <template v-if="member">
-              <button
-                :aria-pressed="draft.includes(member.id)"
-                :aria-label="t('adventure.select', { name: name(member) })"
-                :disabled="
-                  game.active || blocked || (!draft.includes(member.id) && draft.length === 6)
-                "
-                @click="toggle(member.id)"
+            <h3>{{ t('adventure.box', { number: box + 1 }) }}</h3>
+            <div class="collection-picker pc-box-grid">
+              <div
+                v-for="(member, i) in boxSlots"
+                :key="member?.id ?? `empty-${i}`"
+                :class="member ? 'collection-member' : 'pc-empty-slot'"
               >
-                <img
-                  :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
-                  alt=""
-                /><strong>{{ name(member) }}</strong>
-              </button>
-              <button
-                class="collection-sell"
-                :aria-label="t('adventure.sell', { name: name(member) })"
-                :disabled="game.active || blocked"
-                @click="askSale(member)"
-              >
-                {{ t('adventure.sellButton') }}
-              </button>
-            </template>
-            <span v-else aria-hidden="true">{{ i + 1 }}</span>
+                <template v-if="member">
+                  <button
+                    :aria-pressed="draft.includes(member.id)"
+                    :title="name(member)"
+                    draggable="true"
+                    @dragstart="startPcDrag($event, member.id, false)"
+                    @dragend="pcDrag = null"
+                    :aria-label="t('adventure.select', { name: name(member) })"
+                    :disabled="
+                      game.active || blocked || (!draft.includes(member.id) && draft.length === 6)
+                    "
+                    @click="toggle(member.id)"
+                  >
+                    <img
+                      :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${member.id}.png`"
+                      draggable="false"
+                      alt=""
+                    />
+                  </button>
+                  <button
+                    class="collection-sell"
+                    :aria-label="t('adventure.sell', { name: name(member) })"
+                    :disabled="game.active || blocked"
+                    @click="askSale(member)"
+                  >
+                    <Coins :size="14" aria-hidden="true" />
+                  </button>
+                </template>
+                <span v-else aria-hidden="true">·</span>
+              </div>
+            </div>
           </div>
         </div>
-        <p class="pc-selection-count">{{ t('adventure.selectedTeam', { count: draft.length }) }}</p>
+        <p class="team-note">{{ t('adventure.pcHelp') }}</p>
+        <p class="pc-selection-count" role="status">
+          {{ t('adventure.selectedTeam', { count: draft.length }) }}
+        </p>
         <p v-if="draft.length === 6" class="team-note">{{ t('adventure.teamFull') }}</p>
         <p class="team-note">{{ t('adventure.salePolicy') }}</p>
-        <button class="button primary" @click="pcDialog?.close()">
+        <p v-if="game.error" role="alert">{{ errorText }}</p>
+        <button
+          class="button primary"
+          :disabled="!dirty || game.active || blocked"
+          @click="saveTeam"
+        >
+          {{ t('adventure.saveTeam') }}
+        </button>
+        <span v-if="saved" role="status">{{ t('adventure.teamSaved') }}</span>
+        <button class="button secondary" @click="pcDialog?.close()">
           {{ t('adventure.backToTeam') }}
         </button>
       </div>

@@ -1,23 +1,19 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
-import { Plus } from 'lucide-vue-next'
+import { Plus, ArrowUpRight } from 'lucide-vue-next'
 import type { Pokemon } from '../domain/pokemon'
 import { useCartStore } from '@/cart/application/cartStore'
 import { money, pokemonName, number, typeName, decimal } from '@/shared/presentation/format'
 import PokemonImage from '@/components/PokemonImage.vue'
 import CatalogPurchase from '@/adventure/CatalogPurchase.vue'
 import { useAdventureStore } from '@/adventure/store'
-defineProps<{ pokemon: Pokemon; bento?: boolean }>()
+defineProps<{ pokemon: Pokemon; showMeasures?: boolean }>()
 const cart = useCartStore()
 const game = useAdventureStore()
 </script>
 <template>
-  <article
-    class="pokemon-card illustrated-card pokemon-palette"
-    :class="{ 'bento-card': bento }"
-    :data-type="pokemon.types[0]"
-  >
+  <article class="pokemon-card illustrated-card pokemon-palette" :data-type="pokemon.types[0]">
     <RouterLink
       :to="`/pokemon/${pokemon.id}`"
       class="card-art"
@@ -25,6 +21,7 @@ const game = useAdventureStore()
     >
       <span class="dex-number">{{ number(pokemon.species_id ?? pokemon.id) }}</span
       ><PokemonImage :src="pokemon.image_url" :name="pokemonName(pokemon)" />
+      <ArrowUpRight class="card-open" :size="18" aria-hidden="true" />
       <span v-if="!game.trainer && !pokemon.stock" class="sold-out">{{ t('soldOut') }}</span>
     </RouterLink>
     <div class="type-list">
@@ -38,7 +35,7 @@ const game = useAdventureStore()
           pokemonName(pokemon)
         }}</RouterLink>
       </h3>
-      <p v-if="bento" class="card-measures">
+      <p v-if="showMeasures" class="card-measures">
         <span
           >{{ t('height') }}:
           {{ pokemon.height_m == null ? t('missingData') : decimal(pokemon.height_m) + ' m' }}</span
@@ -73,186 +70,244 @@ const game = useAdventureStore()
 
 <style>
 .illustrated-card.pokemon-card {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  min-width: 0;
+  border-radius: var(--shop-radius);
+  overflow: clip;
+}
+
+.illustrated-card .card-art {
   position: relative;
   isolation: isolate;
-  height: 300px;
-  border-radius: 20px;
-  overflow: hidden;
+  height: auto;
+  aspect-ratio: 1.48;
   background:
     radial-gradient(
-      ellipse at 70% 20%,
-      color-mix(in srgb, var(--pokemon-tint) 26%, transparent),
-      transparent 70%
+      circle at center,
+      transparent 35%,
+      color-mix(in srgb, var(--surface) 65%, transparent) 35.5% 36%,
+      transparent 36.5% 43%,
+      color-mix(in srgb, var(--surface) 65%, transparent) 43.5% 44%,
+      transparent 44.5%
     ),
-    var(--surface);
-  border: 1px solid var(--line);
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
+    radial-gradient(color-mix(in srgb, var(--pokemon-tint) 48%, transparent) 1px, transparent 1px) 0
+      0 / 8px 8px,
+    color-mix(in srgb, var(--pokemon-tint) 47%, var(--surface));
 }
-.illustrated-card .card-art {
+
+.card-open {
   position: absolute;
-  inset: 0;
-  height: 100%;
-  background: none;
-  z-index: 0;
-}
-.illustrated-card .card-art:before {
-  content: '';
-  position: absolute;
-  width: 180px;
-  height: 180px;
-  border: 1px solid color-mix(in srgb, var(--pokemon-tint) 25%, transparent);
+  bottom: 9px;
+  right: 9px;
+  color: var(--ink);
+  background: var(--surface);
   border-radius: 50%;
-  right: 10%;
-  top: 2%;
-  transform: rotate(-20deg);
+  padding: 4px;
+  width: 25px;
+  height: 25px;
 }
+.illustrated-card .card-art:focus-visible {
+  outline-offset: -4px;
+}
+
 .illustrated-card .card-art img {
-  position: absolute;
-  width: 85%;
-  height: 66%;
-  left: 7.5%;
-  top: 0;
+  width: 68%;
+  height: 85%;
   object-fit: contain;
-  filter: drop-shadow(0 10px 7px #0002);
-  transition: transform 0.25s;
+  filter: drop-shadow(0 8px 7px var(--shop-shadow));
 }
-.illustrated-card .card-art:hover img {
-  transform: translateY(-3px) scale(1.03);
-}
-.illustrated-card .card-art .dex-number {
-  left: auto;
-  right: 14px;
-  top: 12px;
-  z-index: 2;
-}
+
+.illustrated-card .dex-number,
 .illustrated-card .sold-out {
-  top: 35px;
-  bottom: auto;
-  right: 12px;
-}
-.illustrated-card .card-body {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  padding: 16px;
-  pointer-events: none;
-  background: linear-gradient(transparent, color-mix(in srgb, var(--surface) 94%, transparent) 48%);
   z-index: 1;
-}
-.illustrated-card .card-body a,
-.illustrated-card .card-body button {
-  pointer-events: auto;
-}
-.illustrated-card h3 {
-  font-size: 1.05rem;
-  line-height: 1.2;
-  margin: 6px 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.illustrated-card .type-list {
-  gap: 4px;
-}
-.illustrated-card .type-tag {
-  font-size: 9px;
+  border-radius: 4px;
   padding: 2px 5px;
+  color: var(--ink);
+  background: var(--surface);
 }
-.illustrated-card .card-bottom {
-  margin-top: 8px;
-  gap: 8px;
+
+.illustrated-card .card-art .dex-number {
+  left: 8px;
+  top: 8px;
 }
-.illustrated-card .card-bottom strong {
-  font-size: 0.95rem;
+
+.illustrated-card .sold-out {
+  right: 8px;
+  bottom: 8px;
 }
-.illustrated-card .add-button {
-  min-width: 44px;
-  min-height: 44px;
-  padding: 6px 9px;
-  border-radius: 50%;
-  gap: 0;
+
+.illustrated-card > .type-list {
+  align-content: start;
+  gap: 4px;
+  padding: 12px var(--card-inset) 0;
 }
-.illustrated-card .add-label {
-  display: none;
+
+.illustrated-card .card-body {
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--card-inset) var(--card-inset);
 }
-@media (max-width: 700px) {
-  .illustrated-card .add-button {
-    border-radius: 12px;
-    gap: 6px;
-    font-size: 12px;
-  }
-  .illustrated-card .add-label {
-    display: inline;
-  }
+
+.illustrated-card h3 {
+  font: 900 clamp(1.4rem, 2.1vw, 1.9rem) / 1.12 var(--font-display);
+  line-height: 1.16;
+  margin: 8px 0 6px;
+  overflow-wrap: anywhere;
 }
+
 .illustrated-card .card-measures {
-  font-size: 0.65rem;
-  color: var(--muted-strong);
   display: flex;
   flex-wrap: wrap;
-  gap: 2px 10px;
-  margin: 6px 0 0;
-  line-height: 1.3;
+  gap: 3px 10px;
+  color: var(--muted-strong);
+  font-size: 0.69rem;
+  line-height: 1.45;
+  margin-bottom: 8px;
+}
+
+.illustrated-card .card-bottom {
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+
+.illustrated-card .card-bottom strong {
+  font-size: clamp(0.95rem, 1.4vw, 1.16rem);
+}
+
+.illustrated-card .add-button {
+  width: auto;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 5px 10px;
+  background: var(--purple);
+  color: var(--on-accent);
+  border-color: transparent;
+  border-radius: 8px;
+}
+
+.illustrated-card .add-button:hover:not(:disabled) {
+  background: var(--button-hover);
+}
+.illustrated-card .catalog-purchase .add-label {
+  overflow-wrap: anywhere;
+}
+
+.catalog-grid .illustrated-card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  container-type: inline-size;
+  background: color-mix(in srgb, var(--pokemon-tint) 10%, var(--surface));
+}
+.catalog-grid .card-art {
+  background:
+    radial-gradient(ellipse at center, #fff7, transparent 72%),
+    repeating-linear-gradient(0deg, transparent 0 19px, #53624916 19px 20px),
+    repeating-linear-gradient(90deg, transparent 0 19px, #53624916 19px 20px),
+    color-mix(in srgb, var(--pokemon-tint) 68%, #fbf2dc);
+  border-bottom: 1px solid var(--line);
+  box-shadow: inset 0 0 0 5px #fff5;
+}
+.catalog-grid .card-art img {
+  filter: drop-shadow(1px 1px 0 white) drop-shadow(2px 3px 0 #181419aa);
+}
+.catalog-grid .card-art .dex-number {
+  left: 0;
+  top: 7px;
+  border-radius: 0;
+  padding: 1px 12px 2px 8px;
+  clip-path: polygon(0 0, 100% 0, 87% 100%, 0 100%);
+  background: var(--catalog-ink);
+  color: var(--catalog-paper);
+  font-weight: 700;
+}
+.catalog-grid .card-open {
+  border-radius: 0;
+  bottom: 0;
+  right: 0;
+  background: var(--catalog-ink);
+  color: var(--catalog-paper);
+}
+.catalog-grid h3 {
+  font-family: Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  margin-block: 5px;
+}
+.catalog-grid .add-button {
+  background: var(--album-accent);
+  color: white;
+  border-radius: 0;
+}
+.catalog-grid .card-bottom strong {
+  font: 700 clamp(0.96rem, 1.5vw, 1.22rem) / 1 var(--font-mono);
+}
+/* Wide tiles keep the artwork beside the offer, even when labels wrap. */
+@container (min-width: 270px) {
+  .catalog-grid .card-body h3 {
+    font-size: clamp(1.5rem, 6cqi, 2.5rem);
+  }
+}
+@media (min-width: 801px) {
+  .bento-block[data-count='6'] > :first-child {
+    grid-template-rows: minmax(200px, 1fr) auto auto;
+  }
+  .bento-block[data-count='6'] > :first-child .card-art {
+    aspect-ratio: auto;
+  }
+  .bento-block[data-count='6'] > :first-child .card-art img {
+    position: absolute;
+    width: 85%;
+    height: 92%;
+  }
+  .bento-block[data-count='6'] > :is(:nth-child(2), :nth-child(3)),
+  .bento-block[data-count='1'] > article {
+    grid-template-rows: auto 1fr;
+    --art-ratio: auto;
+    --art-rows: 2;
+    --art-min-height: clamp(165px, 17vw, 214px);
+    --tile-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  }
+}
+@media (max-width: 800px) {
+  .bento-block[data-count='6'] > :is(:first-child, :last-child),
+  .bento-block:is([data-count='1'], [data-count='3'], [data-count='5']) > :first-child {
+    grid-template-rows: auto 1fr;
+    --art-ratio: auto;
+    --art-rows: 2;
+    --art-min-height: clamp(165px, 17vw, 214px);
+    --tile-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
 }
 .bento-block .illustrated-card {
-  height: auto;
-  min-height: 0;
+  grid-template-columns: var(--tile-columns, minmax(0, 1fr));
 }
-.bento-block .illustrated-card .card-art img {
-  height: 82%;
-  width: 72%;
-  left: 24%;
-  top: 0;
-}
-.bento-block .illustrated-card .card-body {
-  padding: 14px 18px;
-}
-.bento-block .illustrated-card .type-list {
-  position: absolute;
-  bottom: calc(100% + 38px);
-  left: 18px;
-  max-width: 90px;
-}
-.bento-block .illustrated-card .card-body {
-  background: linear-gradient(transparent, color-mix(in srgb, var(--surface) 96%, transparent) 50%);
-}
-@media (max-width: 900px) {
-  .bento-block .illustrated-card .card-art img {
-    width: 85%;
-    height: 73%;
-    left: 12%;
-    top: 0;
-  }
-  .bento-block .illustrated-card .type-list {
-    bottom: calc(100% + 55px);
-  }
+.bento-block .card-art {
+  min-height: var(--art-min-height, 0);
+  aspect-ratio: var(--art-ratio, 1.48);
+  grid-row: 1 / span var(--art-rows, 1);
 }
 @media (prefers-reduced-motion: reduce) {
-  .illustrated-card .card-art img {
+  .catalog-grid .card-art img {
     transition: none;
-  }
-  .illustrated-card .card-art:hover img {
     transform: none;
   }
 }
 
-.illustrated-card > .type-list,
-.bento-block .illustrated-card > .type-list {
-  position: absolute;
-  top: 14px;
-  left: 18px;
-  bottom: auto;
-  z-index: 2;
-  max-width: calc(100% - 76px);
-}
-@media (min-width: 901px) {
-  .bento-block[data-count='6'] > .pokemon-card:nth-child(2) .card-body,
-  .bento-block[data-count='6'] > .pokemon-card:nth-child(3) .card-body {
-    background: none;
+@media (max-width: 700px) {
+  .illustrated-card .card-bottom > .add-button .add-label,
+  .illustrated-card .catalog-purchase .add-button:not(:disabled) .add-label {
+    display: none;
+  }
+
+  .illustrated-card .catalog-purchase .add-button:disabled {
+    padding-inline: 5px;
+    font-size: 0.65rem;
+  }
+
+  .illustrated-card .card-bottom {
+    gap: 4px;
   }
 }
 </style>

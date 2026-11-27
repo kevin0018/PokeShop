@@ -121,7 +121,11 @@ onUnmounted(() => clearTimeout(timer))
         @focusout="schedule"
       >
         <div class="cart-preview-heading">
-          <h2>{{ t('cartPreview') }}</h2>
+          <h2>
+            <ShoppingBag :size="18" aria-hidden="true" />{{
+              t(cart.count ? 'cartPreview' : 'cart')
+            }}
+          </h2>
           <button
             ref="closeButton"
             type="button"
@@ -152,8 +156,16 @@ onUnmounted(() => clearTimeout(timer))
               </RouterLink>
             </li>
           </ul>
-          <p v-else>{{ t('emptyCart') }}</p>
-          <div class="cart-preview-total">
+          <div v-else class="cart-preview-empty">
+            <img src="/studio/113.webp" width="56" height="56" alt="" />
+            <div>
+              <strong>{{ t('emptyCart') }}</strong>
+              <RouterLink to="/catalogo" @click="close()"
+                >{{ t('exploreCatalog') }} <ArrowRight :size="14"
+              /></RouterLink>
+            </div>
+          </div>
+          <div class="cart-preview-total" :class="{ compact: !cart.count }">
             <span>{{ t('total') }} · {{ t('units', cart.count) }}</span
             ><strong>{{ price(cart.total) }}</strong>
           </div>
@@ -182,14 +194,14 @@ onUnmounted(() => clearTimeout(timer))
 .cart-preview {
   z-index: 120;
   width: min(390px, calc(100vw - 24px));
-  max-height: calc(100dvh - 24px);
+  max-height: min(calc(100dvh - 24px), var(--reka-popover-content-available-height, 100dvh));
   overflow-y: auto;
-  padding: 20px;
-  border: 1px solid var(--line);
-  border-radius: 20px;
+  padding: 0 16px 14px;
+  border: 1px solid var(--control-border);
+  border-radius: 12px;
   background: var(--surface);
   color: var(--ink);
-  box-shadow: 0 18px 60px #0003;
+  box-shadow: 0 12px 38px var(--shop-shadow);
 }
 .cart-preview-heading,
 .cart-preview-total {
@@ -198,30 +210,76 @@ onUnmounted(() => clearTimeout(timer))
   justify-content: space-between;
   gap: 12px;
 }
+.cart-preview-heading {
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line);
+}
 .cart-preview-heading h2 {
-  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
+  font: inherit;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+.cart-preview-heading h2 svg {
+  color: var(--purple);
+}
+.cart-preview-heading .icon-button {
+  min-height: 44px;
+  min-width: 44px;
+  color: var(--muted-strong);
+  background: transparent;
+}
+.cart-preview-empty {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 0 12px;
+}
+.cart-preview-empty img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  flex: none;
+}
+.cart-preview-empty strong {
+  font-size: 0.95rem;
+}
+.cart-preview-empty a {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  min-height: 44px;
+  color: var(--purple);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.cart-preview-empty a:hover {
+  text-decoration: underline;
 }
 .cart-preview-lines {
   list-style: none;
   padding: 0;
-  margin: 12px 0;
+  margin: 0;
 }
 .cart-preview-lines li + li {
   border-top: 1px solid var(--line);
 }
 .cart-preview-lines a {
   display: grid;
-  grid-template-columns: 58px minmax(0, 1fr) auto;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  padding: 12px 0;
-  font-size: 0.8rem;
+  padding: 9px 0;
+  font-size: 0.85rem;
 }
-.cart-preview-art {
-  height: 58px;
-  border-radius: 12px;
-  background: var(--lavender);
+.cart-preview-art.pokemon-palette {
+  height: 52px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--pokemon-tint) 26%, var(--surface));
 }
 .cart-preview-art img {
   width: 100%;
@@ -230,32 +288,52 @@ onUnmounted(() => clearTimeout(timer))
 }
 .cart-preview-copy {
   display: grid;
-  gap: 5px;
+  gap: 3px;
   overflow-wrap: anywhere;
 }
 .cart-preview-copy span {
   color: var(--muted-strong);
-  font-size: 0.75rem;
+  font-size: 0.76rem;
 }
 .cart-preview-total {
-  border-top: 1px dashed var(--line);
-  padding: 16px 0;
-  font-size: 0.85rem;
+  border-top: 1px solid var(--line);
+  padding: 12px 0;
+  font-size: 0.83rem;
+  color: var(--muted-strong);
 }
-.cart-preview-link {
+.cart-preview-total strong {
+  font-size: 1.12rem;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.cart-preview-total.compact {
+  padding: 8px 0;
+}
+.cart-preview-total.compact strong {
+  font-size: 0.85rem;
+  color: inherit;
+}
+.cart-preview .cart-preview-link {
   width: 100%;
+  background: var(--feature);
+  color: var(--purple);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-height: 44px;
+  font-weight: 700;
+  justify-content: space-between;
+}
+.cart-preview .cart-preview-link:hover {
+  background: var(--control-hover);
 }
 @media (max-width: 400px) {
-  .cart-preview {
-    padding: 16px;
-  }
   .cart-preview-lines a {
     grid-template-columns: 46px minmax(0, 1fr);
   }
   .cart-preview-lines a > strong {
     grid-column: 2;
   }
-  .cart-preview-art {
+  .cart-preview-art.pokemon-palette {
     height: 46px;
     grid-row: span 2;
   }

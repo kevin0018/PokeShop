@@ -1,368 +1,278 @@
+<script lang="ts">
+let captureSeen = false
+</script>
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ArrowUpRight, ArrowRight, Pause, Play } from 'lucide-vue-next'
-const { t } = useI18n()
+import {
+  ArrowRight,
+  ArrowUpRight,
+  ChevronLeft,
+  ChevronRight,
+  Droplets,
+  Flame,
+  Gamepad2,
+  Leaf,
+  Pause,
+  Play,
+  Radio,
+  RotateCcw,
+  Zap,
+  Ghost,
+} from 'lucide-vue-next'
+import { useAdventureStore } from '@/adventure/store'
+import CaptureIntro from './CaptureIntro.vue'
+import StudioSprite from './StudioSprite.vue'
+import OfferCommands from './OfferCommands.vue'
+import { useCartStore } from '@/cart/application/cartStore'
+import { useCatalogStore } from '../application/catalogStore'
+import { readPreference, savePreference } from '@/shared/infrastructure/preferences'
+import { money, number, typeName } from '@/shared/presentation/format'
+import type { Pokemon } from '../domain/pokemon'
+import { request } from '../infrastructure/httpPokemonRepository'
+
+const { t, n } = useI18n()
+const game = useAdventureStore()
+const stars = [
+  { id: 6, name: 'Charizard', type: 'fuego', icon: Flame },
+  { id: 25, name: 'Pikachu', type: 'electrico', icon: Zap },
+  { id: 94, name: 'Gengar', type: 'fantasma', icon: Ghost },
+] as const
 const starters = [
-  { id: 1, name: 'Bulbasaur', type: 'planta' },
-  { id: 4, name: 'Charmander', type: 'fuego' },
-  { id: 7, name: 'Squirtle', type: 'agua' },
+  { id: 1, name: 'Bulbasaur', type: 'planta', icon: Leaf },
+  { id: 4, name: 'Charmander', type: 'fuego', icon: Flame },
+  { id: 7, name: 'Squirtle', type: 'agua', icon: Droplets },
 ]
-const scene = ref<HTMLElement>(),
-  paused = ref(false),
-  visible = ref(false),
-  hidden = ref(document.hidden),
-  reduced = ref(true)
-const running = computed(() => !paused.value && visible.value && !hidden.value && !reduced.value)
+const selected = ref(0)
+const star = computed(() => stars[selected.value]!)
+function tune(step: number) {
+  selected.value = (selected.value + step + stars.length) % stars.length
+}
+
+const offers = ref<Pokemon[]>([])
+const controller = new AbortController()
+function priceFor(id: number) {
+  if (game.trainer) {
+    const offer = game.shop.find((entry) => entry.id === id)
+    return offer ? t('adventure.credits', { amount: n(offer.price) }) : ''
+  }
+  const offer = offers.value.find((entry) => entry.id === id)
+  return offer ? money(offer.price_cents) : ''
+}
+const cart = useCartStore()
+const catalog = useCatalogStore()
+const product = computed(() => offers.value.find((entry) => entry.id === star.value.id))
+const cartQuantity = computed(
+  () => cart.entries.find((entry) => entry.id === star.value.id)?.quantity ?? 0,
+)
+const owned = computed(() => game.trainer?.collection.some((entry) => entry.id === star.value.id))
+const canAdd = computed(() => {
+  if (game.trainer)
+    return (
+      !game.busy &&
+      !owned.value &&
+      cartQuantity.value === 0 &&
+      game.shop.some((entry) => entry.id === star.value.id)
+    )
+  return product.value && cartQuantity.value < product.value.stock
+})
+const buyLabel = computed(() => {
+  if (game.trainer) {
+    if (owned.value) return t('adventure.owned')
+    if (cartQuantity.value) return t('adventure.inCart')
+  } else if (product.value && !canAdd.value) {
+    return t(product.value.stock ? 'stockMax' : 'soldOut')
+  }
+  return t('addCart')
+})
+const actor = ref<HTMLElement>()
+const scene = ref<HTMLElement>()
+const paused = ref(false)
+const visible = ref(false)
+const hidden = ref(document.hidden)
 const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
-let observer: IntersectionObserver | undefined
+const reduced = ref(motion.matches)
+const captureKey = 'pokeshop.capture.v2'
+const intro = ref(!reduced.value && !captureSeen && !readPreference(captureKey))
+const revealing = ref(false)
+const filmReady = computed(() => !intro.value || revealing.value)
+function endIntro() {
+  captureSeen = true
+  savePreference(captureKey, 'seen')
+  intro.value = false
+  revealing.value = false
+}
+async function replay() {
+  scene.value?.scrollIntoView({ block: 'start', behavior: 'instant' })
+  await nextTick()
+  intro.value = true
+}
+const running = computed(() => !paused.value && visible.value && !hidden.value && !reduced.value)
+// Both shots use the same pose so the Pokémon can land in the offer without a cut.
+const tick = ref(0)
+watch(
+  () => running.value || (intro.value && !reduced.value && !hidden.value),
+  (playing, _, cleanup) => {
+    if (!playing) return
+    const timer = window.setInterval(() => tick.value++, 100)
+    cleanup(() => window.clearInterval(timer))
+  },
+  { immediate: true },
+)
 const updateMotion = () => {
   reduced.value = motion.matches
-  reset()
+  if (reduced.value && intro.value) endIntro()
 }
 const visibility = () => {
   hidden.value = document.hidden
 }
-function pointer(event: PointerEvent) {
-  if (!running.value || !window.matchMedia('(min-width: 769px) and (pointer: fine)').matches) return
-  const r = scene.value!.getBoundingClientRect()
-  scene.value!.style.setProperty('--dx', `${(event.clientX - r.x - r.width / 2) * 0.025}px`)
-  scene.value!.style.setProperty('--dy', `${(event.clientY - r.y - r.height / 2) * 0.025}px`)
-}
-function reset() {
-  scene.value?.style.setProperty('--dx', '0px')
-  scene.value?.style.setProperty('--dy', '0px')
-}
-function toggle() {
-  paused.value = !paused.value
-  reset()
-}
+let observer: IntersectionObserver | undefined
 onMounted(() => {
-  updateMotion()
+  if (!intro.value) delete document.documentElement.dataset.captureBoot
   motion.addEventListener('change', updateMotion)
   document.addEventListener('visibilitychange', visibility)
   observer = new IntersectionObserver(([entry]) => {
     visible.value = !!entry?.isIntersecting
   })
   if (scene.value) observer.observe(scene.value)
+  const ids = [...stars, ...starters].map((entry) => entry.id)
+  request<{ items: Pokemon[] }>(`/batch?ids=${ids.join(',')}`, controller.signal)
+    .then(({ items }) => {
+      offers.value = items
+      catalog.remember(items)
+    })
+    .catch(() => {
+      /* The showcase links remain available while prices are offline. */
+    })
 })
 onUnmounted(() => {
   observer?.disconnect()
+  controller.abort()
   motion.removeEventListener('change', updateMotion)
   document.removeEventListener('visibilitychange', visibility)
 })
 </script>
+
 <template>
+  <CaptureIntro
+    v-if="intro"
+    :id="star.id"
+    :target="actor"
+    :tick="tick"
+    @reveal="revealing = true"
+    @finish="endIntro"
+  />
   <section
     ref="scene"
-    class="starter-home"
+    class="cut-scene starter-scene"
+    :data-star="star.id"
     :data-running="running"
-    @pointermove="pointer"
-    @pointerleave="reset"
+    :data-ready="filmReady"
   >
-    <div class="starter-haze" aria-hidden="true" />
-    <div class="starter-heading">
-      <p>POKÉSHOP</p>
-      <h1>{{ t('starterHeadline') }}</h1>
+    <div class="on-air-set">
+      <div class="ink-field" aria-hidden="true"></div>
+      <div class="paper-rip" aria-hidden="true"></div>
+      <div class="broadcast-frame">
+        <div class="feature-head" :key="'head' + star.id">
+          <p class="program-slug"><Radio :size="16" /> {{ t('studio.special') }}</p>
+          <h1>{{ star.name }}</h1>
+          <p class="feature-types">
+            <component :is="star.icon" :size="15" />
+            {{ (product?.types ?? [star.type]).map(typeName).join(' / ') }}
+            <span>·</span> {{ number(star.id) }}
+          </p>
+        </div>
+        <p :key="'pitch' + star.id" class="sales-pitch">{{ t(`studio.pitch${star.id}`) }}</p>
+        <div class="fighter-field">
+          <span class="back-number" aria-hidden="true">{{ number(star.id).slice(1) }}</span>
+          <div class="ink-strikes" aria-hidden="true"></div>
+          <span class="floor-ink" aria-hidden="true"></span>
+          <div ref="actor" class="feature-actor" :class="{ 'in-capsule': intro }">
+            <div :key="star.id" class="sprite-cutout">
+              <StudioSprite :id="star.id" :tick="tick" />
+            </div>
+          </div>
+          <OfferCommands
+            :key="star.id"
+            :id="star.id"
+            :name="star.name"
+            :price="priceFor(star.id)"
+            :stock="game.trainer ? undefined : product?.stock"
+            :can-add="Boolean(canAdd)"
+            :buy-label="buyLabel"
+            :open="!intro"
+            @add="cart.add(star.id)"
+          />
+        </div>
+      </div>
     </div>
-    <div class="starter-scene" :data-running="running">
-      <span class="starter-landmark" aria-hidden="true">KANTO</span>
+    <div class="broadcast-controls">
+      <div class="control-inner">
+        <div class="on-screen"><span></span>{{ t('studio.onScreen') }}</div>
+        <span class="sr-only" role="status">{{ star.name }} {{ priceFor(star.id) }}</span>
+        <div class="tuner">
+          <button :aria-label="t('studio.previous')" @click="tune(-1)">
+            <ChevronLeft :size="19" />
+          </button>
+          <b
+            >{{ String(selected + 1).padStart(2, '0') }}
+            <i>/ {{ String(stars.length).padStart(2, '0') }}</i></b
+          >
+          <button :aria-label="t('studio.next')" @click="tune(1)">
+            <ChevronRight :size="19" />
+          </button>
+        </div>
+        <div v-if="!reduced" class="playback-controls">
+          <button :aria-label="t('studio.replay')" :title="t('studio.replay')" @click="replay">
+            <RotateCcw :size="16" /><span>{{ t('studio.replay') }}</span>
+          </button>
+          <button
+            class="scene-toggle"
+            :aria-label="t(paused ? 'resumeScene' : 'pauseScene')"
+            :title="t(paused ? 'resumeScene' : 'pauseScene')"
+            :aria-pressed="paused"
+            @click="paused = !paused"
+          >
+            <Play v-if="paused" :size="16" /><Pause v-else :size="16" />
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="starter-stand" aria-labelledby="stand-title">
+    <header class="stand-heading">
+      <div>
+        <p class="station-kicker">KANTO</p>
+        <h2 id="stand-title">{{ t('studio.stand') }}</h2>
+      </div>
+      <RouterLink class="stand-link" to="/catalogo?region=kanto"
+        >{{ t('studio.viewKanto') }}<ArrowRight :size="17"
+      /></RouterLink>
+      <RouterLink class="battle-extra" to="/aventura"
+        ><Gamepad2 :size="16" />{{ t('adventure.nav') }}</RouterLink
+      >
+    </header>
+    <div class="stand-shelf">
       <RouterLink
         v-for="starter in starters"
         :key="starter.id"
         :to="`/pokemon/${starter.id}`"
-        class="hero-starter pokemon-palette"
+        class="stand-card hero-starter"
         :data-type="starter.type"
-        :aria-label="t('viewPokemon', { name: starter.name })"
       >
-        <span class="starter-aura" aria-hidden="true" />
-        <img
-          :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${starter.id}.png`"
-          :alt="starter.name"
-          width="475"
-          height="475"
-          fetchpriority="high"
-        />
-        <span class="starter-name"
-          ><small>#{{ String(starter.id).padStart(3, '0') }}</small
-          >{{ starter.name }}<ArrowUpRight :size="18"
-        /></span>
+        <span class="stand-type"
+          ><component :is="starter.icon" :size="14" />{{ typeName(starter.type) }}</span
+        >
+        <span class="stand-dex">{{ number(starter.id) }}</span>
+        <img :src="`/studio/starter-${starter.id}.png`" alt="" width="58" height="58" />
+        <span class="stand-info"
+          ><strong>{{ starter.name }}</strong
+          ><small v-if="priceFor(starter.id)">{{ priceFor(starter.id) }}</small></span
+        >
+        <ArrowUpRight class="stand-arrow" :size="30" />
       </RouterLink>
-    </div>
-    <div class="starter-bottom">
-      <RouterLink class="starter-catalog" to="/catalogo"
-        >{{ t('exploreCatalog') }}<ArrowRight :size="22"
-      /></RouterLink>
-      <RouterLink class="starter-kanto" to="/catalogo?region=kanto"
-        >{{ t('visitKanto') }}<ArrowUpRight :size="16"
-      /></RouterLink>
-      <button
-        v-if="!reduced"
-        class="scene-toggle icon-button"
-        :aria-label="t(paused ? 'resumeScene' : 'pauseScene')"
-        :title="t(paused ? 'resumeScene' : 'pauseScene')"
-        :aria-pressed="paused"
-        @click="toggle"
-      >
-        <Play v-if="paused" :size="18" /><Pause v-else :size="18" />
-      </button>
     </div>
   </section>
 </template>
-<style>
-.main-content.home-main {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 0;
-}
-.starter-home {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  min-height: calc(100svh - 88px);
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  background: var(--paper);
-  color: var(--ink);
-  padding: 42px 0 32px;
-}
-[data-theme='dark'] .starter-home {
-  background: var(--paper);
-  color: var(--ink);
-}
-.starter-haze {
-  position: absolute;
-  inset: -12%;
-  z-index: -1;
-  background:
-    radial-gradient(ellipse at 18% 66%, #64b68c66, transparent 42%),
-    radial-gradient(ellipse at 53% 54%, #eab06d55, transparent 38%),
-    radial-gradient(ellipse at 88% 65%, #74bddd77, transparent 42%);
-  transform: translate(var(--dx, 0px), var(--dy, 0px));
-  animation: starter-light 12s ease-in-out infinite alternate;
-  animation-play-state: paused;
-}
-.starter-home[data-running='true'] .starter-haze {
-  animation-play-state: running;
-}
-.starter-heading {
-  text-align: center;
-  position: relative;
-  z-index: 2;
-  padding: 0 24px;
-}
-.starter-heading p {
-  font-family: monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.22em;
-  margin: 0 0 14px;
-}
-.starter-heading h1 {
-  font-size: clamp(2.8rem, 5.2vw, 5.5rem);
-  font-weight: 850;
-  line-height: 1.03;
-  letter-spacing: -0.065em;
-  margin: 0 auto;
-  max-width: 1100px;
-  text-wrap: balance;
-  color: inherit;
-}
-.starter-scene {
-  position: relative;
-  width: min(1440px, 100%);
-  justify-self: center;
-  height: clamp(390px, 51vw, 590px);
-  align-self: center;
-}
-.starter-landmark {
-  position: absolute;
-  width: 100%;
-  text-align: center;
-  top: 10%;
-  font-size: clamp(7rem, 23vw, 23rem);
-  line-height: 1;
-  letter-spacing: -0.08em;
-  font-weight: 900;
-  color: transparent;
-  -webkit-text-stroke: 1px color-mix(in srgb, currentColor 15%, #8c76aa55);
-  user-select: none;
-}
-.hero-starter {
-  position: absolute;
-  width: 34%;
-  height: 83%;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  isolation: isolate;
-}
-.hero-starter:nth-of-type(1) {
-  left: 3%;
-  transform: rotate(-5deg);
-}
-.hero-starter:nth-of-type(2) {
-  left: 33%;
-  bottom: 8%;
-  z-index: 2;
-  transform: rotate(4deg);
-}
-.hero-starter:nth-of-type(3) {
-  right: 3%;
-  transform: rotate(5deg);
-}
-.hero-starter img {
-  width: 100%;
-  height: calc(100% - 40px);
-  object-fit: contain;
-  filter: drop-shadow(0 22px 12px #21182e25);
-  transition: transform 0.35s ease;
-}
-.hero-starter:hover img,
-.hero-starter:focus-visible img {
-  transform: scale(1.045) translateY(-6px);
-}
-.starter-aura {
-  position: absolute;
-  width: 78%;
-  aspect-ratio: 1;
-  top: 12%;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--pokemon-tint) 24%, transparent);
-  z-index: -1;
-  filter: blur(24px);
-}
-.starter-name {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: clamp(0.85rem, 1.45vw, 1.3rem);
-  font-weight: 750;
-}
-.starter-name small {
-  font-family: monospace;
-  font-size: 0.6em;
-  font-weight: 400;
-}
-.starter-bottom {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 28px;
-  position: relative;
-  padding: 18px 70px 0;
-}
-.starter-catalog {
-  display: inline-flex;
-  align-items: center;
-  gap: 30px;
-  padding: 16px 25px;
-  background: #513773;
-  color: #fff;
-  border-radius: 40px;
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-[data-theme='dark'] .starter-catalog {
-  background: #cfb5ec;
-  color: #21182e;
-}
-.starter-kanto {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.8rem;
-}
-.starter-bottom .scene-toggle {
-  position: absolute;
-  right: 24px;
-  bottom: 4px;
-  background: transparent;
-  color: inherit;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-}
-@keyframes starter-light {
-  from {
-    opacity: 0.65;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@media (max-width: 700px) {
-  .starter-home {
-    min-height: calc(100svh - 133px);
-    padding: 30px 0 24px;
-  }
-  .starter-heading h1 {
-    font-size: clamp(2.7rem, 9vw, 4.4rem);
-  }
-  .starter-heading p {
-    font-size: 0.6rem;
-  }
-  .starter-scene {
-    height: clamp(340px, 80vw, 510px);
-  }
-  .hero-starter {
-    width: 45%;
-    height: 65%;
-    bottom: 1%;
-  }
-  .hero-starter:nth-of-type(1) {
-    left: 2%;
-    z-index: 3;
-  }
-  .hero-starter:nth-of-type(2) {
-    width: 53%;
-    left: 24%;
-    bottom: 29%;
-    height: 72%;
-  }
-  .hero-starter:nth-of-type(3) {
-    right: 2%;
-    z-index: 3;
-  }
-  .starter-name {
-    gap: 5px;
-    font-size: 0.78rem;
-  }
-  .hero-starter:nth-of-type(2) .starter-name {
-    position: absolute;
-    top: -8px;
-  }
-  .starter-name svg {
-    width: 12px;
-  }
-  .starter-landmark {
-    top: 35%;
-    font-size: 25vw;
-  }
-  .starter-bottom {
-    gap: 16px;
-    padding: 18px 52px 0;
-  }
-  .starter-catalog {
-    padding: 14px 18px;
-    gap: 14px;
-    font-size: 0.8rem;
-  }
-  .starter-bottom .scene-toggle {
-    right: 12px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .starter-haze {
-    animation: none;
-  }
-  .hero-starter img {
-    transition: none;
-  }
-  .hero-starter:hover img,
-  .hero-starter:focus-visible img {
-    transform: none;
-  }
-}
-</style>
+
+<style src="./studio.css"></style>

@@ -136,7 +136,9 @@ function remove(key: string) {
             <DialogTitle>{{ t('filters') }}</DialogTitle
             ><DialogClose class="icon-button" :aria-label="t('close')"><X /></DialogClose>
           </div>
-          <DialogDescription>{{ t('catalogIntro') }}</DialogDescription>
+          <DialogDescription class="filter-description">{{
+            t('filterDescription')
+          }}</DialogDescription>
           <div v-for="field in fields" :key="field.key" class="filter-field">
             <span>{{ field.label }}</span
             ><AppSelect
@@ -169,101 +171,130 @@ function remove(key: string) {
     </div>
   </div>
 </template>
+
 <style>
 .filter-control {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
+  display: contents;
 }
+
+.filter-control > button {
+  grid-column: 2;
+  min-width: 0;
+}
+
 .filter-overlay {
   position: fixed;
   inset: 0;
-  background: #120c2488;
+  background: var(--shop-overlay);
   z-index: 100;
 }
+
 .filter-panel {
   position: fixed;
-  right: 0;
-  top: 0;
-  height: 100dvh;
+  inset: 0 0 0 auto;
+  max-height: 100dvh;
   width: min(440px, 100vw);
   background: var(--surface);
   color: var(--ink);
   z-index: 110;
-  padding: 32px;
+  --filter-inset: 28px;
+  padding: var(--filter-inset);
   overflow: auto;
-  box-shadow: -20px 0 80px #0002;
+  overscroll-behavior: contain;
+  box-shadow: -12px 0 56px var(--shop-shadow);
 }
+
 .filter-heading {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
+
 .filter-heading h2 {
-  font-size: 2rem;
-  margin: 0;
+  font: 900 2.5rem/1 var(--font-display);
+  text-transform: uppercase;
+  transform: skewX(-6deg);
+  border-bottom: 4px solid #c51933;
 }
+
+.filter-description {
+  margin: 4px 0 20px;
+  color: var(--muted-strong);
+}
+
 .filter-field {
   display: grid;
-  gap: 9px;
-  margin: 24px 0;
+  gap: 6px;
+  margin: 16px 0;
 }
+
 .filter-field > span {
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   font-weight: 700;
 }
+
 .filter-field .custom-select {
   width: 100%;
-  justify-content: space-between;
+  min-height: 48px;
+  font-size: 1rem;
 }
+
 .filter-actions {
   display: flex;
   gap: 12px;
   position: sticky;
-  bottom: -32px;
+  bottom: calc(-1 * var(--filter-inset));
   background: var(--surface);
-  padding: 20px 0;
+  padding: 14px 0 max(14px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
 }
+
 .filter-actions > * {
   flex: 1;
+  border-radius: 2px;
 }
-.icon-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  color: inherit;
-  border: 0;
-  cursor: pointer;
-  min-height: 44px;
-  min-width: 44px;
+
+.filter-actions .primary {
+  background: #c51933;
+  color: white;
 }
+
 .active-filters {
+  grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
+
 .filter-chip {
   display: flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid var(--line);
-  background: var(--lavender);
-  color: var(--ink);
-  border-radius: 30px;
-  padding: 8px 12px;
-  cursor: pointer;
+  min-height: 44px;
+  border: 1px solid var(--control-border);
+  background: var(--control-surface);
+  color: var(--purple);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.8rem;
 }
+
+.filter-chip:hover {
+  background: var(--control-hover);
+}
+
 .select-menu {
   z-index: 130 !important;
 }
+
 @media (max-width: 540px) {
   .filter-panel {
-    padding: 24px;
-  }
-  .filter-actions {
-    bottom: -24px;
+    --filter-inset: 16px;
+    inset: auto 0 0;
+    width: 100%;
+    max-height: 93dvh;
+    border-radius: var(--shop-radius) var(--shop-radius) 0 0;
   }
 }
 </style>

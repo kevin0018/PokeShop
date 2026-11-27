@@ -2,6 +2,14 @@ export const adventureEn = {
   nav: 'Adventure',
   title: 'Your team',
   privateAccess: 'Trainer access',
+  viridianCity: 'Viridian City',
+  enterCenter: 'Come on in. Your team is at reception.',
+  reception: 'Pokémon Center · Reception',
+  passwordGreeting:
+    'All right, {name}. Enter your password at the terminal to open your trainer pass.',
+  loginGreeting: 'Welcome back! What name did you register your team under?',
+  registerGreeting:
+    'Your first visit? Have your invitation ready. Let’s get your trainer pass issued.',
   accessText:
     'Have an invitation? Create your trainer account and start with 1,000 credits. To request a code, contact me through my portfolio.',
   register: 'Create trainer',
@@ -23,6 +31,7 @@ export const adventureEn = {
     'Choose up to six Pokémon. The first slot leads the battle. Your team fights at level 50.',
   slot: 'Slot {number}',
   lead: 'Lead',
+  orderHelpTitle: 'Reorder your team',
   reorderHelp:
     'Drag Pokémon or use the arrows to change their order. Keyboard: Alt + left/right arrow.',
   moveEarlier: 'Move {name} earlier',
@@ -37,6 +46,8 @@ export const adventureEn = {
   openPc: 'Open PC',
   closePc: 'Close PC',
   boxes: 'Pokémon boxes',
+  pcHelp:
+    'Tap a Pokémon to add or remove it. Drag to place it in a team slot or return it to the box.',
   box: 'Box {number}',
   selectedTeam: '{count} / 6 in your team',
   backToTeam: 'Back to team',
@@ -64,7 +75,7 @@ export const adventureEn = {
   insufficient: 'Not enough credits',
   gymsTitle: 'Gyms',
   gymsHelp:
-    'Win to unlock the next gym. Your first victory earns credits; rematches are free practice.',
+    'Touch an available city to enter its gym. Win to unlock the next one. Your first victory earns credits; rematches are free practice.',
   challenge: 'Challenge {name}',
   practice: 'Practice with {name}',
   locked: 'Win the previous gym first',
@@ -84,6 +95,7 @@ export const adventureEn = {
   confirmSurrender: 'Leave this battle?',
   surrenderHelp:
     'You keep your Pokémon and credits. You can try again with a fully recovered team.',
+  backToCommands: 'Back to commands',
   cancel: 'Keep battling',
   won: 'Badge secured!',
   lost: 'A new plan, another try.',
@@ -95,6 +107,8 @@ export const adventureEn = {
   attackLine: '{name} used {move}.',
   damageLine: '{name} lost {amount} HP.',
   missLine: 'The attack missed.',
+  sendFirst: 'Go, {name}!',
+  recall: '{name}, come back!',
   switchLine: '{name} enters the battle.',
   faintLine: '{name} fainted.',
   recoilLine: '{name} took recoil damage.',
@@ -103,6 +117,17 @@ export const adventureEn = {
   notEffective: 'Not very effective.',
   immune: 'It had no effect.',
   battleLog: 'Battle events',
+  palletTown: 'Pallet Town',
+  fight: 'Fight',
+  commandPrompt: 'What will {name} do?',
+  leaderLines: {
+    g1: 'Even Onix started out as a pebble. Show me what you’re made of!',
+    g2: 'See that ripple? Starmie is ready. Are you?',
+    g3: 'Hear that crackle, rookie? Raichu is reporting for duty!',
+    g4: 'Mind the blossoms. My Pokémon have been tending them all morning.',
+    g5: 'Watch my hand. By the time you see the ball, I’ll have made my move.',
+    g6: 'I saw this battle in a dream. The ending was the one thing I couldn’t see.',
+  },
   historyTitle: 'Battle history',
   viewHistory: 'View history: turn {turn}',
   emptyHistory: 'No turns have been played yet.',
@@ -154,6 +179,14 @@ export const adventureEs = {
   nav: 'Aventura',
   title: 'Tu equipo',
   privateAccess: 'Acceso de entrenadores',
+  viridianCity: 'Ciudad Verde',
+  enterCenter: 'Adelante. Te esperamos en recepción.',
+  reception: 'Centro Pokémon · Recepción',
+  passwordGreeting:
+    'De acuerdo, {name}. Introduce tu contraseña en el terminal para abrir tu ficha.',
+  loginGreeting: '¡Qué alegría verte! ¿Con qué nombre registraste a tu equipo?',
+  registerGreeting:
+    '¿Es tu primera visita? Ten a mano tu invitación. Vamos a darte de alta como entrenador.',
   accessText:
     '¿Tienes una invitación? Crea tu cuenta y empieza con 1.000 créditos. Para solicitar un código, contacta conmigo a través de mi portfolio.',
   register: 'Crear entrenador',
@@ -175,6 +208,7 @@ export const adventureEs = {
     'Elige hasta seis Pokémon. La primera plaza inicia el combate. Tu equipo lucha a nivel 50.',
   slot: 'Plaza {number}',
   lead: 'Inicial',
+  orderHelpTitle: 'Cambiar el orden',
   reorderHelp:
     'Arrastra los Pokémon o usa las flechas para cambiar el orden. Teclado: Alt + flecha izquierda/derecha.',
   moveEarlier: 'Mover a {name} antes',
@@ -189,6 +223,8 @@ export const adventureEs = {
   openPc: 'Abrir PC',
   closePc: 'Cerrar PC',
   boxes: 'Cajas de Pokémon',
+  pcHelp:
+    'Toca un Pokémon para añadirlo o retirarlo. Arrástralo a una plaza del equipo o de vuelta a la caja.',
   box: 'Caja {number}',
   selectedTeam: '{count} / 6 en tu equipo',
   backToTeam: 'Volver al equipo',
@@ -216,7 +252,7 @@ export const adventureEs = {
   insufficient: 'Créditos insuficientes',
   gymsTitle: 'Gimnasios',
   gymsHelp:
-    'Gana para desbloquear el siguiente gimnasio. La primera victoria da créditos; las revanchas son prácticas gratuitas.',
+    'Toca una ciudad disponible para entrar en su gimnasio. Gana para desbloquear el siguiente. La primera victoria da créditos; las revanchas son prácticas gratuitas.',
   challenge: 'Retar a {name}',
   practice: 'Practicar con {name}',
   locked: 'Gana primero el gimnasio anterior',
@@ -236,6 +272,7 @@ export const adventureEs = {
   confirmSurrender: '¿Abandonar este combate?',
   surrenderHelp:
     'Conservas tus Pokémon y créditos. Puedes volver a intentarlo con el equipo recuperado.',
+  backToCommands: 'Volver al menú',
   cancel: 'Seguir luchando',
   won: '¡Medalla conseguida!',
   lost: 'Otro plan, otro intento.',
@@ -247,6 +284,8 @@ export const adventureEs = {
   attackLine: '{name} ha usado {move}.',
   damageLine: '{name} ha perdido {amount} PS.',
   missLine: 'El ataque ha fallado.',
+  sendFirst: '¡Adelante, {name}!',
+  recall: '¡Vuelve, {name}!',
   switchLine: '{name} entra al combate.',
   faintLine: '{name} se ha debilitado.',
   recoilLine: '{name} recibe daño de retroceso.',
@@ -255,6 +294,17 @@ export const adventureEs = {
   notEffective: 'No es muy eficaz.',
   immune: 'No ha tenido efecto.',
   battleLog: 'Eventos del combate',
+  palletTown: 'Pueblo Paleta',
+  fight: 'Luchar',
+  commandPrompt: '¿Qué hará {name}?',
+  leaderLines: {
+    g1: 'Hasta Onix empezó siendo un guijarro. ¡Enséñame de qué estás hecho!',
+    g2: '¿Ves esas ondas en el agua? Starmie ya está lista. ¿Y tú?',
+    g3: '¿Oyes ese chisporroteo, recluta? ¡Raichu se presenta al servicio!',
+    g4: 'Cuidado con las flores. Mis Pokémon llevan toda la mañana mimándolas.',
+    g5: 'Mira mi mano. Para cuando veas la Poké Ball, ya habré hecho mi jugada.',
+    g6: 'Soñé con este combate. Lo único que no pude ver fue el desenlace.',
+  },
   historyTitle: 'Historial del combate',
   viewHistory: 'Ver historial: turno {turn}',
   emptyHistory: 'Todavía no se ha jugado ningún turno.',
