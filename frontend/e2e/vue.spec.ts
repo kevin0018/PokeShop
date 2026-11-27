@@ -418,3 +418,35 @@ test('opens directly on a still Pokémon when reduced motion is requested', asyn
   )
   await expect(page.getByRole('button', { name: 'Repetir captura' })).toHaveCount(0)
 })
+
+test('detail thumbnails navigate with the keyboard in the localized, still layout', async ({
+  page,
+}) => {
+  await page.addInitScript(() => localStorage.setItem('pokeshop.locale', 'en'))
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.setViewportSize({ width: 320, height: 800 })
+  await page.route('**/official-artwork/25.png', (route) =>
+    route.fulfill({ path: 'public/studio/25.webp' }),
+  )
+  await page.goto('/pokemon/25')
+
+  const recommendations = page.locator('.profile-stage').getByRole('region', {
+    name: 'Recommended Pokémon',
+  })
+  await expect(recommendations.getByRole('link')).toHaveCount(4)
+  await expect(page.locator('.profile-art img')).toHaveCSS('animation-name', 'none')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  const thumbnail = recommendations.getByRole('link').first()
+  const destination = await thumbnail.getAttribute('href')
+  const name = await thumbnail.getAttribute('aria-label')
+  await expect(thumbnail).not.toHaveAttribute('href', '/pokemon/25')
+  await expect(thumbnail).toHaveAttribute('aria-label', /\S/)
+  await thumbnail.press('Enter')
+  await expect(page).toHaveURL(destination!)
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(name!)
+  await expect(recommendations.getByRole('link')).toHaveCount(4)
+  await expect(recommendations.locator(`a[href="${destination}"]`)).toHaveCount(0)
+
+  await page.goBack()
+  await expect(page.getByRole('heading', { name: 'Pikachu', exact: true })).toBeVisible()
+})

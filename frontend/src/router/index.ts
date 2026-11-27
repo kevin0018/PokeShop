@@ -26,7 +26,11 @@ const router = createRouter({
     { path: '/carrito', name: 'cart', component: () => import('@/cart/presentation/CartView.vue') },
     { path: '/:pathMatch(.*)*', component: () => import('@/views/NotFoundView.vue') },
   ],
-  scrollBehavior: () => ({ top: 0 }),
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) return savedPosition
+    if (to.name === 'pokemon' && from.name === 'pokemon') return false
+    return { top: 0 }
+  },
 })
 
 export default router

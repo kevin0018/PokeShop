@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from src.adventure.content import SHOP_IDS
 from src.pokemon.infrastructure.postgres_repository import PostgresCatalog
 
-from .schemas import CatalogResponse, PokemonItems, PokemonResponse
+from .schemas import CatalogResponse, PokemonDetailResponse, PokemonItems
 
 router = APIRouter()
 
@@ -85,7 +85,7 @@ async def recommendations(
     return {"items": await catalog.recommendations(parse_ids(ids))}
 
 
-@router.get("/{pokemon_id}", response_model=PokemonResponse)
+@router.get("/{pokemon_id}", response_model=PokemonDetailResponse)
 async def get_pokemon(pokemon_id: int, catalog=Depends(get_catalog)):
     pokemon = await catalog.get(pokemon_id)
     if pokemon is None:

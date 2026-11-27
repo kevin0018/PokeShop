@@ -4,7 +4,8 @@ export const money = (cents: number) => i18n.global.n(cents / 100, 'currency')
 export const number = (id: number) => `#${String(id).padStart(3, '0')}`
 export const decimal = (value: number) =>
   new Intl.NumberFormat(i18n.global.locale.value, { maximumFractionDigits: 1 }).format(value)
-export const pokemonName = (p: Pokemon) => p.names?.[i18n.global.locale.value] || p.name
+export const pokemonName = (p: Pick<Pokemon, 'name' | 'names'>) =>
+  p.names?.[i18n.global.locale.value] || p.name
 export const typeName = (type: string) =>
   i18n.global.te(`types.${type}`) ? i18n.global.t(`types.${type}`) : type
 export const description = (p: Pokemon) =>

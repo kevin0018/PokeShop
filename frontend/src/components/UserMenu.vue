@@ -30,7 +30,7 @@ async function logout() {
 </script>
 
 <template>
-  <DropdownMenuRoot v-model:open="open">
+  <DropdownMenuRoot v-model:open="open" :modal="false">
     <DropdownMenuTrigger
       class="user-link"
       :class="{ 'is-signed-in': game.trainer }"

@@ -99,7 +99,44 @@ class PostgresCatalog:
 
     async def get(self, pokemon_id):
         items, _ = await self.search(ids=[pokemon_id])
-        return items[0] if items else None
+        if not items:
+            return None
+        pokemon = items[0]
+        species_id = pokemon.get("species_id") or pokemon_id
+        async with engine.connect() as conn:
+            chain = await conn.scalar(
+                text("""
+                    SELECT chain.data->'chain' FROM api_cache species
+                    JOIN api_cache chain ON chain.url = species.data->'evolution_chain'->>'url'
+                    WHERE species.url = :species_url
+                """),
+                {"species_url": f"https://pokeapi.co/api/v2/pokemon-species/{species_id}/"},
+            )
+            if chain:
+                species_ids = []
+                stage = [chain]
+                while stage:
+                    species_ids.extend(
+                        int(node["species"]["url"].rstrip("/").split("/")[-1])
+                        for node in stage
+                    )
+                    stage = [child for node in stage for child in node.get("evolves_to", [])]
+                if len(species_ids) > 1:
+                    rows = await conn.execute(
+                        text("""
+                            SELECT p.id, p.data->>'name' AS name, p.data->'names' AS names,
+                                   p.data->>'image_url' AS image_url
+                            FROM pokemon p JOIN offers o ON o.pokemon_id = p.id
+                            WHERE (p.data->>'species_id')::int = ANY(:ids)
+                              AND (p.id = :current_id OR (
+                                (p.data->>'species_id')::int <> :species_id
+                                AND (p.data->>'is_default')::boolean))
+                            ORDER BY array_position(CAST(:ids AS integer[]), (p.data->>'species_id')::int)
+                        """),
+                        {"ids": species_ids, "current_id": pokemon_id, "species_id": species_id},
+                    )
+                    pokemon["evolution_family"] = [dict(row) for row in rows.mappings()]
+        return pokemon
 
     async def featured(self):
         items, _ = await self.search(ids=FEATURED)

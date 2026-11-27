@@ -19,6 +19,7 @@ export interface Pokemon {
   stats?: Record<string, number>
   region?: string
   region_names?: Record<string, string>
+  evolution_family?: Pick<Pokemon, 'id' | 'name' | 'names' | 'image_url'>[]
   evolution_stage?: number
   reason?: string
 }

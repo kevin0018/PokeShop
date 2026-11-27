@@ -3,7 +3,7 @@ import { nextTick, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { PopoverRoot, PopoverAnchor, PopoverPortal, PopoverContent } from 'reka-ui'
 import { ChartNoAxesColumnIncreasing, X } from 'lucide-vue-next'
-defineProps<{ stats?: Record<string, number> }>()
+defineProps<{ stats?: Record<string, number>; type?: string }>()
 const { t } = useI18n(),
   open = ref(false),
   pinned = ref(false),
@@ -79,7 +79,10 @@ onUnmounted(() => clearTimeout(timer))
       </button></PopoverAnchor
     ><PopoverPortal
       ><PopoverContent
-        class="stats-popover"
+        class="stats-popover pokemon-palette"
+        :data-type="type"
+        side="bottom"
+        align="start"
         :side-offset="12"
         :collision-padding="16"
         :aria-label="t('baseStats')"
@@ -103,24 +106,26 @@ onUnmounted(() => clearTimeout(timer))
             <X :size="18" />
           </button>
         </div>
-        <div
-          v-for="key in ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed']"
-          :key="key"
-          class="stat"
-        >
-          <div>
-            <span>{{ t(key) }}</span
-            ><strong>{{ stats?.[key] ?? t('missingData') }}</strong>
-          </div>
-          <meter
-            v-if="stats?.[key] != null"
-            min="0"
-            max="255"
-            :value="stats[key]"
-            :aria-label="t(key)"
+        <div class="stats-values">
+          <div
+            v-for="key in ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed']"
+            :key="key"
+            class="stat"
           >
-            {{ stats[key] }} / 255
-          </meter>
+            <div>
+              <span>{{ t(key) }}</span
+              ><strong>{{ stats?.[key] ?? t('missingData') }}</strong>
+            </div>
+            <meter
+              v-if="stats?.[key] != null"
+              min="0"
+              max="255"
+              :value="stats[key]"
+              :aria-label="t(key)"
+            >
+              {{ stats[key] }} / 255
+            </meter>
+          </div>
         </div>
       </PopoverContent></PopoverPortal
     ></PopoverRoot
@@ -133,11 +138,19 @@ onUnmounted(() => clearTimeout(timer))
 .stats-popover {
   z-index: 120;
   width: min(360px, calc(100vw - 32px));
-  background: var(--surface);
-  color: var(--ink);
-  padding: 20px 24px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--pokemon-tint) 16%, #19171a),
+    #101014 75%
+  );
+  color: #fff5ed;
+  padding: 16px 20px;
+  max-height: var(--reka-popover-content-available-height);
+  overflow: auto;
+  --purple: var(--pokemon-tint);
+  --line: #ffffff26;
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: 10px;
   box-shadow: 0 18px 60px #0003;
 }
 .stats-popover-heading {
@@ -152,6 +165,28 @@ onUnmounted(() => clearTimeout(timer))
   margin: 0;
 }
 .stats-popover .stat {
-  margin: 14px 0;
+  margin: 8px 0;
+}
+.stats-popover .stat meter {
+  height: 6px;
+  margin-top: 3px;
+}
+.stats-popover .icon-button {
+  background: transparent;
+  border: 0;
+  color: inherit;
+}
+.stats-popover-heading {
+  margin-bottom: 8px;
+}
+.stats-values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+}
+.stats-values .stat > div {
+  align-items: baseline;
+  gap: 3px;
+  font-size: 0.75rem;
 }
 </style>

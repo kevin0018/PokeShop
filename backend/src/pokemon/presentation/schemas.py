@@ -37,6 +37,17 @@ class PokemonResponse(BaseModel):
     reason: str | None = None
 
 
+class EvolutionMember(BaseModel):
+    id: int
+    name: str
+    names: dict[str, str] | None = None
+    image_url: str
+
+
+class PokemonDetailResponse(PokemonResponse):
+    evolution_family: list[EvolutionMember] = Field(default_factory=list)
+
+
 class PokemonItems(BaseModel):
     items: list[PokemonResponse]
 
