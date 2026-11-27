@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
-import { RouterView, useRoute } from 'vue-router'
+import { RouterView, useRoute, useRouter } from 'vue-router'
 const route = useRoute()
+const router = useRouter()
 import BaseHeader from './components/BaseHeader.vue'
 import CartNotice from './cart/presentation/CartNotice.vue'
 import BaseFooter from './components/BaseFooter.vue'
@@ -13,9 +14,10 @@ import { useAdventureStore } from './adventure/store'
 
 const cart = useCartStore()
 const game = useAdventureStore()
-onMounted(() => {
+onMounted(async () => {
   void cart.hydrate()
-  void game.load()
+  await router.isReady()
+  if (route.name !== 'adventure') void game.load()
 })
 </script>
 

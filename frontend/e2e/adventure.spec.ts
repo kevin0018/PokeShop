@@ -11,6 +11,23 @@ async function checkBattleWidths(page: Page) {
   }
 }
 
+test('opening Adventure as a guest checks the session once', async ({ page }) => {
+  const sessionPath = '/api/v1/adventure/session'
+  const requests: string[] = []
+  page.on('request', (request) => {
+    if (new URL(request.url()).pathname === sessionPath) requests.push(request.method())
+  })
+  const session = page.waitForResponse(
+    (response) => new URL(response.url()).pathname === sessionPath,
+  )
+  await page.goto('/aventura', { waitUntil: 'networkidle' })
+  await expect(page.locator('#trainer-password')).toBeVisible()
+  const response = await session
+  expect(response.status()).toBe(200)
+  expect(await response.json()).toBeNull()
+  expect(requests).toEqual(['GET'])
+})
+
 test('invited trainer buys a team, resumes a battle and earns the first badge', async ({
   page,
 }, testInfo) => {
