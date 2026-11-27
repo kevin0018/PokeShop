@@ -8,9 +8,8 @@ PokéShop TV is a fictional Pokémon shopping channel built with Vue 3, TypeScri
 
 [Repository](https://github.com/kevin0018/PokeShop) · [Live demo](https://pokeshop-app.duckdns.org) · [Local API documentation](http://localhost:8000/docs)
 
-[![Actual PokeShop interface](docs/home.png)](docs/home.png)
 
-[Catalog preview](docs/catalog.png) · [Trainer catalog](docs/catalog-trainer.png) · [Cart preview](docs/cart.png) · [Adventure battle](docs/adventure.png) · [Mobile battle](docs/adventure-mobile.png)
+[Trainer catalog](docs/catalog-trainer.png) · [Adventure battle](docs/adventure.png) · [Mobile battle](docs/adventure-mobile.png)
 
 [Pokémon Center](docs/center.png) · [Collection PC](docs/collection-pc.png) · [Gym leaders](docs/gyms.png)
 

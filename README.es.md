@@ -8,9 +8,8 @@ PokéShop TV es una teletienda ficticia de Pokémon hecha con Vue 3, TypeScript 
 
 [Repositorio](https://github.com/kevin0018/PokeShop) · [Demo pública](https://pokeshop-app.duckdns.org) · [Documentación local de la API](http://localhost:8000/docs)
 
-[![Interfaz real de PokeShop](docs/home.png)](docs/home.png)
 
-[Vista del catálogo](docs/catalog.png) · [Catálogo con entrenador](docs/catalog-trainer.png) · [Vista del carrito](docs/cart.png) · [Combate de aventura](docs/adventure.png) · [Combate en móvil](docs/adventure-mobile.png)
+[Catálogo con entrenador](docs/catalog-trainer.png) · [Combate de aventura](docs/adventure.png) · [Combate en móvil](docs/adventure-mobile.png)
 
 [Centro Pokémon](docs/center.png) · [PC de la colección](docs/collection-pc.png) · [Líderes de gimnasio](docs/gyms.png)
 
