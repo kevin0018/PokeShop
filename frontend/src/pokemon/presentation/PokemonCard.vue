@@ -195,128 +195,122 @@ const game = useAdventureStore()
 }
 
 .catalog-grid .illustrated-card {
-  container-type: inline-size;
-  border: 1px solid color-mix(in srgb, var(--pokemon-tint) 36%, #27242b);
-  border-radius: 12px;
-  background: #19171c;
-  color: #fff8f1;
+  --specimen-ink: #23372e;
+  display: flex;
+  flex-direction: column;
+  padding: 12px clamp(9px, 1.3vw, 17px) 0;
+  border: 0;
+  border-top: 5px solid var(--pokemon-tint);
+  border-radius: 3px 10px 3px 3px;
+  color: var(--specimen-ink);
+  background: linear-gradient(115deg, #f5eedc, #dfd9c8);
+  box-shadow: 0 5px 12px #09151b44;
+}
+.catalog-grid .card-body {
+  display: contents;
+}
+.catalog-grid .card-body h3 {
+  order: 0;
+  margin: 0 0 3px;
+  color: inherit;
+  font:
+    italic clamp(1.35rem, 2.6vw, 2.15rem) / 1.12 Georgia,
+    serif;
+  letter-spacing: -0.055em;
+}
+.catalog-grid .type-list {
+  order: 1;
+  padding: 0 0 10px;
+}
+.catalog-grid .type-tag {
+  padding: 0;
+  background: transparent;
+  color: var(--specimen-ink);
+  font: 700 0.65rem/1.3 var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.catalog-grid .type-tag + .type-tag::before {
+  content: '/ ';
 }
 .catalog-grid .card-art {
+  order: 2;
+  height: clamp(120px, 17vw, 180px);
+  aspect-ratio: auto;
   background:
     radial-gradient(
-      ellipse at 50% -35%,
-      oklch(from var(--pokemon-tint) 67% 0.17 h),
-      transparent 82%
+      ellipse at 49% 60%,
+      color-mix(in srgb, var(--pokemon-tint) 35%, transparent),
+      transparent 66%
     ),
-    linear-gradient(160deg, color-mix(in srgb, var(--pokemon-tint) 50%, #201923), #19171c 90%);
+    repeating-linear-gradient(0deg, transparent 0 17px, #3f503015 17px 18px),
+    repeating-linear-gradient(90deg, transparent 0 17px, #3f503015 17px 18px);
 }
 .catalog-grid .card-art img {
   z-index: 1;
-  filter: drop-shadow(0 8px 7px #120d165c);
+  width: 88%;
+  height: 100%;
+  filter: drop-shadow(1px 4px 1px #342d202e);
+}
+.catalog-grid .card-art::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  inset-block: 18px 15px;
+  width: 7px;
+  border-right: 1px solid #687664;
+  background: repeating-linear-gradient(to bottom, #687664 0 1px, transparent 1px 12px);
 }
 .catalog-grid .card-art .dex-number {
-  top: auto;
-  bottom: 0;
-  left: 6px;
-  font: 900 clamp(2.6rem, 17cqi, 7.4rem) / 0.9 var(--font-body);
-  letter-spacing: -0.075em;
+  inset: 0 auto auto 0;
+  z-index: 0;
   padding: 0;
   background: transparent;
-  color: #ffffff32;
-  z-index: 0;
+  color: #4b58444d;
+  font:
+    italic clamp(2.5rem, 5vw, 4.25rem) / 0.95 Georgia,
+    serif;
+  letter-spacing: -0.08em;
 }
 .catalog-grid .card-open {
-  top: 9px;
-  right: 9px;
-  bottom: auto;
-  color: white;
-  background: #1c161d70;
-  border: 1px solid #ffffff4a;
+  display: none;
 }
-.catalog-grid .sold-out {
+.catalog-grid .card-art .sold-out {
   z-index: 2;
 }
-.catalog-grid h3 {
-  color: inherit;
-  font-family: var(--font-body);
-  font-weight: 800;
-  letter-spacing: -0.045em;
-  margin-block: 5px;
-}
-.catalog-grid .card-measures,
-.catalog-grid .purchase-unavailable {
-  color: #d4cbd1;
+.catalog-grid .card-measures {
+  order: 3;
+  justify-content: space-between;
+  margin: 0;
+  padding: 7px 0;
+  color: #45554e;
+  font: 0.7rem/1.4 var(--font-mono);
 }
 .catalog-grid .card-bottom {
-  border-color: #ffffff29;
+  order: 4;
+  margin: auto calc(-1 * clamp(9px, 1.3vw, 17px)) 0;
+  padding: 6px clamp(9px, 1.3vw, 17px);
+  border: 0;
+  background: #23332f;
+  color: #fff8ee;
+  flex-wrap: wrap;
 }
-.catalog-grid .card-bottom strong {
-  color: #fff8f1;
-  font: 750 clamp(0.96rem, 1.5vw, 1.22rem) / 1.2 var(--font-body);
+.catalog-grid .card-bottom strong,
+.catalog-grid .purchase-unavailable {
+  color: inherit;
 }
 .catalog-grid .add-button {
-  border-radius: 99px;
-  background: var(--pokemon-tint);
-  color: #18141b;
+  color: #fff9ec;
+  border: 1px solid #83948a;
+  border-radius: 5px;
+  background: transparent;
 }
 .catalog-grid .add-button:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--pokemon-tint) 78%, white);
+  background: #40584e;
 }
-.catalog-grid .image-fallback {
-  color: white;
+.catalog-grid .card-art:focus-visible {
+  outline-color: #324f43;
 }
-/* Wide tiles keep the artwork beside the offer, even when labels wrap. */
-@container (min-width: 270px) {
-  .catalog-grid .card-body h3 {
-    font-size: clamp(1.5rem, 6cqi, 2.5rem);
-  }
-}
-@media (min-width: 801px) {
-  .bento-block[data-count='6'] > :first-child {
-    grid-template-rows: minmax(200px, 1fr) auto auto;
-  }
-  .bento-block[data-count='6'] > :first-child .card-art {
-    aspect-ratio: auto;
-  }
-  .bento-block[data-count='6'] > :first-child .card-art img {
-    position: absolute;
-    width: 85%;
-    height: 92%;
-  }
-  .bento-block[data-count='6'] > :is(:nth-child(2), :nth-child(3)),
-  .bento-block[data-count='1'] > article {
-    grid-template-rows: auto 1fr;
-    --art-ratio: auto;
-    --art-rows: 2;
-    --art-min-height: clamp(165px, 17vw, 214px);
-    --tile-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-  }
-}
-@media (max-width: 800px) {
-  .bento-block[data-count='6'] > :is(:first-child, :last-child),
-  .bento-block:is([data-count='1'], [data-count='3'], [data-count='5']) > :first-child {
-    grid-template-rows: auto 1fr;
-    --art-ratio: auto;
-    --art-rows: 2;
-    --art-min-height: clamp(165px, 17vw, 214px);
-    --tile-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  }
-}
-.bento-block .illustrated-card {
-  grid-template-columns: var(--tile-columns, minmax(0, 1fr));
-}
-.bento-block .card-art {
-  min-height: var(--art-min-height, 0);
-  aspect-ratio: var(--art-ratio, 1.48);
-  grid-row: 1 / span var(--art-rows, 1);
-}
-@media (prefers-reduced-motion: reduce) {
-  .catalog-grid .card-art img {
-    transition: none;
-    transform: none;
-  }
-}
-
 @media (max-width: 700px) {
   .illustrated-card .card-bottom > .add-button .add-label,
   .illustrated-card .catalog-purchase .add-button:not(:disabled) .add-label {

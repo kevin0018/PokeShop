@@ -23,6 +23,7 @@ class PostgresCatalog:
         forms="all",
         ids=None,
         region="",
+        habitat=None,
     ):
         clauses, params = [], {"limit": limit, "offset": offset}
         if q:
@@ -36,6 +37,13 @@ class PostgresCatalog:
         if pokemon_type:
             clauses.append("p.data->'types' ? :type")
             params["type"] = pokemon_type
+        if habitat:
+            clauses.append("""EXISTS (
+                SELECT 1 FROM api_cache species
+                WHERE species.url = concat('https://pokeapi.co/api/v2/pokemon-species/', p.data->>'species_id', '/')
+                  AND species.data->'habitat'->>'name' = :habitat
+            )""")
+            params["habitat"] = habitat
         if region:
             clauses.append("p.data->>'region' = :region")
             params["region"] = region

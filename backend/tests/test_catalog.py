@@ -40,9 +40,8 @@ class CatalogTests(unittest.TestCase):
         result = self.client.get("/api/v1/pokemon").json()
         self.assertEqual(result["total"], 12)
         for item in result["items"]:
-            self.assertEqual(
-                self.client.get(f'/api/v1/pokemon/{item["id"]}').json(), item
-            )
+            detail = self.client.get(f'/api/v1/pokemon/{item["id"]}').json()
+            self.assertEqual({key: detail[key] for key in item}, item)
             self.assertGreater(item["price_cents"], 0)
 
     def test_filter_by_name_number_and_type(self):

@@ -4,6 +4,7 @@ import type { Pokemon } from '../domain/pokemon'
 import { httpPokemonRepository, request } from '../infrastructure/httpPokemonRepository'
 export const useCatalogStore = defineStore('catalog', () => {
   // Entity cache is independent from the current page; cart references never disappear on navigation.
+  const catalogLocation = ref('/catalogo')
   const items = ref<Pokemon[]>([])
   const loading = ref(false)
   const loaded = ref(false)
@@ -33,5 +34,5 @@ export const useCatalogStore = defineStore('catalog', () => {
       loading.value = false
     }
   }
-  return { items, loading, loaded, error, types, load, remember, hydrate }
+  return { catalogLocation, items, loading, loaded, error, types, load, remember, hydrate }
 })

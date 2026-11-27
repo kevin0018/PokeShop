@@ -64,7 +64,7 @@ const inCart = computed(
 )
 </script>
 <template>
-  <RouterLink v-if="!pokemon" class="back-link" to="/catalogo"
+  <RouterLink v-if="!pokemon" class="back-link" :to="catalog.catalogLocation"
     ><ArrowLeft :size="16" />{{ t('backCatalog') }}</RouterLink
   >
   <p v-if="loading && !pokemon" class="state-box" role="status">{{ t('loadingPokemon') }}</p>
@@ -79,7 +79,7 @@ const inCart = computed(
     :data-type="pokemon.types[0]"
   >
     <div class="profile-stage">
-      <RouterLink class="scene-back" to="/catalogo"
+      <RouterLink class="scene-back" :to="catalog.catalogLocation"
         ><ArrowLeft :size="14" />{{ t('backCatalog') }}</RouterLink
       >
       <nav
@@ -198,7 +198,7 @@ const inCart = computed(
   <div v-if="!loading && !error && !pokemon" class="state-box">
     <h1>{{ t('pokemonMissing') }}</h1>
     <p>{{ t('pokemonMissingBody') }}</p>
-    <RouterLink class="button primary" to="/catalogo">{{ t('exploreCatalog') }}</RouterLink>
+    <RouterLink class="button primary" :to="catalog.catalogLocation">{{ t('exploreCatalog') }}</RouterLink>
   </div>
 </template>
 

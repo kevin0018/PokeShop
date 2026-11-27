@@ -36,11 +36,14 @@ async def list_pokemon(
     region: str = Query("", max_length=30),
     currency: Literal["eur", "credits"] = "eur",
     playable: bool = False,
+    habitat: Literal["forest", "sea", "cave"] | None = None,
     catalog=Depends(get_catalog),
 ):
     if currency == "credits" and sort in ("price_asc", "price_desc"):
         sort = sort.replace("price", "credit")
     selection = {"ids": SHOP_IDS} if playable else {}
+    if habitat:
+        selection["habitat"] = habitat
     items, total = await catalog.search(
         q,
         pokemon_type,

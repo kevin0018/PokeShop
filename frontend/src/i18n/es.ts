@@ -1,5 +1,12 @@
 import type en from './en'
 export default {
+  guide: {
+    title: 'Guía de campo',
+    explore: '¿Dónde quieres explorar?',
+    forest: 'Bosque',
+    sea: 'Costa',
+    cave: 'Cueva',
+  },
   studio: {
     skip: 'Saltar intro',
     replay: 'Repetir captura',

@@ -1,4 +1,11 @@
 export default {
+  guide: {
+    title: 'Field guide',
+    explore: 'Where would you like to explore?',
+    forest: 'Forest',
+    sea: 'Coast',
+    cave: 'Cave',
+  },
   studio: {
     skip: 'Skip intro',
     replay: 'Replay capture',

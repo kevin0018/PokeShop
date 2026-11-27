@@ -43,6 +43,19 @@ class PersistentCatalogTests(unittest.TestCase):
 
         asyncio.run(run())
 
+    def test_habitat_search_includes_forms_of_the_same_species(self):
+        async def check():
+            catalog = PostgresCatalog()
+            first, total = await catalog.search(habitat="sea", q="lapras", limit=1)
+            second, next_total = await catalog.search(habitat="sea", q="lapras", limit=1, offset=1)
+            self.assertEqual(total, next_total)
+            self.assertGreater(total, 1)
+            self.assertEqual(first[0]["species_id"], second[0]["species_id"])
+            self.assertNotEqual(first[0]["id"], second[0]["id"])
+            self.assertEqual(await catalog.search(habitat="cave", q="lapras"), ([], 0))
+
+        self.run_async(check)
+
     def test_units_forms_filters_pagination(self):
         async def check():
             repo = PostgresCatalog()
